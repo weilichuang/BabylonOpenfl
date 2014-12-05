@@ -1,0 +1,6 @@
+-cp src
+-swf bin/OimoPhysicsHaxe.swf
+-swf-header 1024:768:60:54B7E7
+--flash-strict
+-swf-version 12
+-main com.element.oimo.physics.demo.OimoPhysicsDemos
