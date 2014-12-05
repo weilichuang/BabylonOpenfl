@@ -1,6 +1,7 @@
 package example;
 
 import babylon.Engine;
+import babylon.materials.StandardMaterial;
 import babylon.Scene;
 import openfl.display.Sprite;
 import openfl.events.Event;
@@ -66,6 +67,41 @@ class BaseDemo extends Sprite
 		DC.registerObject(this, "global");
 		
 		onInit();
+	}
+	
+	public function setDiffuseTextureEnabled(value:Bool):Void
+	{
+		StandardMaterial.DiffuseTextureEnabled = value;
+	}
+	
+	public function setAmbientTextureEnabled(value:Bool):Void
+	{
+		StandardMaterial.AmbientTextureEnabled = value;
+	}
+	
+	public function setOpacityTextureEnabled(value:Bool):Void
+	{
+		StandardMaterial.OpacityTextureEnabled = value;
+	}
+	
+	public function setReflectionTextureEnabled(value:Bool):Void
+	{
+		StandardMaterial.ReflectionTextureEnabled = value;
+	}
+	
+	public function setEmissiveTextureEnabled(value:Bool):Void
+	{
+		StandardMaterial.EmissiveTextureEnabled = value;
+	}
+	
+	public function setSpecularTextureEnabled(value:Bool):Void
+	{
+		StandardMaterial.SpecularTextureEnabled = value;
+	}
+	
+	public function setBumpTextureEnabled(value:Bool):Void
+	{
+		StandardMaterial.BumpTextureEnabled = value;
 	}
 	
 	private function onInit():Void
