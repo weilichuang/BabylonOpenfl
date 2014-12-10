@@ -1,4 +1,4 @@
-uniform vec3 color;
+uniform vec4 color;
 
 #ifdef ALPHATEST
 varying vec2 vUV;
@@ -11,5 +11,5 @@ void main(void) {
 		discard;
 #endif
 
-	gl_FragColor = vec4(color, 1.);
+	gl_FragColor = color;
 }

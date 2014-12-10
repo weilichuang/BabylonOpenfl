@@ -5,8 +5,7 @@ import babylon.math.Color3;
 import babylon.Scene;
 
 /**
- * ...
- * @author weilichuang
+ * https://www.shadertoy.com/view/XsjSRt
  */
 class CloudProceduralTexture extends ProceduralTexture
 {
@@ -22,9 +21,7 @@ class CloudProceduralTexture extends ProceduralTexture
 		
 		this.updateShaderUniforms();
 
-		// Use 0 to render just once, 1 to render on every frame, 2 to render every two frames and so on...
 		this.refreshRate = 0;
-		// https://www.shadertoy.com/view/XsjSRt
 	}
 	
 	public function updateShaderUniforms():Void

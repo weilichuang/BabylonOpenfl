@@ -10,11 +10,13 @@ import babylon.lights.SpotLight;
 import babylon.materials.textures.BaseTexture;
 import babylon.materials.textures.RenderTargetTexture;
 import babylon.math.Color3;
+import babylon.math.FastMath;
 import babylon.math.Matrix;
 import babylon.mesh.AbstractMesh;
 import babylon.mesh.Mesh;
 import babylon.mesh.VertexBuffer;
 import babylon.Scene;
+import babylon.tools.Tools;
 
 using StringTools;
 
@@ -425,7 +427,7 @@ class StandardMaterial extends Material
                 defines.push("#define UV2");
             }
 			
-            if (mesh.isVerticesDataPresent(VertexBuffer.ColorKind))
+            if (mesh.useVertexColors && mesh.isVerticesDataPresent(VertexBuffer.ColorKind))
 			{
                 attribs.push(VertexBuffer.ColorKind);
                 defines.push("#define VERTEXCOLOR");
@@ -629,17 +631,26 @@ class StandardMaterial extends Material
 		{
             _effect.setTexture("bumpSampler", this.bumpTexture);
 
-            _effect.setFloat2("vBumpInfos", this.bumpTexture.coordinatesIndex, this.bumpTexture.level);
+            _effect.setFloat2("vBumpInfos", this.bumpTexture.coordinatesIndex, 1.0 / this.bumpTexture.level);
             _effect.setMatrix("bumpMatrix", this.bumpTexture.getTextureMatrix());
         }
 
         // Colors
         _scene.ambientColor.multiplyToRef(this.ambientColor, this._globalAmbientColor);
+		
+		// Scaling down colors according to emissive
+		this._scaledDiffuse.r = this.diffuseColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
+		this._scaledDiffuse.g = this.diffuseColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
+		this._scaledDiffuse.b = this.diffuseColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
+
+		this._scaledSpecular.r = this.specularColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
+		this._scaledSpecular.g = this.specularColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
+		this._scaledSpecular.b = this.specularColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
 
         _effect.setVector3("vEyePosition", this._scene.activeCamera.position);
         _effect.setColor3("vAmbientColor", this._globalAmbientColor);
-        _effect.setColor4("vDiffuseColor", this.diffuseColor, this.alpha * mesh.visibility);
-        _effect.setColor4("vSpecularColor", this.specularColor, this.specularPower);
+        _effect.setColor4("vDiffuseColor", this._scaledDiffuse, this.alpha * mesh.visibility);
+        _effect.setColor4("vSpecularColor", this._scaledSpecular, this.specularPower);
         _effect.setColor3("vEmissiveColor", this.emissiveColor);
 				
 		//TODO 添加材质是否接受光照

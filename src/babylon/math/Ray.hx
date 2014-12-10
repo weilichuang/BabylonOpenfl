@@ -41,6 +41,9 @@ class Ray
             var inv:Float = 1.0 / this.direction.x;
             var min:Float = (minimum.x - this.origin.x) * inv;
             var max:Float = (maximum.x - this.origin.x) * inv;
+			
+			if (max == Math.NEGATIVE_INFINITY)
+				max = Math.POSITIVE_INFINITY;
 
             if (min > max) 
 			{
@@ -70,6 +73,9 @@ class Ray
             var inv:Float = 1.0 / this.direction.y;
             var min:Float = (minimum.y - this.origin.y) * inv;
             var max:Float = (maximum.y - this.origin.y) * inv;
+			
+			if (max == Math.NEGATIVE_INFINITY)
+				max = Math.POSITIVE_INFINITY;
 
             if (min > max) 
 			{
@@ -99,6 +105,9 @@ class Ray
             var inv:Float = 1.0 / this.direction.z;
             var min:Float = (minimum.z - this.origin.z) * inv;
             var max:Float = (maximum.z - this.origin.z) * inv;
+			
+			if (max == Math.NEGATIVE_INFINITY)
+				max = Math.POSITIVE_INFINITY;
 
             if (min > max) 
 			{

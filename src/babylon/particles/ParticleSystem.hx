@@ -482,6 +482,7 @@ class ParticleSystem implements IDispose
 
         // Render
         engine.enableEffect(effect);
+		engine.setCullState(false);
 
         var viewMatrix:Matrix = this._scene.getViewMatrix();
         effect.setTexture("diffuseSampler", this.particleTexture);

@@ -1,11 +1,11 @@
 varying vec2 vPosition;
 varying vec2 vUV;
 
-uniform float ampScale;
-uniform float ringScale;
-uniform vec3 woodColor1;
-uniform vec3 woodColor2;
-
+uniform vec3 herb1;
+uniform vec3 herb2;
+uniform vec3 herb3;
+uniform vec3 dirt;
+uniform vec3 ground;
 
 float rand(vec2 n) {
 	return fract(cos(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
@@ -28,26 +28,9 @@ float fbm(vec2 n) {
 }
 
 void main(void) {
-
-	float herbwidth = 8.0;
-
-	vec3 dirt = vec3(0.32, 0.17, 0.09);
-	vec3 herb = vec3(0.0, 0.39, 0.09);
-	vec3 ground = dirt;
-
-	herbwidth = floor(herbwidth - noise(vUV * 8.0 ));
-
-	float ratioy = mod(floor(gl_FragCoord.y), herbwidth);
-	float ratiox = mod(floor(gl_FragCoord.x), herbwidth);
-
-	/*herb = herb * ratiox;
-	dirt = dirt * ratioy;*/
-
-	if (ratioy >= 0.0 && ratioy < herbwidth / fbm(vUV * 2.0))
-		ground = herb;
-
-	if (ratiox >= 0.0 && ratiox < herbwidth / 2.0)
-		ground = herb;
-
-	gl_FragColor = vec4(ground, 1.0);
+	vec3 color = mix(ground, herb1, rand(gl_FragCoord.xy * 4.0));
+	color = mix(color, herb2, rand(gl_FragCoord.xy * 8.0));
+	color = mix(color, herb3, rand(gl_FragCoord.xy));
+	color = mix(color, herb1, fbm(gl_FragCoord.xy * 16.0));
+	gl_FragColor = vec4(color, 1.0);
 }

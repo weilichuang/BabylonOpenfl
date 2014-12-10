@@ -76,6 +76,15 @@ class ProceduralTexture extends Texture
 		this._fragment = fragment;
 	}
 	
+	public function reset(): Void 
+	{
+		if (_effect != null)
+		{
+			var engine = this.getScene().getEngine();
+			engine.releaseEffect(this._effect);
+		}
+	}
+	
 	override public function isReady():Bool
 	{
 		var engine:Engine = this.getScene().getEngine();

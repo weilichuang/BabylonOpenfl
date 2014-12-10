@@ -1,6 +1,8 @@
 package babylon.mesh;
 import babylon.bones.Skeleton;
+import babylon.cameras.Camera;
 import babylon.culling.BoundingInfo;
+import babylon.culling.BoundingSphere;
 import babylon.materials.Material;
 import babylon.math.Vector3;
 import babylon.tools.Tools;
@@ -8,6 +10,7 @@ import babylon.tools.Tools;
 class InstancedMesh extends AbstractMesh
 {
 	private var _sourceMesh:Mesh;
+	private var _currentLOD: Mesh;
 
 	public function new(name,source:Mesh) 
 	{
@@ -32,11 +35,6 @@ class InstancedMesh extends AbstractMesh
 
 		this.refreshBoundingInfo();
 		this._syncSubMeshes();
-	}
-	
-	override public function preActivate(): Void 
-	{
-		this.sourceMesh.preActivate();
 	}
 	
 	override private function set_receiveShadows(value:Bool):Bool
@@ -122,10 +120,28 @@ class InstancedMesh extends AbstractMesh
 
 		_updateBoundingInfo();
 	}
+	
+	override public function preActivate(): Void 
+	{
+		if (this._currentLOD != null)
+		{
+			this._currentLOD.preActivate();
+		}
+	}
 
 	override public function activate(renderId: Int): Void 
 	{
-		sourceMesh._registerInstanceForRenderId(this, renderId);
+		if (this._currentLOD != null)
+		{
+			this._currentLOD._registerInstanceForRenderId(this, renderId);
+		}
+	}
+	
+	override public function getLOD(camera: Camera, boundingSphere:BoundingSphere = null): AbstractMesh 
+	{
+		this._currentLOD = cast this.sourceMesh.getLOD(this.getScene().activeCamera, this.getBoundingInfo().boundingSphere);
+
+		return this._currentLOD;
 	}
 
 	public function _syncSubMeshes(): Void

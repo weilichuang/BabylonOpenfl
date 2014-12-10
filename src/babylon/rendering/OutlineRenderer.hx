@@ -25,7 +25,7 @@ class OutlineRenderer
 		this._scene = scene;
 	}
 	
-	public function render(subMesh:SubMesh, batch:InstancesBatch):Void
+	public function render(subMesh:SubMesh, batch:InstancesBatch, useOverlay: Bool = false):Void
 	{
 		var engine:Engine = _scene.getEngine();
 		
@@ -41,8 +41,8 @@ class OutlineRenderer
 		var material:Material = subMesh.getMaterial();
 		
 		engine.enableEffect(this._effect);
-		this._effect.setFloat("offset", mesh.outlineWidth);
-		this._effect.setColor3("color", mesh.outlineColor);
+		this._effect.setFloat("offset", useOverlay ? 0 : mesh.outlineWidth);
+		this._effect.setColor4("color", useOverlay ? mesh.overlayColor : mesh.outlineColor, useOverlay ? mesh.overlayAlpha : 1.0);
 		this._effect.setMatrix("viewProjection", _scene.getTransformMatrix());
 
 		// Bones

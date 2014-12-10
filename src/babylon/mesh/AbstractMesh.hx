@@ -7,6 +7,7 @@ import babylon.collisions.Collider;
 import babylon.collisions.IntersectionInfo;
 import babylon.collisions.PickingInfo;
 import babylon.culling.BoundingInfo;
+import babylon.culling.BoundingSphere;
 import babylon.culling.octrees.Octree;
 import babylon.IDispose;
 import babylon.materials.Material;
@@ -77,6 +78,10 @@ class AbstractMesh extends Node implements IDispose
 	public var outlineColor:Color3 = Color3.Red();
 	public var outlineWidth:Float = 0.02;
 	
+	public var renderOverlay:Bool = false;
+	public var overlayColor:Color3 = Color3.Red();
+	public var overlayAlpha:Float = 0.5;
+	
 	public var useOctreeForRenderingSelection:Bool = true;
 	public var useOctreeForPicking:Bool = true;
 	public var useOctreeForCollisions:Bool = true;
@@ -116,6 +121,8 @@ class AbstractMesh extends Node implements IDispose
 	
 	private var _isDirty:Bool = false;
 	
+	public var _masterMesh: AbstractMesh;
+	
 	//用于检测碰撞
 	private var _positions: Array<Vector3> = null;
 	public var positions(get, null):Array<Vector3>;
@@ -136,6 +143,10 @@ class AbstractMesh extends Node implements IDispose
 	public var _intersectionsInProgress:Array<AbstractMesh>;
 	
 	public var hasVertexAlpha:Bool = false;
+	
+	public var useVertexColors:Bool = true;
+	
+	private var _onAfterWorldMatrixUpdate:Array<AbstractMesh->Void> = new Array<AbstractMesh->Void>();
 
 	public function new(name:String, scene:Scene) 
 	{
@@ -171,7 +182,7 @@ class AbstractMesh extends Node implements IDispose
 		return false;
 	}
 	
-	public function getLOD(camera:Camera):AbstractMesh
+	public function getLOD(camera:Camera, boundingSphere:BoundingSphere = null):AbstractMesh
 	{
 		return this;
 	}
@@ -263,6 +274,11 @@ class AbstractMesh extends Node implements IDispose
 
 	public function getBoundingInfo(): BoundingInfo
 	{
+		if (this._masterMesh != null)
+		{
+			return this._masterMesh.getBoundingInfo();
+		}
+			
 		if (this._boundingInfo == null)
 		{
 			this._updateBoundingInfo();
@@ -281,6 +297,11 @@ class AbstractMesh extends Node implements IDispose
 
 	override public function getWorldMatrix(): Matrix
 	{
+		if (this._masterMesh != null)
+		{
+			return this._masterMesh.getWorldMatrix();
+		}
+			
 		if (this._currentRenderId != this.getScene().getRenderId())
 		{
 			this.computeWorldMatrix();
@@ -445,12 +466,17 @@ class AbstractMesh extends Node implements IDispose
 			this._boundingInfo = new BoundingInfo(this.absolutePosition, this.absolutePosition);
 
 		this._boundingInfo.update(this.worldMatrixFromCache);
-
+		
+		this._updateSubMeshesBoundingInfo(this.worldMatrixFromCache);
+	}
+	
+	public function _updateSubMeshesBoundingInfo(matrix: Matrix):Void
+	{
 		for (subIndex in 0...this.subMeshes.length)
 		{
 			var subMesh:SubMesh = this.subMeshes[subIndex];
 
-			subMesh.updateBoundingInfo(this.worldMatrixFromCache);
+			subMesh.updateBoundingInfo(matrix);
 		}
 	}
 
@@ -570,8 +596,33 @@ class AbstractMesh extends Node implements IDispose
 
 		// Absolute position
 		this._absolutePosition.setTo(this._worldMatrix.m[12], this._worldMatrix.m[13], this._worldMatrix.m[14]);
+		
+		// Callbacks
+		for (callbackIndex in 0..._onAfterWorldMatrixUpdate.length)
+		{
+			this._onAfterWorldMatrixUpdate[callbackIndex](this);
+		}
 
 		return this._worldMatrix;
+	}
+	
+	/**
+	* If you'd like to be callbacked after the mesh position, rotation or scaling has been updated
+	* @param func: callback function to add
+	*/
+	public function registerAfterWorldMatrixUpdate(func: AbstractMesh->Void): Void
+	{
+		this._onAfterWorldMatrixUpdate.push(func);
+	}
+
+	public function unregisterAfterWorldMatrixUpdate(func: AbstractMesh->Void): Void
+	{
+		var index = this._onAfterWorldMatrixUpdate.indexOf(func);
+
+		if (index > -1)
+		{
+			this._onAfterWorldMatrixUpdate.splice(index, 1);
+		}
 	}
 
 	public function setPositionWithLocalVector(vector3: Vector3): Void 
@@ -992,6 +1043,8 @@ class AbstractMesh extends Node implements IDispose
 				}
 			}
 		}
+		
+		this._onAfterWorldMatrixUpdate = [];
 
 		this._isDisposed = true;
 

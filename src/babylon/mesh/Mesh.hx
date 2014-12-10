@@ -2,6 +2,7 @@ package babylon.mesh;
 
 import babylon.cameras.Camera;
 import babylon.culling.BoundingInfo;
+import babylon.culling.BoundingSphere;
 import babylon.Engine;
 import babylon.materials.Effect;
 import babylon.materials.Material;
@@ -61,13 +62,17 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 	public var _binaryInfo:Dynamic;
 	
 	private var _LODLevels:Array<MeshLODLevel> = [];
-	private var _attachedLODLevel:MeshLODLevel;
 	
 	public function new(name:String, scene:Scene)
 	{
 		super(name, scene);
 
         _batchCache = new InstancesBatch();
+	}
+	
+	public function hasLODLevels():Bool
+	{
+		return _LODLevels.length > 0;
 	}
 	
 	// Methods
@@ -89,12 +94,18 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 
 	public function addLODLevel(distance: Float, mesh: Mesh): Mesh 
 	{
+		if (mesh != null && mesh._masterMesh != null)
+		{
+			Logger.warn("You cannot use a mesh as LOD level twice");
+			return this;
+		}
+			
 		var level:MeshLODLevel = new MeshLODLevel(distance, mesh);
 		this._LODLevels.push(level);
 
 		if (mesh != null)
 		{
-			mesh._attachedLODLevel = level;
+			mesh._masterMesh = this;
 		}
 
 		this._sortLODLevels();
@@ -104,43 +115,37 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 
 	public function removeLODLevel(mesh: Mesh): Mesh
 	{
-		if (mesh != null && mesh._attachedLODLevel == null)
+		if (mesh == null)
+			return null;
+		
+		var i:Int = 0;
+		while (i < _LODLevels.length) 
 		{
-			return this;
-		}
-
-		if (mesh != null)
-		{
-			var index:Int = this._LODLevels.indexOf(mesh._attachedLODLevel);
-			mesh._attachedLODLevel = null;
-
-			this._LODLevels.splice(index, 1);
-
-			this._sortLODLevels();
-		} 
-		else
-		{
-			for (i in 0...this._LODLevels.length) 
+			if (this._LODLevels[i].mesh == mesh) 
 			{
-				if (this._LODLevels[i].mesh == null) 
-				{
-					this._LODLevels.splice(i, 1);
-					break;
-				}
+				this._LODLevels.splice(i, 1);
+				mesh._masterMesh = null;
+				i--;
 			}
+			
+			i++;
 		}
+		
+		this._sortLODLevels();
 
 		return this;
 	}
 
-	override public function getLOD(camera: Camera): AbstractMesh 
+	override public function getLOD(camera: Camera, boundingSphere:BoundingSphere = null): AbstractMesh 
 	{
 		if (this._LODLevels == null || this._LODLevels.length == 0) 
 		{
 			return this;
 		}
 
-		var distanceToCamera:Float = this.getBoundingInfo().boundingSphere.centerWorld.subtract(camera.position).length();
+		var distanceToCamera:Float = boundingSphere != null ? 
+									boundingSphere.centerWorld.subtract(camera.position).length() : 
+									this.getBoundingInfo().boundingSphere.centerWorld.subtract(camera.position).length();
 
 		if (this._LODLevels[this._LODLevels.length - 1].distance > distanceToCamera) 
 		{
@@ -155,7 +160,8 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 			{
 				if (level.mesh != null)
 				{
-					level.mesh._worldMatrix = this._worldMatrix;
+					level.mesh.preActivate();
+					level.mesh._updateSubMeshesBoundingInfo(this.worldMatrixFromCache);
 				}
 				return level.mesh;
 			}
@@ -247,7 +253,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 	
 	override private function get_isBlocked():Bool
 	{
-		return _attachedLODLevel != null;
+		return _masterMesh != null;
 	}
 	
 	override public function isReady(): Bool 
@@ -533,7 +539,11 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 	#if html5
 	public function _renderWithInstances(subMesh: SubMesh, fillMode: Int, batch: InstancesBatch, effect: Effect, engine: Engine): Void
 	{
-		var matricesCount = this.instances.length + 1;
+		var visibleInstances:Array<InstancedMesh> = batch.visibleInstances[subMesh._id];
+		if (visibleInstances == null)
+			return;
+			
+		var matricesCount = visibleInstances.length + 1;
 		var bufferSize = matricesCount * 16 * 4;
 
 		while (this._instancesBufferSize < bufferSize)
@@ -564,7 +574,6 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 			instancesCount++;
 		}
 
-		var visibleInstances:Array<InstancedMesh> = batch.visibleInstances[subMesh._id];
 		if (visibleInstances != null)
 		{
 			for (instanceIndex in 0...visibleInstances.length)
@@ -636,6 +645,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 		{
 			engine.setDepthWrite(false);
 			scene.getOutlineRenderer().render(subMesh, batch);
+			engine.setDepthWrite(savedDepthWrite);
 		}
 
 		effectiveMaterial._preBind();
@@ -643,7 +653,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 		var effect:Effect = effectiveMaterial.getEffect();
 
 		// Bind
-		var fillMode = engine.forceWireframe ? Material.WireFrameFillMode : effectiveMaterial.fillMode;
+		var fillMode:Int = scene.forceWireframe ? Material.WireFrameFillMode : effectiveMaterial.fillMode;
 		_bind(subMesh, effect, fillMode);
 
 		var world:Matrix = getWorldMatrix();
@@ -692,6 +702,15 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 			engine.setColorWrite(false);
 			scene.getOutlineRenderer().render(subMesh, batch);
 			engine.setColorWrite(true);
+		}
+		
+		// Overlay
+		if (this.renderOverlay) 
+		{
+			var currentMode:Int = engine.getAlphaMode();
+			engine.setAlphaMode(Engine.ALPHA_COMBINE);
+			scene.getOutlineRenderer().render(subMesh, batch, true);
+			engine.setAlphaMode(currentMode);
 		}
 
 		for (callbackIndex in 0..._onAfterRenderCallbacks.length)

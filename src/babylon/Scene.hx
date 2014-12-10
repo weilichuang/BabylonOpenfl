@@ -4,6 +4,7 @@ import babylon.actions.ActionEvent;
 import babylon.actions.ActionManager;
 import babylon.animations.Animatable;
 import babylon.animations.Animation;
+import babylon.audio.AudioEngine;
 import babylon.bones.Skeleton;
 import babylon.cameras.Camera;
 import babylon.collisions.Collider;
@@ -40,6 +41,7 @@ import babylon.rendering.BoundingBoxRenderer;
 import babylon.rendering.OutlineRenderer;
 import babylon.rendering.RenderingManager;
 import babylon.sprites.SpriteManager;
+import babylon.tools.DebugLayer;
 import babylon.tools.SmartArray;
 import babylon.tools.Tools;
 import babylon.utils.MathUtils;
@@ -65,6 +67,7 @@ class Scene
 	public var afterCameraRender:Camera->Void;
 	
 	public var forceWireframe:Bool = false;
+	public var forceShowBoundingBoxes:Bool = false;
 	
 	public var clipPlane:Plane;
 	
@@ -172,7 +175,8 @@ class Scene
 	public var _onReadyCallbacks:Array<Dynamic>;
 	public var _pendingData:Array<Dynamic>;
 	
-	public var _onBeforeRenderCallbacks:Array <Void->Void>;
+	public var _onBeforeRenderCallbacks:Array<Void->Void> ;
+	public var _onAfterRenderCallbacks:Array<Void->Void>;
 	
 	private var _activeMeshes:SmartArray<AbstractMesh>; 	
 	private var _processedMaterials:SmartArray<Material>; 		
@@ -204,6 +208,8 @@ class Scene
 	// Procedural textures
 	public var proceduralTexturesEnabled:Bool = true;
 	public var _proceduralTextures:Array<ProceduralTexture> = [];
+	
+	private var _debugLayer: DebugLayer;
 	
 	public function new(engine:Engine) 
 	{
@@ -273,6 +279,7 @@ class Scene
         this._pendingData = [];
 
         this._onBeforeRenderCallbacks = [];
+		this._onAfterRenderCallbacks = [];
 		
 		// Internal smart arrays
         this._activeMeshes = new SmartArray<AbstractMesh>();
@@ -306,6 +313,13 @@ class Scene
 		this._outlineRenderer = new OutlineRenderer(this);
 
 		this.attachControl();
+		
+		this._debugLayer = new DebugLayer(this);
+	}
+	
+	public function getDebugLayer():DebugLayer
+	{
+		return _debugLayer;
 	}
 	
 	public function getStageWidth():Int
@@ -569,6 +583,21 @@ class Scene
 		{
             this._onBeforeRenderCallbacks.splice(index, 1);
         }
+	}
+	
+	public function registerAfterRender(func:Void->Void):Void
+	{
+		this._onAfterRenderCallbacks.push(func);
+	}
+
+	public function unregisterAfterRender(func:Void->Void):Void
+	{
+		var index = this._onAfterRenderCallbacks.indexOf(func);
+
+		if (index > -1)
+		{
+			this._onAfterRenderCallbacks.splice(index, 1);
+		}
 	}
 	
 	public function _addPendingData(data:Dynamic):Void
@@ -1069,17 +1098,23 @@ class Scene
 			
 			mesh.computeWorldMatrix();
 			
-			mesh.preActivate();
-			
-			statistics.totalVertices += mesh.getTotalVertices();
-			
 			// Intersections
-			if (mesh.isEnabled() && mesh.isVisible && 
-				mesh.actionManager != null && 
+			if (mesh.actionManager != null && 
 				mesh.actionManager.hasSpecificTriggers([ActionManager.OnIntersectionEnterTrigger, ActionManager.OnIntersectionExitTrigger]))
 			{
 				this._meshesForIntersections.pushNoDuplicate(mesh);
 			}
+			
+			// Switch to current LOD
+			var meshLOD:AbstractMesh = mesh.getLOD(this.activeCamera);
+			if (meshLOD == null)
+			{
+				continue;
+			}
+			
+			statistics.totalVertices += mesh.getTotalVertices();
+
+			mesh.preActivate();
 
 			if (mesh.isEnabled() && 
 				mesh.isVisible && 
@@ -1091,14 +1126,8 @@ class Scene
 				
 				mesh.activate(this._renderId);
 				
-				this._activeMesh(mesh);
+				this._activeMesh(meshLOD);
 			}
-			
-			//测试代码
-			//if (mesh.name == "Tableau Sam 2")
-			//{
-				//break;
-			//}
 		}
 
 		//TODO 粒子应该也有个包围盒
@@ -1133,29 +1162,27 @@ class Scene
 			this._activeSkeletons.pushNoDuplicate(mesh.skeleton);
 		}
 
-		if (mesh.showBoundingBox) 
+		if (mesh.showBoundingBox || this.forceShowBoundingBoxes) 
 		{
 			this._boundingBoxRenderer.renderList.push(mesh.getBoundingInfo().boundingBox);
 		}
 		
-		var activeMesh:AbstractMesh = mesh.getLOD(this.activeCamera);
-
-		if (activeMesh != null && activeMesh.subMeshes != null)
+		if (mesh != null && mesh.subMeshes != null)
 		{
 			// Submeshes Octrees
 			var len: Int;
 			var subMeshes: Array<SubMesh>;
 
-			if (activeMesh._submeshesOctree != null && activeMesh.useOctreeForRenderingSelection)
+			if (mesh._submeshesOctree != null && mesh.useOctreeForRenderingSelection)
 			{
-				var intersections = activeMesh._submeshesOctree.select(this._frustumPlanes);
+				var intersections = mesh._submeshesOctree.select(this._frustumPlanes);
 
 				len = intersections.length;
 				subMeshes = intersections.data;
 			} 
 			else 
 			{
-				subMeshes = activeMesh.subMeshes;
+				subMeshes = mesh.subMeshes;
 				len = subMeshes.length;
 			}
 
@@ -1163,7 +1190,7 @@ class Scene
 			{
 				var subMesh = subMeshes[subIndex];
 
-				this._evaluateSubMesh(subMesh, activeMesh);
+				this._evaluateSubMesh(subMesh, mesh);
 			}
 		}
 	}
@@ -1365,23 +1392,11 @@ class Scene
 	private var _oldViewPort:Rectangle;
 	public function render(rect:Rectangle):Void
 	{
-		//if (!_oldViewPort.equals(rect))
-		//{
-			//_oldViewPort.copyFrom(rect);
-			
-			//Logger.log(rect);
-			
-			//activeCamera.viewport.x = rect.x;
-			//activeCamera.viewport.y = rect.y;
-			//activeCamera.viewport.width = rect.width;
-			//activeCamera.viewport.height = rect.height;
-			//
-			//_engine.setViewport(activeCamera.viewport);
-		//}
-		
 		var startDate = Lib.getTimer();
 		
 		this.statistics.reset();
+		
+		engine.resetDrawCalls();
 
 		this._meshesForIntersections.reset();
 		
@@ -1507,12 +1522,20 @@ class Scene
 		
 		// Intersection checks
 		this._checkIntersections();
+		
+		// Update the audio listener attached to the camera
+		this._updateAudioParameters();
 
         // After render
         if (afterRender != null) 
 		{
             afterRender();
         }
+		
+		for (callbackIndex in 0..._onAfterRenderCallbacks.length) 
+		{
+			this._onAfterRenderCallbacks[callbackIndex]();
+		}
 
         // Cleaning
         for (index in 0..._toBeDisposed.length)
@@ -1522,6 +1545,31 @@ class Scene
 		_toBeDisposed.reset();
 		
 		statistics.lastFrameDuration = Lib.getTimer() - startDate;
+	}
+	
+	private function _updateAudioParameters():Void
+	{
+		var listeningCamera:Camera;
+		var audioEngine:AudioEngine = this.getEngine().getAudioEngine();
+
+		if (this.activeCameras.length > 0)
+		{
+			listeningCamera = this.activeCameras[0];
+		} 
+		else
+		{
+			listeningCamera = this.activeCamera;
+		}
+
+		//if (listeningCamera != null && audioEngine.canUseWebAudio)
+		//{
+			//audioEngine.audioContext.listener.setPosition(listeningCamera.position.x, listeningCamera.position.y, listeningCamera.position.z);
+			//
+			//var mat = Matrix.Invert(listeningCamera.getViewMatrix());
+			//var cameraDirection = Vector3.TransformNormal(new Vector3(0, 0, -1), mat);
+			//cameraDirection.normalize();
+			//audioEngine.audioContext.listener.setOrientation(cameraDirection.x, cameraDirection.y, cameraDirection.z, 0, 1, 0);
+		//}
 	}
 	
 	public function activePhysics(active:Bool):Void
@@ -1543,8 +1591,14 @@ class Scene
 		
 		this._boundingBoxRenderer.dispose();
 		
+		// Debug layer
+		//this.debugLayer.enabled = false;
+		
 		if (this.onDispose != null)
 			this.onDispose();
+			
+		this._onBeforeRenderCallbacks = [];
+		this._onAfterRenderCallbacks = [];
 
         // Detach cameras
         for (index in 0...this.cameras.length) 

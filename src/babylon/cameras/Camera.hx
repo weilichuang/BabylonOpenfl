@@ -25,7 +25,7 @@ class Camera extends Node
 	
 	public var fov:Float = 0.8;
 	public var minZ:Float = 1.0;
-	public var maxZ:Float = 5000.0;
+	public var maxZ:Float = 10000.0;
 	public var inertia:Float = 0.9;
 	
 	public var mode:Int;

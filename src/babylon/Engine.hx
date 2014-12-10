@@ -1,5 +1,6 @@
 package babylon;
 
+import babylon.audio.AudioEngine;
 import babylon.cameras.Camera;
 import babylon.Engine.EngineCapabilities;
 import babylon.materials.Effect;
@@ -76,7 +77,6 @@ class Engine
     public static inline var DELAYLOADSTATE_LOADING:Int = 2;
     public static inline var DELAYLOADSTATE_NOTLOADED:Int = 4;
 	
-	public var forceWireframe:Bool = false;
 	public var cullBackFaces:Bool = true;
 	
 	//public var renderEvenInBackground:Bool = true;
@@ -97,6 +97,7 @@ class Engine
 	// States
 	private var _depthCullingState:DepthCullingState = new DepthCullingState();
 	private var _alphaState:AlphaState = new AlphaState();
+	private var _alphaMode:Int = ALPHA_DISABLE;
 	
 	private var _currentEffect:Effect;
 	private var _compiledEffects:Map<String, Effect>;
@@ -121,7 +122,10 @@ class Engine
 	
 	private var _uintIndicesCurrentlySet:Bool = false;
 	
-
+	private var _audioEngine: AudioEngine;
+	
+	private var _drawCalls:Int = 0;
+	
 	public function new(stage:Stage, antialias:Bool = true, options:Dynamic = null)
 	{
 		_stage = stage;
@@ -132,7 +136,6 @@ class Engine
 		}
 
         // Options
-        this.forceWireframe = false;
         this.cullBackFaces = true;
 
 		this._runningLoop = false;
@@ -160,6 +163,8 @@ class Engine
 		this.setDepthTest(true);
 		this.setDepthFunctionToLessOrEqual();
 		this.setDepthWrite(true);
+		
+		_audioEngine = new AudioEngine();
 		
         // Fullscreen
         //this.isFullscreen = false;
@@ -210,6 +215,11 @@ class Engine
         document.addEventListener("mspointerlockchange", onPointerLockChange, false);
         document.addEventListener("mozpointerlockchange", onPointerLockChange, false);
         document.addEventListener("webkitpointerlockchange", onPointerLockChange, false);*/
+	}
+	
+	public function getAudioEngine():AudioEngine
+	{
+		return _audioEngine;
 	}
 	
 	public function displayLoadingUI():Void
@@ -339,6 +349,17 @@ class Engine
         return this._caps;
     }
 	
+	public function getDrawCalls(): Int 
+	{
+		return this._drawCalls;
+	}
+
+	// Methods
+	public function resetDrawCalls(): Void 
+	{
+		this._drawCalls = 0;
+	}
+	
 	public inline function setDepthFunctionToGreater(): Void 
 	{
 		this._depthCullingState.depthFunc = GL.GREATER;
@@ -460,6 +481,7 @@ class Engine
 		GLUtil.resetGLStates();
 		
 		#if cpp
+		setDepthTest(true);
 		setCullState(true);
 		setAlphaMode(ALPHA_DISABLE);
 		#end
@@ -481,7 +503,7 @@ class Engine
         GL.bindFramebuffer(GL.FRAMEBUFFER, null);
 		
 		setCullState(false);
-        setDepthTest(true);
+        setDepthTest(false);
 		setDepthWrite(true);
 		//openfl文本显示时需要用到这种模式
 		setAlphaMode(ALPHA_COMBINE);
@@ -530,7 +552,7 @@ class Engine
 
     public inline function flushFramebuffer():Void
 	{
-        GL.flush();
+        //GL.flush();
     }
 
     public function restoreDefaultFramebuffer():Void
@@ -782,6 +804,8 @@ class Engine
 		#end
 			
         GL.drawElements(useTriangles ? GL.TRIANGLES : GL.LINES, indexCount, indexFormat, indexStart * 2);
+		
+		this._drawCalls++;
     }
 	
 	public function drawPointClouds(verticesStart:Int, verticesCount:Int, instancesCount:Int = 0):Void
@@ -798,6 +822,7 @@ class Engine
 		#end
 		
 		GL.drawArrays(GL.POINTS, verticesStart, verticesCount);
+		this._drawCalls++;
 	}
 	
 	public function releaseEffect(effect: Effect): Void
@@ -1180,7 +1205,14 @@ class Engine
 				_alphaState.alphaBlend = true;
                 
         }
+		
+		this._alphaMode = mode;
     }
+	
+	public function getAlphaMode(): Int
+	{
+		return this._alphaMode;
+	}
 
     public function setAlphaTesting(enable:Bool):Void
 	{

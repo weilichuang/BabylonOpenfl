@@ -6,12 +6,12 @@
     <movie input="" />
     <movie path="application.xml" />
     <movie fps="60" />
-    <movie width="960" />
-    <movie height="640" />
+    <movie width="800" />
+    <movie height="600" />
     <movie version="1" />
     <movie minorVersion="0" />
     <movie platform="Lime" />
-    <movie background="#000000" />
+    <movie background="000000" />
     <movie preferredSDK="Haxe 3.1.3;3.1.3;" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
@@ -35,7 +35,7 @@
     <option noInlineOnDebug="True" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="False" />
-    <option additional="--remap flash:openfl&#xA;#--macro keep(&quot;example.WindowCafeSceneDemo&quot;)" />
+    <option additional="--remap flash:openfl&#xA;#--macro keep(&quot;example.HeartDemo&quot;)&#xA;-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

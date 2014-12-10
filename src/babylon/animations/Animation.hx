@@ -5,6 +5,7 @@ import babylon.math.Color3;
 import babylon.math.Quaternion;
 import babylon.math.Vector2;
 import babylon.math.Vector3;
+import babylon.mesh.AbstractMesh;
 import babylon.utils.Logger;
 
 typedef BabylonFrame = {
@@ -42,6 +43,8 @@ class Animation
 	private var _stopped:Bool = false;
 		
 	public var _target:Dynamic;
+	
+	private var _easingFunction:IEasingFunction;
 
 	public function new(name:String, targetProperty:String, framePerSecond:Int, dataType:Int, 
 						loopMode:Int = Animation.ANIMATIONLOOPMODE_CYCLE)
@@ -54,6 +57,72 @@ class Animation
         this.loopMode = loopMode;
 
         this._keys = [];
+	}
+	
+	public static function CreateAndStartAnimation(name: String, mesh: AbstractMesh, tartgetProperty: String,
+													framePerSecond: Int, totalFrame: Int,
+													from: Dynamic, to: Dynamic, loopMode:Int = Animation.ANIMATIONLOOPMODE_CYCLE) 
+	{
+
+		var dataType:Int = -1;
+
+		if (Std.is(from,Float) && Math.isFinite(cast from))
+		{
+			dataType = Animation.ANIMATIONTYPE_FLOAT;
+		}
+		else if (Std.is(from,Quaternion))
+		{
+			dataType = Animation.ANIMATIONTYPE_QUATERNION;
+		}
+		else if (Std.is(from,Vector3)) 
+		{
+			dataType = Animation.ANIMATIONTYPE_VECTOR3;
+		} 
+		else if (Std.is(from,Vector2)) 
+		{
+			dataType = Animation.ANIMATIONTYPE_VECTOR2;
+		} 
+		else if (Std.is(from,Color3))
+		{
+			dataType = Animation.ANIMATIONTYPE_COLOR3;
+		}
+
+		if (dataType == -1)
+		{
+			return;
+		}
+
+		var animation = new Animation(name, tartgetProperty, framePerSecond, dataType, loopMode);
+
+		var keys:Array<BabylonFrame> = [];
+		keys.push({ frame: 0, value: from });
+		keys.push({ frame: totalFrame, value: to });
+		animation.setKeys(keys);
+
+		mesh.animations.push(animation);
+
+		mesh.getScene().beginAnimation(mesh, 0, totalFrame, (animation.loopMode == 1));
+
+	}
+	
+	public function isStopped(): Bool
+	{
+		return this._stopped;
+	}
+
+	public function getKeys(): Array<BabylonFrame>
+	{
+		return this._keys;
+	}
+
+	public function getEasingFunction():IEasingFunction
+	{
+		return this._easingFunction;
+	}
+
+	public function setEasingFunction(easingFunction: IEasingFunction):Void
+	{
+		this._easingFunction = easingFunction;
 	}
 	
 	/**
@@ -149,12 +218,13 @@ class Animation
 		{
 			var frameInfo:BabylonFrame = _keys[key];
 			var nextFrameInfo:BabylonFrame = _keys[key + 1];
-			
+			// for each frame, we need the key just before the frame superior
             if (nextFrameInfo.frame >= currentFrame)
 			{
                 var startValue:Dynamic = frameInfo.value;
                 var endValue:Dynamic = nextFrameInfo.value;
 
+				// gradient : percent of currentFrame between the frame inf and the frame sup
                 var gradient:Float;
 				if (nextFrameInfo.frame == frameInfo.frame)
 				{
@@ -165,14 +235,19 @@ class Animation
 					gradient = (currentFrame - frameInfo.frame) / (nextFrameInfo.frame - frameInfo.frame);
 				}
 				
+				// check for easingFunction and correction of gradient
+				if (this._easingFunction != null) 
+				{
+					gradient = this._easingFunction.ease(gradient);
+				}
+				
                 switch (dataType)
 				{
                     // Float
                     case Animation.ANIMATIONTYPE_FLOAT:
                         switch (loopMode) 
 						{
-                            case Animation.ANIMATIONLOOPMODE_CYCLE, 
-								Animation.ANIMATIONLOOPMODE_CONSTANT:
+                            case Animation.ANIMATIONLOOPMODE_CYCLE, Animation.ANIMATIONLOOPMODE_CONSTANT:
                                 return floatInterpolate(cast startValue, cast endValue, gradient);                                
                             case Animation.ANIMATIONLOOPMODE_RELATIVE:
                                 return offsetValue * repeatCount + floatInterpolate(cast startValue, cast endValue, gradient);
@@ -182,8 +257,7 @@ class Animation
                         var quaternion:Quaternion = null;
                         switch (loopMode) 
 						{
-                            case Animation.ANIMATIONLOOPMODE_CYCLE, 
-								Animation.ANIMATIONLOOPMODE_CONSTANT:
+                            case Animation.ANIMATIONLOOPMODE_CYCLE, Animation.ANIMATIONLOOPMODE_CONSTANT:
                                 quaternion = quaternionInterpolate(cast startValue, cast endValue, gradient);
                             case Animation.ANIMATIONLOOPMODE_RELATIVE:
                                 quaternion = quaternionInterpolate(cast startValue, cast endValue, gradient).add(offsetValue.scale(repeatCount));
@@ -193,8 +267,7 @@ class Animation
                     case Animation.ANIMATIONTYPE_VECTOR3:
                         switch (loopMode) 
 						{
-                            case Animation.ANIMATIONLOOPMODE_CYCLE, 
-								Animation.ANIMATIONLOOPMODE_CONSTANT:
+                            case Animation.ANIMATIONLOOPMODE_CYCLE, Animation.ANIMATIONLOOPMODE_CONSTANT:
                                 return vector3Interpolate(cast startValue, cast endValue, gradient);
                             case Animation.ANIMATIONLOOPMODE_RELATIVE:
                                 return vector3Interpolate(cast startValue, cast endValue, gradient).add(offsetValue.scale(repeatCount));
@@ -203,8 +276,7 @@ class Animation
 					case Animation.ANIMATIONTYPE_VECTOR2:
                         switch (loopMode) 
 						{
-                            case Animation.ANIMATIONLOOPMODE_CYCLE, 
-								Animation.ANIMATIONLOOPMODE_CONSTANT:
+                            case Animation.ANIMATIONLOOPMODE_CYCLE, Animation.ANIMATIONLOOPMODE_CONSTANT:
                                 return vector2Interpolate(cast startValue, cast endValue, gradient);
                             case Animation.ANIMATIONLOOPMODE_RELATIVE:
                                 return vector2Interpolate(cast startValue, cast endValue, gradient).add(offsetValue.scale(repeatCount));
@@ -213,8 +285,7 @@ class Animation
 					case Animation.ANIMATIONTYPE_COLOR3:
                         switch (loopMode) 
 						{
-                            case Animation.ANIMATIONLOOPMODE_CYCLE, 
-								Animation.ANIMATIONLOOPMODE_CONSTANT:
+                            case Animation.ANIMATIONLOOPMODE_CYCLE, Animation.ANIMATIONLOOPMODE_CONSTANT:
                                 return color3Interpolate(cast startValue, cast endValue, gradient);
                             case Animation.ANIMATIONLOOPMODE_RELATIVE:
                                 return color3Interpolate(cast startValue, cast endValue, gradient).add(offsetValue.scale(repeatCount));
@@ -267,16 +338,26 @@ class Animation
 			return false;
         }
 		
+		if (_keys.length == 0)
+		{
+			_stopped = true;
+			return false;
+		}
+		
 		if (delay < 0)
 			delay = 0;
    
 		var returnValue:Bool = true;
+		
+		var firstFrame:BabylonFrame = _keys[0];
+		var lastFrame:BabylonFrame = _keys[_keys.length - 1];
+		
 		// Adding a start key at frame 0 if missing
-		if (_keys.length == 0 || _keys[0].frame != 0)
+		if (firstFrame.frame != 0)
 		{
 			var newKey = {
 				frame: 0,
-				value: _keys[0].value
+				value: firstFrame.value
 			};
 
 			//this._keys.splice(0, 0, newKey);
@@ -284,18 +365,19 @@ class Animation
 		}
 
 		// Check limits
-		if (from < _keys[0].frame || from > _keys[_keys.length - 1].frame) 
+		if (from < firstFrame.frame || from > lastFrame.frame) 
 		{
-			from = _keys[0].frame;
+			from = firstFrame.frame;
 		}
 		
-		if (to < _keys[0].frame || to > _keys[_keys.length - 1].frame)
+		if (to < firstFrame.frame || to > lastFrame.frame)
 		{
-			to = _keys[_keys.length - 1].frame;
+			to = lastFrame.frame;
 		}
 		
 		// Compute ratio
 		var range:Float = to - from;
+		// ratio represents the frame delta between from and to
 		var ratio:Float = delay * (this.framePerSecond * speedRatio) / 1000.0;
 		
 		var offsetValue = getZeroValue(this.dataType);
@@ -305,7 +387,7 @@ class Animation
 		if (ratio > range && !loop)
 		{ 
 			returnValue = false;
-			highLimitValue = _keys[_keys.length - 1].value;
+			highLimitValue = lastFrame.value;
 		} 
 		else 
 		{
@@ -321,10 +403,10 @@ class Animation
 					{
 						// Float
 						case Animation.ANIMATIONTYPE_FLOAT:
-							this._offsetsCache.set(keyOffset,toValue - fromValue);
+							this._offsetsCache.set(keyOffset, toValue - fromValue);
 						// Quaternion
 						case Animation.ANIMATIONTYPE_QUATERNION:
-							this._offsetsCache.set(keyOffset,cast(toValue, Quaternion).subtract(cast fromValue));
+							this._offsetsCache.set(keyOffset, cast(toValue, Quaternion).subtract(cast fromValue));
 						// Vector3
 						case Animation.ANIMATIONTYPE_VECTOR3:
 							this._offsetsCache.set(keyOffset, cast(toValue, Vector3).subtract(cast fromValue));
@@ -354,7 +436,7 @@ class Animation
 		{
 			var property = Reflect.getProperty(_target, this.targetPropertyPath[0]);
 
-			for (index in 1...this.targetPropertyPath.length - 1)
+			for (index in 1...(this.targetPropertyPath.length - 1))
 			{
 				property = Reflect.getProperty(property, this.targetPropertyPath[index]);
 			}
@@ -363,7 +445,6 @@ class Animation
 		} 
 		else 
 		{
-			//Logger.log("update " + this.targetPropertyPath[0] + " value " + currentValue);
 			Reflect.setProperty(_target, this.targetPropertyPath[0], currentValue);
 		}
 		

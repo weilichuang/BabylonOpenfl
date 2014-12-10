@@ -59,8 +59,8 @@ class ShadowDemo extends BaseDemo
 
 		// Torus
 		var torus = MeshHelper.CreateTorus("torus", 4, 2, 30, scene, false);
-		//torus.renderOutline = true;
-		//torus.outlineWidth = 0.25;
+		torus.renderOutline = true;
+		torus.outlineWidth = 0.25;
 
 		// Shadows
 		var shadowGenerator:ShadowGenerator = new ShadowGenerator(1024, light);
