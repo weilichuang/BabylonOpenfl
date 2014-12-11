@@ -16,5 +16,12 @@ class Logger
 			Lib.trace(message);
 		#end
 	}
+	
+	public static inline function error(message:Dynamic):Void
+	{
+		#if debug
+			throw Std.string(message);
+		#end
+	}
 }
 

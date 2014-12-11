@@ -941,9 +941,11 @@ class Engine
 		if (GL.getShaderParameter(shader, GL.COMPILE_STATUS) == 0)
 		{
 			if (type == "vertex")
-				throw "Error compiling vertex shader";
+				Logger.warn("Error compiling vertex shader");
 			else
-				throw "Error compiling fragment shader";
+				Logger.warn("Error compiling fragment shader");
+				
+			Logger.warn("shaderInfoLog:" + GL.getShaderInfoLog(shader));
 		}
 
         return shader;
