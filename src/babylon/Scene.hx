@@ -9,6 +9,7 @@ import babylon.bones.Skeleton;
 import babylon.cameras.Camera;
 import babylon.collisions.Collider;
 import babylon.collisions.PickingInfo;
+import babylon.culling.BoundingBox;
 import babylon.culling.octrees.Octree;
 import babylon.layer.Layer;
 import babylon.lensflare.LensFlareSystem;
@@ -1089,9 +1090,16 @@ class Scene
 
 		for (meshIndex in 0...len)
 		{
-			var mesh:AbstractMesh = this.meshes[meshIndex];
+			var mesh:AbstractMesh = meshes[meshIndex];
 
-			if (!mesh.isReady() || mesh.isBlocked)
+			if (mesh.isBlocked)
+			{
+				continue;
+			}
+			
+			statistics.totalVertices += mesh.getTotalVertices();
+			
+			if (!mesh.isReady())
 			{
 				continue;
 			}
@@ -1112,8 +1120,6 @@ class Scene
 				continue;
 			}
 			
-			statistics.totalVertices += mesh.getTotalVertices();
-
 			mesh.preActivate();
 
 			if (mesh.isEnabled() && 
@@ -1736,16 +1742,17 @@ class Scene
             this._selectionOctree = new Octree<AbstractMesh>(Octree.CreationFuncForMeshes, maxCapacity, maxDepth);
         }
 
-        var min = new Vector3(Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY);
-        var max = new Vector3(Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY);
+        var min:Vector3 = new Vector3(Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY);
+        var max:Vector3 = new Vector3(Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY);
         for (index in 0...this.meshes.length) 
 		{
             var mesh:AbstractMesh = this.meshes[index];
 
-            mesh.computeWorldMatrix();
+            mesh.computeWorldMatrix(true);
 			
-            var minBox = mesh.getBoundingInfo().boundingBox.minimumWorld;
-            var maxBox = mesh.getBoundingInfo().boundingBox.maximumWorld;
+			var boundingBox:BoundingBox = mesh.getBoundingInfo().boundingBox;
+            var minBox = boundingBox.minimumWorld;
+            var maxBox = boundingBox.maximumWorld;
 
             Tools.checkExtends(minBox, min, max);
             Tools.checkExtends(maxBox, min, max);

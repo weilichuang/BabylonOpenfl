@@ -19,7 +19,7 @@ typedef BabylonMinMax = {
 class Tools 
 {
 	
-	public static var timer:Timer;
+	//public static var timer:Timer;
 	
 	// World limits
 	public static function checkExtends(v:Vector3, min:Vector3, max:Vector3):Void

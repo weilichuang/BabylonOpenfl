@@ -48,10 +48,10 @@ class Octree<T>
 	{ 
 		this._selectionContent.reset();
 
-        for (index in 0...this.blocks.length) 
+        for (index in 0...blocks.length) 
 		{
-            var block:OctreeBlock<T> = this.blocks[index];
-            block.select(frustumPlanes, this._selectionContent, allowDuplicate);
+            var block:OctreeBlock<T> = blocks[index];
+            block.select(frustumPlanes, _selectionContent, allowDuplicate);
         }
 		
 		if (allowDuplicate)

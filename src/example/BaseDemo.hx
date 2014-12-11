@@ -1,6 +1,7 @@
 package example;
 
 import babylon.Engine;
+import babylon.load.SceneLoader;
 import babylon.materials.StandardMaterial;
 import babylon.Scene;
 import openfl.display.Sprite;
@@ -55,6 +56,8 @@ class BaseDemo extends Sprite
 		
 		engine = new Engine(this.stage, true);
 		scene = new Scene(engine);
+		
+		SceneLoader.ForceFullSceneLoadingForIncremental = true;
 		
 		var tf:TextField = new FPS(10, 10, 0xFF0000);
 		var format:TextFormat = tf.defaultTextFormat;

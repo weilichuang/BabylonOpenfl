@@ -55,6 +55,13 @@ class TrainDemo extends BaseDemo
 				}
 			}
 			
+			for (index in 0...scene.meshes.length)
+			{
+				var mesh = scene.meshes[index];
+
+				mesh.isBlocker = mesh.checkCollisions;
+			}
+			
 			var mat:StandardMaterial = Std.instance(scene.getMaterialByName("terrain_eau"), StandardMaterial);
 			if(mat != null)
 				mat.bumpTexture = null;

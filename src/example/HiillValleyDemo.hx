@@ -11,7 +11,8 @@ class HiillValleyDemo extends BaseDemo
     	SceneLoader.Load(scene, "scenes/hillvalley/", "HillValley.incremental.babylon", function() {
 			scene.collisionsEnabled = false;
 			scene.lightsEnabled = false;
-			//scene.createOrUpdateSelectionOctree();
+			cast(scene.activeCamera,FreeCamera).applyGravity = true;
+			scene.createOrUpdateSelectionOctree();
 			
 			for (matIndex in 0...scene.materials.length)
 			{

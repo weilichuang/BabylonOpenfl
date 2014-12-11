@@ -22,8 +22,7 @@ class EspilitDemo extends BaseDemo
 			scene.autoClear = true;
 			scene.collisionsEnabled = true;
 			scene.gravity = new Vector3(0, -0.5, 0);
-			//octree有点问题
-			//scene.createOrUpdateSelectionOctree();
+			scene.createOrUpdateSelectionOctree();
 				
     		scene.activeCamera = scene.cameras[0];
     		if (scene.activeCamera != null) {

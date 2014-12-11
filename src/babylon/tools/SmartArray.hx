@@ -1,9 +1,7 @@
 package babylon.tools;
 
-//TODO 抽个时间删除SmartArray
 class SmartArray<T>
 {
-	
 	public var data:Array<T>;
 	public var length:Int;
 
@@ -13,16 +11,12 @@ class SmartArray<T>
 		this.length = 0;
 	}
 	
-	public function push(value:T):Void
+	public inline function push(value:T):Void
 	{
 		this.data[this.length++] = value;
-        
-        /*if (this.length > this.data.length) {
-            this.data.length *= 2;
-        }*/
 	}
 	
-	public function pushNoDuplicate(value:T):Void
+	public inline function pushNoDuplicate(value:T):Void
 	{
 		if (this.data.indexOf(value) == -1)
 		{
@@ -30,7 +24,7 @@ class SmartArray<T>
         }        
 	}
 	
-	public function sort(compareFn:T->T->Int):Void
+	public inline function sort(compareFn:T->T->Int):Void
 	{
 		this.data.sort(compareFn);
 	}
@@ -56,19 +50,9 @@ class SmartArray<T>
             return;
         }
 		
-        /*if (this.length + array.length > this.data.length) {
-            this.data.length = (this.length + array.length) * 2;
-        }*/
-
         for (index in 0...array.length)
 		{
-            var item:T = array[index];
-			
-            var pos = this.data.indexOf(item);
-            if (pos == -1 || pos >= this.length) 
-			{
-                this.data[this.length++] = item;
-            }
+			this.pushNoDuplicate(array[index]);
         }
 	}
 	
