@@ -16,7 +16,7 @@ class AnimationDemo extends BaseDemo
     {
     	var light = new PointLight("Omni", new Vector3(0, 100, 100), scene);
 		var camera = new ArcRotateCamera("Camera", 0, 0.8, 100, Vector3.Zero(), scene);
-		camera.attachControl(this.stage, false);
+		camera.attachControl(this.touchLayer, false);
 
 		//Boxes
 		var box1 = MeshHelper.CreateBox("Box1", 10.0, scene);

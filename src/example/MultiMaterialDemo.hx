@@ -17,7 +17,7 @@ class MultiMaterialDemo extends BaseDemo
     override function onInit():Void
     {
     	var camera = new ArcRotateCamera("Camera", 0, 0, 10, Vector3.Zero(), scene);
-    	camera.attachControl(this.stage);
+    	camera.attachControl(this.touchLayer);
 		
     	var light = new PointLight("Omni", new Vector3(20, 100, 2), scene);
 		

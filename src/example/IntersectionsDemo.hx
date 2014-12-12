@@ -15,7 +15,7 @@ class IntersectionsDemo extends BaseDemo
 	override function onInit():Void
     {
 		var camera = new ArcRotateCamera("Camera", 1, 0.8, 70, new Vector3(5, 0, 0), scene);
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 
 		// Material
 		var matPlan = new StandardMaterial("matPlan1", scene);

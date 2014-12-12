@@ -17,7 +17,7 @@ class BumpMapDemo extends BaseDemo
     {
     	var camera = new ArcRotateCamera("Camera", 0, 0, 10, Vector3.Zero(), scene);
 		camera.setPosition(new Vector3( -5, 5, 0));
-    	camera.attachControl(this.stage);
+    	camera.attachControl(this.touchLayer);
 		
     	var light = new PointLight("Omni", new Vector3(20, 100, 2), scene);
 		

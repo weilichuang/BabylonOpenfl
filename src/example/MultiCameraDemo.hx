@@ -23,11 +23,11 @@ class MultiCameraDemo extends BaseDemo
     {
     	var camera = new ArcRotateCamera("Camera", 0, 0, 10, Vector3.Zero(), scene);
 		camera.setPosition(new Vector3( -5, 5, 0));
-    	camera.attachControl(this.stage);
+    	camera.attachControl(this.touchLayer);
 		
 		var camera2 = new ArcRotateCamera("Camera2", 0, 0, 10, Vector3.Zero(), scene);
 		camera2.setPosition(new Vector3( -5, 15, 0));
-    	camera2.attachControl(this.stage);
+    	camera2.attachControl(this.touchLayer);
 		
 		camera.viewport = new Viewport(0.5, 0, 0.5, 1.0);
 		camera2.viewport = new Viewport(0, 0, 0.5, 1.0);

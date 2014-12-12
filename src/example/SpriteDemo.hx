@@ -19,7 +19,7 @@ class SpriteDemo extends BaseDemo
 		// Create camera and light
 		var light = new PointLight("Point", new Vector3(5, 10, 5), scene);
 		var camera = new ArcRotateCamera("Camera", 1, 0.8, 8, new Vector3(0, 0, 0), scene);
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 		
 		// Create a sprite manager to optimize GPU ressources
 		// Parameters : name, imgUrl, capacity, cellSize, scene

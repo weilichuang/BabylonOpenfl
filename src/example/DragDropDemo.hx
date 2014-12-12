@@ -19,7 +19,7 @@ class DragDropDemo extends BaseDemo
 	{
 		var camera = new ArcRotateCamera("Camera", 0, 0, 10, new Vector3(0, 0, 0), scene);
 		camera.setPosition(new Vector3(20, 200, 400));
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 
 		camera.lowerBetaLimit = 0.1;
 		camera.upperBetaLimit = (Math.PI / 2) * 0.99;
@@ -117,7 +117,7 @@ class DragDropDemo extends BaseDemo
 		{
 			if (startingPoint != null)
 			{
-				camera.attachControl(this.stage);
+				camera.attachControl(this.touchLayer);
 				startingPoint = null;
 				return;
 			}
@@ -143,9 +143,9 @@ class DragDropDemo extends BaseDemo
 			startingPoint = current;
 		}
 
-		this.stage.addEventListener(MouseEvent.MOUSE_DOWN, onPointerDown, false);
-		this.stage.addEventListener(MouseEvent.MOUSE_UP, onPointerUp, false);
-		this.stage.addEventListener(MouseEvent.MOUSE_MOVE, onPointerMove, false);
+		this.touchLayer.addEventListener(MouseEvent.MOUSE_DOWN, onPointerDown, false);
+		this.touchLayer.addEventListener(MouseEvent.MOUSE_UP, onPointerUp, false);
+		this.touchLayer.addEventListener(MouseEvent.MOUSE_MOVE, onPointerMove, false);
 
 		scene.executeWhenReady(function()
 		{

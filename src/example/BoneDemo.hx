@@ -24,7 +24,7 @@ class BoneDemo extends BaseDemo
 		var camera = new ArcRotateCamera("Camera", 0, 0, 10, new Vector3(0, 30, 0), scene);
 		camera.setPosition(new Vector3(20, 70, 120));
 		camera.minZ = 10.0;
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 
 		scene.ambientColor = new Color3(0.3, 0.3, 0.3);
 

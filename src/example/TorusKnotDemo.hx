@@ -17,7 +17,7 @@ class TorusKnotDemo extends BaseDemo
 		var camera = new ArcRotateCamera("Camera", 0, Math.PI / 2, 12, Vector3.Zero(), scene);
 	
 		// Attach it to handle user inputs (keyboard, mouse, touch)
-		camera.attachControl(this.stage, false);
+		camera.attachControl(this.touchLayer);
 	
 		// Add a light
 		var light = new HemisphericLight("hemi", new Vector3(0, 1, 0), scene);

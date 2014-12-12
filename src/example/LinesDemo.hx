@@ -15,7 +15,7 @@ class LinesDemo extends BaseDemo
     {
     	var camera:ArcRotateCamera = new ArcRotateCamera("Camera", 0, 0, 10, new Vector3(0, 0, 0), scene);
 		camera.setPosition(new Vector3(20, 200, 400));
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 
 		camera.maxZ = 20000;
 

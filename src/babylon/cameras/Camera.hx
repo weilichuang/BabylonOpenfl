@@ -10,6 +10,7 @@ import babylon.postprocess.PostProcess;
 import babylon.math.Viewport;
 import babylon.utils.Logger;
 import openfl.display.DisplayObject;
+import openfl.display.Sprite;
 
 class Camera extends Node
 {
@@ -175,12 +176,12 @@ class Camera extends Node
         return check;
     }
 
-	public function attachControl(canvas:DisplayObject, noPreventDefault:Bool = false)
+	public function attachControl(canvas:Sprite, noPreventDefault:Bool = false)
 	{
 		
 	}
 
-	public function detachControl(canvas:DisplayObject)
+	public function detachControl()
 	{
 		
 	}

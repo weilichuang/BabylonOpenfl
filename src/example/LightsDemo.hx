@@ -17,7 +17,7 @@ class LightsDemo extends BaseDemo
     override function onInit():Void
     {
     	camera = new ArcRotateCamera("Camera", 0, 0, 10, Vector3.Zero(), scene);
-    	camera.attachControl(this.stage);
+    	camera.attachControl(this.touchLayer);
 		camera.setPosition(new Vector3( -10, 10, 0));
 		
     	var light0 = new PointLight("Omni0", new Vector3(0, 10, 0), scene);

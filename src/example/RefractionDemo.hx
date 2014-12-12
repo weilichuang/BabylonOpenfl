@@ -31,7 +31,7 @@ class RefractionDemo extends BaseDemo
 		
     	camera.setPosition(new Vector3(-60, 60, 0));
     	camera.lowerBetaLimit = (Math.PI / 2) * 0.8;
-    	camera.attachControl(this.stage);
+    	camera.attachControl(this.touchLayer);
 		
     	var lensFlareSystem = new LensFlareSystem("lensFlareSystem", light3, scene);
     	var flare00 = new LensFlare(lensFlareSystem,0.2, 0, new Color3(1, 1, 1), "img/lens5.png");

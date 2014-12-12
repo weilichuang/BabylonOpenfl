@@ -61,7 +61,7 @@ class HeartDemo extends BaseDemo
 			lightSphere2.material = material2;
 		
     		if (scene.activeCamera != null) {
-    			scene.activeCamera.attachControl(this);
+    			scene.activeCamera.attachControl(this.touchLayer);
     			var _c:FreeCamera = cast scene.activeCamera;
     			_c.keysUp.push(87);
     			_c.keysDown.push(83);

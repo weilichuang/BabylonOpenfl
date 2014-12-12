@@ -21,7 +21,7 @@ class HiillValleyDemo extends BaseDemo
 				
     		scene.activeCamera = scene.cameras[0];
     		if (scene.activeCamera != null) {
-    			scene.activeCamera.attachControl(this);
+    			scene.activeCamera.attachControl(this.touchLayer);
     			var _c:FreeCamera = Std.instance(scene.activeCamera, FreeCamera);
     			_c.keysUp.push(87);
     			_c.keysDown.push(83);

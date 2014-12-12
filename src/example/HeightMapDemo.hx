@@ -27,7 +27,7 @@ class HeightMapDemo extends BaseDemo
 		camera.upperBetaLimit = (Math.PI / 2) * 0.9;
 		camera.lowerRadiusLimit = 30;
 		camera.upperRadiusLimit = 150;
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 
 		// Ground
 		var groundMaterial = new StandardMaterial("ground", scene);

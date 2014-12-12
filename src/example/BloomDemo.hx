@@ -22,7 +22,7 @@ class BloomDemo extends BaseDemo
     override function onInit():Void
     {
     	var camera = new ArcRotateCamera("Camera", 0, 0, 10, Vector3.Zero(), scene);
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 		
 		var light = new DirectionalLight("dir01", new Vector3(0, -1, -0.2), scene);
 		var light2 = new DirectionalLight("dir02", new Vector3(-1, -2, -1), scene);

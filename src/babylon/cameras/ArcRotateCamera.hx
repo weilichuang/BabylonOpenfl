@@ -285,22 +285,21 @@ class ArcRotateCamera extends Camera
         //window.addEventListener("blur", this._onLostFocus, false);
 	}
 	
-	override public function detachControl(canvas:DisplayObject):Void
+	override public function detachControl():Void
 	{
-        if (_attachedCanvas != canvas) 
+        if (_attachedCanvas != null) 
 		{
-            return;
+            _attachedCanvas.removeEventListener(MouseEvent.MOUSE_DOWN, this._onMouseDown);
+			_attachedCanvas.removeEventListener(MouseEvent.MOUSE_UP, this._onMouseUp);
+			_attachedCanvas.removeEventListener(MouseEvent.MOUSE_OUT, this._onMouseOut);
+			_attachedCanvas.removeEventListener(MouseEvent.MOUSE_MOVE, this._onMouseMove);
+			_attachedCanvas.removeEventListener(KeyboardEvent.KEY_DOWN, this._onKeyDown);
+			_attachedCanvas.removeEventListener(KeyboardEvent.KEY_UP, this._onKeyUp);
+			//window.removeEventListener("blur", this._onLostFocus);
+			
+			_attachedCanvas = null;
         }
-
-        _attachedCanvas.removeEventListener(MouseEvent.MOUSE_DOWN, this._onMouseDown);
-        _attachedCanvas.removeEventListener(MouseEvent.MOUSE_UP, this._onMouseUp);
-        _attachedCanvas.removeEventListener(MouseEvent.MOUSE_OUT, this._onMouseOut);
-        _attachedCanvas.removeEventListener(MouseEvent.MOUSE_MOVE, this._onMouseMove);
-        _attachedCanvas.removeEventListener(KeyboardEvent.KEY_DOWN, this._onKeyDown);
-        _attachedCanvas.removeEventListener(KeyboardEvent.KEY_UP, this._onKeyUp);
-        //window.removeEventListener("blur", this._onLostFocus);
         
-        _attachedCanvas = null;
         if (_reset != null)
 		{
             _reset();

@@ -70,10 +70,10 @@ class PostProcessRenderPipelineManagerDemo extends BaseDemo
 		skyboxMaterial.specularColor = new Color3(0, 0, 0);
 		skybox.material = skyboxMaterial;
 
-		camera_01.attachControl(this.stage);
-		camera_02.attachControl(this.stage);
-		camera_03.attachControl(this.stage);
-		camera_04.attachControl(this.stage);
+		camera_01.attachControl(this.touchLayer);
+		camera_02.attachControl(this.touchLayer);
+		camera_03.attachControl(this.touchLayer);
+		camera_04.attachControl(this.touchLayer);
 
 		var standardPipeline = new PostProcessRenderPipeline(engine, "standardPipeline");
 

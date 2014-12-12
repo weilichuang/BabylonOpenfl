@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<vbox style="backgroundColor: 0x888888;backgroundAlpha:0.5" width="500" >
+	<hbox>
+		<text text="Total meshes:" />
+		<text text="" id="meshCountTF" />
+	</hbox>
+	<hbox>
+		<text text="Total vertices:" />
+		<text text="" id="verticeCountTF" />
+	</hbox>
+	<hbox>
+		<text text="Active meshes:" />
+		<text text="" id="activeMeshCountTF" />
+	</hbox>
+	<hbox>
+		<text text="Active vertices:" />
+		<text text="" id="activeVerticeCountTF" />
+	</hbox>
+	<hbox>
+		<text text="Active particles:" />
+		<text text="" id="particleCountTF" />
+	</hbox>
+	<spacer />
+	
+	<hbox>
+		<text text="Frame durations:" />
+		<text text="" id="frameDurationTF" />
+	</hbox>
+	<hbox>
+		<text text="Draw calls:" />
+		<text text="" id="drawCallTF" />
+	</hbox>
+	<spacer />
+	
+	<hbox>
+		<text text="Evaluate Active Meshes duration:" />
+		<text text="" id="evaluateMeshDurationTF" />
+	</hbox>
+	<hbox>
+		<text text="Render Targets duration:" />
+		<text text="" id="renderTargetDurationTF" />
+	</hbox>
+	<hbox>
+		<text text="Particles duration:" />
+		<text text="" id="particleDurationTF" />
+	</hbox>
+	<hbox>
+		<text text="Sprites duration:" />
+		<text text="" id="spriteDurationTF" />
+	</hbox>
+	<hbox>
+		<text text="Render duration:" />
+		<text text="" id="renderDurationTF" />
+	</hbox>
+</vbox>

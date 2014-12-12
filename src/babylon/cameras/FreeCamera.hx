@@ -10,6 +10,7 @@ import babylon.mesh.AbstractMesh;
 import babylon.Scene;
 import babylon.tools.Tools;
 import openfl.display.DisplayObject;
+import openfl.display.Sprite;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.Lib;
@@ -18,7 +19,7 @@ class FreeCamera extends TargetCamera
 {
 	public var ellipsoid:Vector3;
 		
-	public var _attachedCanvas:DisplayObject;
+	public var _attachedCanvas:Sprite;
 	
 	public var _keys:Array<Int>;
 	public var keysUp:Array<Int>;
@@ -71,7 +72,7 @@ class FreeCamera extends TargetCamera
         this._newPosition = Vector3.Zero();
 	}
 	
-	override public function attachControl(canvas:DisplayObject, noPreventDefault:Bool = false) 
+	override public function attachControl(canvas:Sprite, noPreventDefault:Bool = false) 
 	{
         var previousPosition:Dynamic = null;
         var engine:Engine = this._scene.getEngine();
@@ -179,33 +180,31 @@ class FreeCamera extends TargetCamera
             };
         }
 
-        Lib.current.stage.addEventListener(MouseEvent.MOUSE_DOWN, this._onMouseDown, false);
-        Lib.current.stage.addEventListener(MouseEvent.MOUSE_UP, this._onMouseUp, false);
-        Lib.current.stage.addEventListener(MouseEvent.MOUSE_OUT, this._onMouseOut, false);
-        Lib.current.stage.addEventListener(MouseEvent.MOUSE_MOVE, this._onMouseMove, false);
-        Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, this._onKeyDown, false);
-        Lib.current.stage.addEventListener(KeyboardEvent.KEY_UP, this._onKeyUp, false);
-        //window.addEventListener("blur", this._onLostFocus, false);
+        _attachedCanvas.addEventListener(MouseEvent.MOUSE_DOWN, this._onMouseDown, false);
+        _attachedCanvas.addEventListener(MouseEvent.MOUSE_UP, this._onMouseUp, false);
+        _attachedCanvas.addEventListener(MouseEvent.MOUSE_OUT, this._onMouseOut, false);
+        _attachedCanvas.addEventListener(MouseEvent.MOUSE_MOVE, this._onMouseMove, false);
+        _attachedCanvas.stage.addEventListener(KeyboardEvent.KEY_DOWN, this._onKeyDown, false);
+        _attachedCanvas.stage.addEventListener(KeyboardEvent.KEY_UP, this._onKeyUp, false);
     }
 	
-	override public function detachControl(canvas:DisplayObject):Void
+	override public function detachControl():Void
 	{
-        if (this._attachedCanvas != canvas) {
-            return;
+        if (_attachedCanvas != null)
+		{
+            _attachedCanvas.removeEventListener(MouseEvent.MOUSE_DOWN, this._onMouseDown);
+			_attachedCanvas.removeEventListener(MouseEvent.MOUSE_UP, this._onMouseUp);
+			_attachedCanvas.removeEventListener(MouseEvent.MOUSE_OUT, this._onMouseOut);
+			_attachedCanvas.removeEventListener(MouseEvent.MOUSE_MOVE, this._onMouseMove);
+			_attachedCanvas.stage.removeEventListener(KeyboardEvent.KEY_DOWN, this._onKeyDown);
+			_attachedCanvas.stage.removeEventListener(KeyboardEvent.KEY_UP, this._onKeyUp);
+			
+			_attachedCanvas = null;
         }
 
-        Lib.current.stage.removeEventListener(MouseEvent.MOUSE_DOWN, this._onMouseDown);
-        Lib.current.stage.removeEventListener(MouseEvent.MOUSE_UP, this._onMouseUp);
-        Lib.current.stage.removeEventListener(MouseEvent.MOUSE_OUT, this._onMouseOut);
-        Lib.current.stage.removeEventListener(MouseEvent.MOUSE_MOVE, this._onMouseMove);
-        Lib.current.stage.removeEventListener(KeyboardEvent.KEY_DOWN, this._onKeyDown);
-        Lib.current.stage.removeEventListener(KeyboardEvent.KEY_UP, this._onKeyUp);
-        //window.removeEventListener("blur", this._onLostFocus);
-        
-        this._attachedCanvas = null;
-        if (this._reset != null)
+        if (_reset != null)
 		{
-            this._reset();
+            _reset();
         }
     }
 	
@@ -273,6 +272,23 @@ class FreeCamera extends TargetCamera
             this.cameraDirection.addInPlace(this._transformedDirection);
         }
     }
+	
+	public function move(sx:Float, sz:Float):Void
+	{
+		if (this._localDirection == null) 
+		{
+            this._localDirection = Vector3.Zero();
+            this._transformedDirection = Vector3.Zero();
+        }
+		
+		var speed:Float = this._computeLocalCameraSpeed();
+
+		this._localDirection.setTo( -speed * sx, 0, -speed * sz);
+
+		this.getViewMatrix().invertToRef(this._cameraTransformMatrix);
+		Vector3.TransformNormalToRef(this._localDirection, this._cameraTransformMatrix, this._transformedDirection);
+		this.cameraDirection.addInPlace(this._transformedDirection);
+	}
 	
 	public function moveLeft():Void
 	{

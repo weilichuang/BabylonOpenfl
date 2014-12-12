@@ -19,7 +19,7 @@ class ParticlesDemo extends BaseDemo
     	// Setup environment
 		var light0 = new PointLight("Omni", new Vector3(0, 2, 8), scene);
 		var camera = new ArcRotateCamera("ArcRotateCamera", 1, 0.8, 20, new Vector3(0, 0, 0), scene);
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 
 		// Fountain object
 		var fountain = MeshHelper.CreateBox("foutain", 1.0, scene);

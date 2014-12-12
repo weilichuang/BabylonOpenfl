@@ -42,7 +42,6 @@ import babylon.rendering.BoundingBoxRenderer;
 import babylon.rendering.OutlineRenderer;
 import babylon.rendering.RenderingManager;
 import babylon.sprites.SpriteManager;
-import babylon.tools.DebugLayer;
 import babylon.tools.SmartArray;
 import babylon.tools.Tools;
 import babylon.utils.MathUtils;
@@ -209,9 +208,7 @@ class Scene
 	// Procedural textures
 	public var proceduralTexturesEnabled:Bool = true;
 	public var _proceduralTextures:Array<ProceduralTexture> = [];
-	
-	private var _debugLayer: DebugLayer;
-	
+
 	public function new(engine:Engine) 
 	{
 		this.engine = engine;
@@ -314,15 +311,8 @@ class Scene
 		this._outlineRenderer = new OutlineRenderer(this);
 
 		this.attachControl();
-		
-		this._debugLayer = new DebugLayer(this);
 	}
-	
-	public function getDebugLayer():DebugLayer
-	{
-		return _debugLayer;
-	}
-	
+
 	public function getStageWidth():Int
 	{
 		return engine.getStage().stageWidth;
@@ -1609,7 +1599,7 @@ class Scene
         // Detach cameras
         for (index in 0...this.cameras.length) 
 		{
-            this.cameras[index].detachControl(engine.getStage());
+            this.cameras[index].detachControl();
         }
 
         // Release lights

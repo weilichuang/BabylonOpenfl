@@ -6,7 +6,7 @@
 	<meta title="babylonhx" package="com.babylon.engine" version="1.0.0" company="" />
 	
 	<!-- output -->
-	<app main="example.DanceMoveDemo" file="DanceMoveDemo" path="bin" />
+	<app main="example.WindowCafeSceneDemo" file="WindowCafeSceneDemo" path="bin" />
 	
 	<window background="#000000" fps="0" if="html5" />
 	<window background="#000000" fps="60" unless="html5" />
@@ -22,6 +22,7 @@
 	<haxelib name="actuate" />
 	<haxelib name="dconsole" />
 	<haxelib name="assetsmanager"/>
+	<haxelib name="haxeui"/>
 	
 	<!-- assets -->
 	<icon path="assets/openfl.svg" />
@@ -30,6 +31,7 @@
 	<!-- <assets path="assets/scenes" rename="scenes" /> -->
 	<assets path="assets/skybox" rename="skybox" />
 	<assets path="assets/shaders" rename="shaders" />
+	<assets path="assets/ui" rename="assets/ui" />
 	
 	<!-- optimize output 
 	<haxeflag name="-dce full" /> -->

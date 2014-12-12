@@ -33,7 +33,7 @@ class PhysicsDemo extends BaseDemo
 		camera.checkCollisions = true;
 		camera.applyGravity = true;
 		camera.setTarget(new Vector3(0, 0, 0));
-		camera.attachControl(this);
+		camera.attachControl(this.touchLayer);
 		
 		if(camera.keysUp.indexOf(87) == -1)
 			camera.keysUp.push(87);

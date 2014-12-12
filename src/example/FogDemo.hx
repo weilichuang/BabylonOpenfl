@@ -20,6 +20,7 @@ class FogDemo extends BaseDemo
 		
     	var camera = new FreeCamera("Camera", new Vector3(0, 0, -20), scene);
 		camera.setTarget(new Vector3(0, 0, 0));
+		camera.attachControl(this.touchLayer);
 		
     	var light = new PointLight("Omni", new Vector3(20, 100, 2), scene);
 		

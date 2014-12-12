@@ -7,9 +7,9 @@ import babylon.math.Matrix;
 import babylon.Node;
 import babylon.postprocess.BlackAndWhitePostProcess;
 import babylon.postprocess.FilterPostProcess;
-import openfl.events.Event;
+import haxe.ui.toolkit.controls.Button;
+import haxe.ui.toolkit.events.UIEvent;
 import openfl.events.KeyboardEvent;
-import openfl.events.MouseEvent;
 import openfl.Lib;
 import openfl.ui.Keyboard;
 
@@ -18,18 +18,7 @@ class TrainDemo extends BaseDemo
 	private var curIndex:Int = 0;
 	private var cameraParent:Node;
 	
-	private var leftButton:CustomButton;
-	private var rightButton:CustomButton;
-	private var upButton:CustomButton;
-	private var downButton:CustomButton;
-	private var resetButton:CustomButton;
-	
-	private var isLeft:Bool = false;
-	private var isRight:Bool = false;
-	private var isUp:Bool = false;
-	private var isDown:Bool = false;
-	
-	private var cameraButton:CustomButton;
+	private var cameraButton:Button;
 	
     override function onInit():Void
     {
@@ -85,74 +74,14 @@ class TrainDemo extends BaseDemo
     			engine.runRenderLoop(scene.render);
     		});
     	});
-		
-		leftButton = new CustomButton("Left");
-		this.addChild(leftButton);
-		leftButton.x = 0;
-		leftButton.y = Lib.current.stage.stageHeight - 250;
-		leftButton.addEventListener(MouseEvent.MOUSE_DOWN, onLeftButtonMouseDown);
-		leftButton.addEventListener(MouseEvent.MOUSE_UP, onLeftButtonMouseUp);
-		
-		rightButton = new CustomButton("Right");
-		this.addChild(rightButton);
-		rightButton.x = 200;
-		rightButton.y = Lib.current.stage.stageHeight - 250;
-		rightButton.addEventListener(MouseEvent.MOUSE_DOWN, onRightButtonMouseDown);
-		rightButton.addEventListener(MouseEvent.MOUSE_UP, onRightButtonMouseUp);
-		
-		upButton = new CustomButton("Up");
-		this.addChild(upButton);
-		upButton.x = 100;
-		upButton.y = Lib.current.stage.stageHeight - 350;
-		upButton.addEventListener(MouseEvent.MOUSE_DOWN, onUpButtonMouseDown);
-		upButton.addEventListener(MouseEvent.MOUSE_UP, onUpButtonMouseUp);
-		
-		downButton = new CustomButton("Down");
-		this.addChild(downButton);
-		downButton.x = 100;
-		downButton.y = Lib.current.stage.stageHeight - 150;
-		downButton.addEventListener(MouseEvent.MOUSE_DOWN, onDownButtonMouseDown);
-		downButton.addEventListener(MouseEvent.MOUSE_UP, onDownButtonMouseUp);
-		
-		resetButton = new CustomButton("Reset");
-		this.addChild(resetButton);
-		resetButton.x = 0;
-		resetButton.y = Lib.current.stage.stageHeight - 450;
-		resetButton.addEventListener(MouseEvent.MOUSE_DOWN, onResetMouseDown);
-		
-		cameraButton = new CustomButton("Camera");
-		this.addChild(cameraButton);
-		cameraButton.x = 100;
-		cameraButton.y = Lib.current.stage.stageHeight - 450;
-		cameraButton.addEventListener(MouseEvent.MOUSE_DOWN, onCameraMouseDown);
-		
-		this.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+
+		cameraButton = new Button();
+		cameraButton.text = "Next Camera";
+		rootUI.addChild(cameraButton);
+		cameraButton.x = (stage.stageWidth - cameraButton.width) / 2;
+		cameraButton.y = stage.stageHeight - 100;
+		cameraButton.onClick = onCameraMouseDown;
     }
-	
-	private function onEnterFrame(event:Event):Void
-	{
-		if (cameraParent != null)
-		{
-			//Logger.log("cameraParent.position : " + cameraParent.position);
-			//if (cameraParent.parent != null)
-				//Logger.log("cameraParent.parent.position : " + cameraParent.position);
-		}
-		
-		if (this.scene != null)
-		{
-			if (isLeft)
-				Std.instance(scene.activeCamera, FreeCamera).moveLeft();
-				
-			if (isUp)
-				Std.instance(scene.activeCamera, FreeCamera).moveFront();
-			
-			if (isRight)
-				Std.instance(scene.activeCamera, FreeCamera).moveRight();
-			
-			if (isDown)
-				Std.instance(scene.activeCamera, FreeCamera).moveBehind();
-		}
-	}
 	
 	private function onKeyDown(e:KeyboardEvent):Void
 	{
@@ -169,84 +98,8 @@ class TrainDemo extends BaseDemo
 			chooseCamera(curIndex);
 		}
 	}
-	
-	private function onLeftButtonMouseDown(e:MouseEvent):Void
-	{
-		if (this.scene == null)
-			return;
-			
-		if (this.scene.activeCamera == null)
-			return;
-			
-		isLeft = true;
-		Std.instance(scene.activeCamera, FreeCamera).moveLeft();
-	}
-	
-	private function onLeftButtonMouseUp(e:MouseEvent):Void
-	{
-		isLeft = false;
-	}
-	
-	private function onDownButtonMouseDown(e:MouseEvent):Void
-	{
-		if (this.scene == null)
-			return;
-			
-		if (this.scene.activeCamera == null)
-			return;
-		
-		isDown = true;
-		Std.instance(scene.activeCamera, FreeCamera).moveBehind();
-	}
-	
-	private function onDownButtonMouseUp(e:MouseEvent):Void
-	{
-		isDown = false;
-	}
-	
-	private function onRightButtonMouseDown(e:MouseEvent):Void
-	{
-		if (this.scene == null)
-			return;
-			
-		if (this.scene.activeCamera == null)
-			return;
-			
-		isRight = true;
-		Std.instance(scene.activeCamera, FreeCamera).moveRight();
-	}
-	
-	private function onRightButtonMouseUp(e:MouseEvent):Void
-	{
-		isRight = false;
-	}
-	
-	private function onUpButtonMouseDown(e:MouseEvent):Void
-	{
-		if (this.scene == null)
-			return;
-			
-		if (this.scene.activeCamera == null)
-			return;
-		
-		isUp = true;
-		Std.instance(scene.activeCamera, FreeCamera).moveFront();
-	}
-	
-	private function onUpButtonMouseUp(e:MouseEvent):Void
-	{
-		isUp = false;
-	}
-	
-	private function onResetMouseDown(e:MouseEvent):Void
-	{
-		isUp = false;
-		isDown = false;
-		isLeft = false;
-		isRight = false;
-	}
-	
-	private function onCameraMouseDown(e:MouseEvent):Void
+
+	private function onCameraMouseDown(e:UIEvent):Void
 	{
 		if (this.scene == null)
 			return;
@@ -267,22 +120,14 @@ class TrainDemo extends BaseDemo
 		if (scene.cameras[index] == null)
 			return;
 				
-		scene.activeCamera.detachControl(this);
+		scene.activeCamera.detachControl();
 		scene.activeCamera = scene.cameras[index];
 		
 		if (scene.activeCamera != null)
 		{
 			cameraParent = scene.activeCamera.parent;
-			
-			if (cameraParent != null)
-			{
-				//Logger.log("camera.parent is :" + cameraParent.name);
-				//Logger.log("cameraParent.parent is :" + cameraParent.parent.name);
-				//if (cameraParent.parent.parent != null)
-					//Logger.log("cameraParent.parent is :" + cameraParent.parent.parent.name);
-			}
-			
-			scene.activeCamera.attachControl(this);
+
+			scene.activeCamera.attachControl(this.touchLayer);
 		}
 	}
 

@@ -25,7 +25,7 @@ class ActionManagerDemo extends BaseDemo
     {
     	var camera = new ArcRotateCamera("Camera", 0, 0, 10, new Vector3(0, 0, 0), scene);
 		camera.setPosition(new Vector3(20, 200, 400));
-		camera.attachControl(this.stage);
+		camera.attachControl(this.touchLayer);
 
 		camera.lowerBetaLimit = 0.1;
 		camera.upperBetaLimit = (Math.PI / 2) * 0.99;

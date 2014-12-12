@@ -21,7 +21,7 @@ class LensFlaresDemo extends BaseDemo
     	var light0 = new PointLight("Omni0", new Vector3(21.84, 50, -28.26), scene);
     	camera.alpha = 2.8;
     	camera.beta = 2.25;
-    	camera.attachControl(this.stage);
+    	camera.attachControl(this.touchLayer);
 		
     	var lensFlareSystem = new LensFlareSystem("lensFlareSystem", light0, scene);
     	var flare00 = new LensFlare(0.2, 0, lensFlareSystem, new Color3(1, 1, 1), "img/lens5.png");

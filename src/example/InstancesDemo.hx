@@ -33,7 +33,7 @@ class InstancesDemo extends BaseDemo
     	light = new DirectionalLight("dir01", new Vector3(0, -1, -0.3), scene);
 		camera = new FreeCamera("Camera", new Vector3(0, 10, -20), scene);
 		camera.speed = 0.4;
-		camera.attachControl(this);
+		camera.attachControl(this.touchLayer);
 		
 		camera.keysUp.push(87);
 		camera.keysDown.push(83);
