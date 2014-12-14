@@ -33,12 +33,12 @@
 	<spacer />
 	
 	<hbox>
-		<text text="Evaluate Active Meshes duration:" />
-		<text text="" id="evaluateMeshDurationTF" />
+		<text text="Evaluate Meshes duration:" />
+		<text text="100ms" id="evaluateMeshDurationTF" />
 	</hbox>
 	<hbox>
 		<text text="Render Targets duration:" />
-		<text text="" id="renderTargetDurationTF" />
+		<text text="100ms" id="renderTargetDurationTF" />
 	</hbox>
 	<hbox>
 		<text text="Particles duration:" />
