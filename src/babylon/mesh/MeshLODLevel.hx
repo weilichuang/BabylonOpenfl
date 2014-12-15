@@ -2,7 +2,7 @@ package babylon.mesh;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class MeshLODLevel
 {

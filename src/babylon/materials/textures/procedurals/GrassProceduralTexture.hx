@@ -6,7 +6,7 @@ import babylon.Scene;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class GrassProceduralTexture extends ProceduralTexture
 {

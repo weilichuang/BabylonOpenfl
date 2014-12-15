@@ -24,8 +24,11 @@ class Material
     public var alpha:Float = 1.0;
     public var backFaceCulling:Bool = true;
 	
+	@:dox(hide)
     public var _effect:Effect;
+	@:dox(hide)
     public var _wasPreviouslyReady:Bool;
+	
 	private var _scene:Scene;
 	private var _fillMode:Int = TriangleFillMode;
 	
@@ -35,6 +38,7 @@ class Material
 	public var onCompiled:Effect->Void;
 	public var onError:Effect->String->Void;
 
+	@:dox(hide)
 	public var _renderId:Int;
 	
 	public var wireframe(get, set):Bool;

@@ -12,7 +12,7 @@ import babylon.Scene;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class OutlineRenderer
 {

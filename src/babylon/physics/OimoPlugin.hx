@@ -24,7 +24,7 @@ typedef OimoMesh = {
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class OimoPlugin implements IPhysicsEnginePlugin
 {

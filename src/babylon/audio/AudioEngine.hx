@@ -2,7 +2,7 @@ package babylon.audio;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class AudioEngine
 {

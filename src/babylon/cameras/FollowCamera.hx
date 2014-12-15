@@ -5,7 +5,7 @@ import babylon.Scene;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class FollowCamera extends TargetCamera
 {

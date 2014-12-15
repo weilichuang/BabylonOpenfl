@@ -11,7 +11,7 @@ import com.element.oimo.physics.dynamics.World;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class OimoLink
 {

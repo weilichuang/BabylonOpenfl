@@ -3,7 +3,7 @@ import openfl.utils.Float32Array;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class Vector4
 {

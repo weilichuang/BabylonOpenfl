@@ -4,7 +4,7 @@ import openfl.gl.GL;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class AlphaState
 {

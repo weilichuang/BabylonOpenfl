@@ -4,7 +4,7 @@ import haxe.ds.IntMap;
 using StringTools;
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class EffectFallbacks
 {

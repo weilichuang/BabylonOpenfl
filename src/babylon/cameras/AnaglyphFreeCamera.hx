@@ -10,7 +10,7 @@ import babylon.Scene;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class AnaglyphFreeCamera extends FreeCamera
 {

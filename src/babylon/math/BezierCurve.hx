@@ -2,7 +2,7 @@ package babylon.math;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class BezierCurve
 {

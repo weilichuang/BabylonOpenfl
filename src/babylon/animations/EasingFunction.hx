@@ -4,7 +4,7 @@ import babylon.math.FastMath;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class EasingFunction implements IEasingFunction
 {

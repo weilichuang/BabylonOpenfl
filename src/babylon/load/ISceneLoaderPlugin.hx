@@ -4,7 +4,7 @@ import babylon.mesh.AbstractMesh;
 import babylon.particles.ParticleSystem;
 
 /**
- * @author weilichuang
+ * 
  */
 
 interface ISceneLoaderPlugin 

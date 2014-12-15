@@ -2,7 +2,7 @@ package babylon.utils;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class StringUtil
 {

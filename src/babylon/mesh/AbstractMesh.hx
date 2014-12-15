@@ -32,6 +32,17 @@ class AbstractMesh extends Node implements IDispose
 	public static inline var BILLBOARDMODE_Z:Int = 4;
 	public static inline var BILLBOARDMODE_ALL:Int = 7;
 	
+	public var isPickable(get, set):Bool;
+	public var checkCollisions(get, set):Bool;
+	public var receiveShadows(get, set):Bool;
+	public var skeleton(get, set):Skeleton;
+	public var material(get, set):Material;
+	public var visibility(get, set):Float;
+	public var worldMatrixFromCache(get, never):Matrix;
+	public var absolutePosition(get, never):Vector3;
+	public var positions(get, never):Array<Vector3>;
+	public var isBlocked(get, never):Bool;
+	
 	public var rotation:Vector3 = new Vector3(0, 0, 0);
 	public var rotationQuaternion:Quaternion = null;
 	public var scaling:Vector3 = new Vector3(1, 1, 1);
@@ -40,31 +51,12 @@ class AbstractMesh extends Node implements IDispose
 	public var infiniteDistance:Bool = false;
 	public var isVisible:Bool = true;
 	
-	//--------- get set ------------//
-	private var _isPickable:Bool = true;
-	public var isPickable(get, set):Bool;
+	public var subMeshes: Array<SubMesh>;
 	
-	private var _needCheckCollisions:Bool = false;
-	public var checkCollisions(get, set):Bool;
-	
-	private var _receiveShadows:Bool = false;
-	public var receiveShadows(get, set):Bool;
-	
-	private var _skeleton:Skeleton;
-	public var skeleton(get, set):Skeleton;
-	
-	private var _visibility:Float = 1.0;
-	public var visibility(get, set):Float;
-	
-	private var _material:Material;
-	public var material(get, set):Material;
+	public var hasVertexAlpha:Bool = false;
+	public var useVertexColors:Bool = true;
 	
 	public var isBlocker:Bool = false;
-	
-	public var worldMatrixFromCache(get, null):Matrix;
-	
-	public var absolutePosition(get, null):Vector3;
-	//--------- get set end --------//
 	
 	public var showBoundingBox:Bool = false;
 	public var showSubMeshesBoundingBox:Bool = false;
@@ -88,15 +80,34 @@ class AbstractMesh extends Node implements IDispose
 	
 	public var layerMask: Int = 0xFFFFFFFF;
 	
-	// Physics
-	public var _physicImpostor:Int = 0;
-	public var _physicsMass: Float = 0;
-	public var _physicsFriction: Float = 0;
-	public var _physicRestitution: Float = 0;
-	
-	 // Collisions
+	// Collisions
 	public var ellipsoid:Vector3 = new Vector3(0.5, 1, 0.5);
 	public var ellipsoidOffset:Vector3 = new Vector3(0, 0, 0);
+	
+	// Physics
+	@:dox(hide)
+	public var _physicImpostor:Int = 0;
+	@:dox(hide)
+	public var _physicsMass: Float = 0;
+	@:dox(hide)
+	public var _physicsFriction: Float = 0;
+	@:dox(hide)
+	public var _physicRestitution: Float = 0;
+	
+	@:dox(hide)
+	public var _masterMesh: AbstractMesh;
+	@:dox(hide)
+	public var _boundingInfo: BoundingInfo;
+	
+	@:dox(hide)
+	public var _submeshesOctree: Octree<SubMesh>;
+	
+	@:dox(hide)
+	public var _renderId:Int = 0;
+	
+	@:dox(hide)
+	public var _intersectionsInProgress:Array<AbstractMesh>;
+	
 	private var _collider:Collider;
 	private var _oldPositionForCollisions:Vector3 = new Vector3(0, 0, 0);
 	private var _diffPositionForCollisions:Vector3 = new Vector3(0, 0, 0);
@@ -121,30 +132,15 @@ class AbstractMesh extends Node implements IDispose
 	
 	private var _isDirty:Bool = false;
 	
-	public var _masterMesh: AbstractMesh;
-	
-	//用于检测碰撞
+	private var _isPickable:Bool = true;
+	private var _needCheckCollisions:Bool = false;
+	private var _receiveShadows:Bool = false;
+	private var _skeleton:Skeleton;
+	private var _visibility:Float = 1.0;
+	private var _material:Material;
 	private var _positions: Array<Vector3> = null;
-	public var positions(get, null):Array<Vector3>;
-	private function get_positions():Array<Vector3>
-	{
-		return _positions;
-	}
-
-	public var _boundingInfo: BoundingInfo;
-	
 	
 	private var _isDisposed:Bool = false;
-	public var _renderId:Int = 0;
-
-	public var subMeshes: Array<SubMesh>;
-	
-	public var _submeshesOctree: Octree<SubMesh>;
-	public var _intersectionsInProgress:Array<AbstractMesh>;
-	
-	public var hasVertexAlpha:Bool = false;
-	
-	public var useVertexColors:Bool = true;
 	
 	private var _onAfterWorldMatrixUpdate:Array<AbstractMesh->Void> = new Array<AbstractMesh->Void>();
 
@@ -176,75 +172,9 @@ class AbstractMesh extends Node implements IDispose
 		_collider = new Collider();
 	}
 	
-	public var isBlocked(get, never):Bool;
-	private function get_isBlocked():Bool
-	{
-		return false;
-	}
-	
 	public function getLOD(camera:Camera, boundingSphere:BoundingSphere = null):AbstractMesh
 	{
 		return this;
-	}
-	
-	private function get_material():Material
-	{
-		return _material;
-	}
-	
-	private function set_material(value:Material):Material
-	{
-		return _material = value;
-	}
-	
-	private function get_isPickable():Bool
-	{
-		return _isPickable;
-	}
-	
-	private function set_isPickable(value:Bool):Bool
-	{
-		return _isPickable = value;
-	}
-	
-	private function get_checkCollisions():Bool
-	{
-		return _needCheckCollisions;
-	}
-	
-	private function set_checkCollisions(value:Bool):Bool
-	{
-		return _needCheckCollisions = value;
-	}
-	
-	private function get_receiveShadows():Bool
-	{
-		return _receiveShadows;
-	}
-	
-	private function set_receiveShadows(value:Bool):Bool
-	{
-		return _receiveShadows = value;
-	}
-	
-	private function get_visibility():Float
-	{
-		return _visibility;
-	}
-	
-	private function set_visibility(value:Float):Float
-	{
-		return _visibility = value;
-	}
-	
-	private function get_skeleton():Skeleton
-	{
-		return _skeleton;
-	}
-	
-	private function set_skeleton(value:Skeleton):Skeleton
-	{
-		return _skeleton = value;
 	}
 	
 	public function isDisposed():Bool
@@ -307,17 +237,6 @@ class AbstractMesh extends Node implements IDispose
 			this.computeWorldMatrix();
 		}
 		return this._worldMatrix;
-	}
-
-	private function get_worldMatrixFromCache(): Matrix
-	{
-		return this._worldMatrix;
-	}
-
-	
-	private function get_absolutePosition(): Vector3 
-	{
-		return this._absolutePosition;
 	}
 
 	public function rotate(axis: Vector3, amount: Float, space: Space): Void
@@ -399,6 +318,7 @@ class AbstractMesh extends Node implements IDispose
 		return this._pivotMatrix;
 	}
 
+	@:dox(hide)
 	override public function _isSynchronized(): Bool
 	{
 		if (this._isDirty)
@@ -439,17 +359,6 @@ class AbstractMesh extends Node implements IDispose
 		return true;
 	}
 
-	override private function _initCache():Void
-	{
-		super._initCache();
-
-		this._cache.localMatrixUpdated = false;
-		this._cache.position = Vector3.Zero();
-		this._cache.scaling = Vector3.Zero();
-		this._cache.rotation = Vector3.Zero();
-		this._cache.rotationQuaternion = new Quaternion(0, 0, 0, 0);
-	}
-
 	public function markAsDirty(property: String): Void
 	{
 		if (property == "rotation")
@@ -460,6 +369,7 @@ class AbstractMesh extends Node implements IDispose
 		this._isDirty = true;
 	}
 
+	@:dox(hide)
 	public function _updateBoundingInfo(): Void 
 	{
 		if(this._boundingInfo == null)
@@ -470,6 +380,7 @@ class AbstractMesh extends Node implements IDispose
 		this._updateSubMeshesBoundingInfo(this.worldMatrixFromCache);
 	}
 	
+	@:dox(hide)
 	public function _updateSubMeshesBoundingInfo(matrix: Matrix):Void
 	{
 		for (subIndex in 0...this.subMeshes.length)
@@ -807,6 +718,7 @@ class AbstractMesh extends Node implements IDispose
 	}
 
 	// Collisions
+	@:dox(hide)
 	public function _collideForSubMesh(subMesh: SubMesh, transformMatrix: Matrix, collider: Collider): Void 
 	{
 		this._generatePointsArray();
@@ -861,6 +773,7 @@ class AbstractMesh extends Node implements IDispose
 		}
 	}
 
+	@:dox(hide)
 	public function _checkCollision(collider: Collider): Void 
 	{
 		// Bounding box test
@@ -876,6 +789,7 @@ class AbstractMesh extends Node implements IDispose
 	}
 
 	// Picking
+	@:dox(hide)
 	public function _generatePointsArray(): Bool
 	{
 		return false;
@@ -1053,6 +967,98 @@ class AbstractMesh extends Node implements IDispose
 		{
 			this.onDispose();
 		}
+	}
+	
+	private function get_positions():Array<Vector3>
+	{
+		return _positions;
+	}
+	
+	private function get_isBlocked():Bool
+	{
+		return false;
+	}
+	
+	private function get_material():Material
+	{
+		return _material;
+	}
+	
+	private function set_material(value:Material):Material
+	{
+		return _material = value;
+	}
+	
+	private function get_isPickable():Bool
+	{
+		return _isPickable;
+	}
+	
+	private function set_isPickable(value:Bool):Bool
+	{
+		return _isPickable = value;
+	}
+	
+	private function get_checkCollisions():Bool
+	{
+		return _needCheckCollisions;
+	}
+	
+	private function set_checkCollisions(value:Bool):Bool
+	{
+		return _needCheckCollisions = value;
+	}
+	
+	private function get_receiveShadows():Bool
+	{
+		return _receiveShadows;
+	}
+	
+	private function set_receiveShadows(value:Bool):Bool
+	{
+		return _receiveShadows = value;
+	}
+	
+	private function get_visibility():Float
+	{
+		return _visibility;
+	}
+	
+	private function set_visibility(value:Float):Float
+	{
+		return _visibility = value;
+	}
+	
+	private function get_skeleton():Skeleton
+	{
+		return _skeleton;
+	}
+	
+	private function set_skeleton(value:Skeleton):Skeleton
+	{
+		return _skeleton = value;
+	}
+
+	private function get_worldMatrixFromCache(): Matrix
+	{
+		return this._worldMatrix;
+	}
+
+	
+	private function get_absolutePosition(): Vector3 
+	{
+		return this._absolutePosition;
+	}
+
+	override private function _initCache():Void
+	{
+		super._initCache();
+
+		this._cache.localMatrixUpdated = false;
+		this._cache.position = Vector3.Zero();
+		this._cache.scaling = Vector3.Zero();
+		this._cache.rotation = Vector3.Zero();
+		this._cache.rotationQuaternion = new Quaternion(0, 0, 0, 0);
 	}
 
 }

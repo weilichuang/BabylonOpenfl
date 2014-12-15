@@ -7,7 +7,7 @@ import babylon.tools.Tools;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class TargetCamera extends Camera
 {

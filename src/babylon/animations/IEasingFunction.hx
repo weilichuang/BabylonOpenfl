@@ -1,7 +1,7 @@
 package babylon.animations;
 
 /**
- * @author weilichuang
+ * 
  */
 
 interface IEasingFunction 

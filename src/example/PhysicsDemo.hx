@@ -20,7 +20,7 @@ import openfl.ui.Keyboard;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class PhysicsDemo extends BaseDemo
 {

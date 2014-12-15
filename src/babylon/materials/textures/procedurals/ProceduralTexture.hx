@@ -14,7 +14,7 @@ import haxe.ds.StringMap;
 
 /**
  * ...
- * @author weilichuang
+ * 
  */
 class ProceduralTexture extends Texture
 {
