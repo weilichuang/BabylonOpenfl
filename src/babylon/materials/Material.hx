@@ -37,9 +37,12 @@ class Material
     public var onDispose:Void->Void;
 	public var onCompiled:Effect->Void;
 	public var onError:Effect->String->Void;
+	public var onBind:Material->Void;
 
 	@:dox(hide)
 	public var _renderId:Int;
+	
+	
 	
 	public var wireframe(get, set):Bool;
 	public var pointsCloud(get, set):Bool;
@@ -139,7 +142,12 @@ class Material
 	
 	public function bind(world:Matrix, mesh:Mesh):Void
 	{ 		
-		
+		this._scene._cachedMaterial = this;
+
+		if (this.onBind != null)
+		{
+			this.onBind(this);
+		}
     }
 	
 	public function bindOnlyWorldMatrix(world:Matrix):Void

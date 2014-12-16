@@ -35,7 +35,7 @@ class ProceduralTexture extends Texture
 	private var _samplers:Array<String> = new Array<String>();
 	private var _fragment: String;
 
-	private var _textures:StringMap<Texture> = new StringMap<Texture>();
+	public var _textures:StringMap<Texture> = new StringMap<Texture>();
 	private var _floats:StringMap<Float> = new StringMap<Float>();
 	private var _floatsArrays:StringMap<Array<Float>> = new StringMap<Array<Float>>();
 	private var _colors3:StringMap<Color3> = new StringMap<Color3>();
@@ -45,6 +45,7 @@ class ProceduralTexture extends Texture
 	private var _matrices:StringMap<Matrix> = new StringMap<Matrix>();
 
 	private var _fallbackTexture: Texture;
+	private var _fallbackTextureUsed:Bool = false;
 
 	public function new(name:String, size:Int, fragment:String, scene:Scene, fallbackTexture:Texture = null, generateMipMaps:Bool = false)
 	{
@@ -57,7 +58,7 @@ class ProceduralTexture extends Texture
 		this._size = size;
 		this._generateMipMaps = generateMipMaps;
 		
-		this._fragment = fragment;
+		this.setFragment(fragment);
 		
 		this._fallbackTexture = fallbackTexture;
 		
@@ -87,8 +88,17 @@ class ProceduralTexture extends Texture
 	
 	override public function isReady():Bool
 	{
-		var engine:Engine = this.getScene().getEngine();
+		if (this._fragment == null) 
+		{
+			return false;
+		}
+		
+		if (this._fallbackTextureUsed)
+		{
+			return true;
+		}
 
+		var engine:Engine = this.getScene().getEngine();
 		this._effect = engine.createEffect({ vertex: "procedural", fragment: this._fragment },
 			["position"],
 			this._uniforms,
@@ -96,8 +106,13 @@ class ProceduralTexture extends Texture
 			"", null, null, function(effect:Effect,errorMsg:String):Void {
 				this.releaseInternalTexture();
 
-				this._texture = this._fallbackTexture._texture;
-				this._texture.references++;
+				if (this._fallbackTexture != null)
+				{
+					this._texture = this._fallbackTexture._texture;
+					this._texture.references++;
+				}
+
+				this._fallbackTextureUsed = true;
 			});
 
 		return this._effect.isReady();
@@ -127,6 +142,11 @@ class ProceduralTexture extends Texture
 		{
 			return false;
 		}
+		
+		if (this._fallbackTextureUsed)
+		{
+			return false;
+		}
 
 		if (this._currentRefreshId == -1) // At least render once
 		{
@@ -151,6 +171,11 @@ class ProceduralTexture extends Texture
 
 	public function resize(size:Int, generateMipMaps:Bool):Void
 	{
+		if (this._fallbackTextureUsed) 
+		{
+			return;
+		}
+			
 		this.releaseInternalTexture();
 		this._texture = this.getScene().getEngine().createRenderTargetTexture(size, size, generateMipMaps);
 	}

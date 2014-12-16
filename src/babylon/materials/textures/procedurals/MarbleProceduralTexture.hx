@@ -35,11 +35,11 @@ class MarbleProceduralTexture extends ProceduralTexture
 	
 	public function updateShaderUniforms():Void
 	{
-		this.setColor3("numberOfBricksHeight", this._numberOfBricksHeight);
-		this.setColor3("numberOfBricksWidth", this._numberOfBricksWidth);
+		this.setFloat("numberOfTilesHeight", this._numberOfTilesHeight);
+		this.setFloat("numberOfTilesWidth", this._numberOfTilesWidth);
 		this.setFloat("amplitude", this._amplitude);
-		this.setColor3("brick", this._marbleColor);
-		this.setColor3("joint", this._jointColor);
+		this.setColor3("marbleColor", this._marbleColor);
+		this.setColor3("jointColor", this._jointColor);
 	}
 	
 	public function get_numberOfBricksHeight(): Int

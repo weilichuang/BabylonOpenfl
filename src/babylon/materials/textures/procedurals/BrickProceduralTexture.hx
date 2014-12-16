@@ -34,8 +34,8 @@ class BrickProceduralTexture extends ProceduralTexture
 	{
 		this.setColor3("numberOfBricksHeight", this._numberOfBricksHeight);
 		this.setColor3("numberOfBricksWidth", this._numberOfBricksWidth);
-		this.setColor3("brick", this._brickColor);
-		this.setColor3("joint", this._jointColor);
+		this.setColor3("brickColor", this._brickColor);
+		this.setColor3("jointColor", this._jointColor);
 	}
 	
 	public function get_numberOfBricksHeight(): Int

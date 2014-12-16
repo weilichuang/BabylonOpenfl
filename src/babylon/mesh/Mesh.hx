@@ -653,7 +653,8 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 		var effect:Effect = effectiveMaterial.getEffect();
 
 		// Bind
-		var fillMode:Int = scene.forceWireframe ? Material.WireFrameFillMode : effectiveMaterial.fillMode;
+	var fillMode:Int = scene.forcePointsCloud ? Material.PointFillMode : 
+												(scene.forceWireframe ? Material.WireFrameFillMode : effectiveMaterial.fillMode);
 		_bind(subMesh, effect, fillMode);
 
 		var world:Matrix = getWorldMatrix();

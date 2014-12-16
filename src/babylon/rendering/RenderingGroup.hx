@@ -16,14 +16,14 @@ class RenderingGroup
 	private var _transparentSubMeshes:Array<SubMesh>;
 	private var _alphaTestSubMeshes:Array<SubMesh>;
 	
-	//private var _activeVertices:Int;
+	private var _activeVertices:Int;
 
 	public function new(index:Int, scene:Scene)
 	{
 		this.index = index;
         this._scene = scene;
 		
-		//this._activeVertices = 0;
+		this._activeVertices = 0;
 
         this._opaqueSubMeshes = new Array<SubMesh>();
         this._transparentSubMeshes = new Array<SubMesh>();
@@ -58,7 +58,7 @@ class RenderingGroup
 		{
             submesh = _opaqueSubMeshes[subIndex];
 			
-            //_activeVertices += submesh.verticesCount;
+            _activeVertices += submesh.verticesCount;
 
             submesh.render();
         }
@@ -69,7 +69,7 @@ class RenderingGroup
 		{
             submesh = _alphaTestSubMeshes[subIndex];
 			
-            //_activeVertices += submesh.verticesCount;
+            _activeVertices += submesh.verticesCount;
 
             submesh.render();
         }
@@ -90,19 +90,21 @@ class RenderingGroup
 				
 				var center:Vector3 = submesh.getBoundingInfo().boundingSphere.centerWorld;
 				
+				submesh._alphaIndex = submesh.getMesh().alphaIndex;
                 submesh._distanceToCamera = center.subtract(_scene.activeCamera.position).lengthSquared();
             }
 
             _transparentSubMeshes.sort(function (a:SubMesh, b:SubMesh):Int 
 			{
-                if (a._distanceToCamera < b._distanceToCamera)
+				// Alpha index first
+                if (a._alphaIndex > b._alphaIndex) 
 				{
-                    return 1;
-                }
-                if (a._distanceToCamera > b._distanceToCamera) 
+					return 1;
+				}
+				if (a._alphaIndex < b._alphaIndex) 
 				{
-                    return -1;
-                }
+					return -1;
+				}
                 return 0;
             });
 
@@ -112,7 +114,7 @@ class RenderingGroup
 			{
                 submesh = _transparentSubMeshes[subIndex];
 				
-                //_activeVertices += submesh.verticesCount;
+                _activeVertices += submesh.verticesCount;
 
                 submesh.render();
             }
@@ -136,14 +138,7 @@ class RenderingGroup
 		
         if (material.needAlphaBlending() || mesh.visibility < 1.0 || mesh.hasVertexAlpha)  // Transparent
 		{
-            if (material.alpha > 0 || mesh.visibility < 1.0)
-			{
-                _transparentSubMeshes.push(subMesh);
-            }
-			else
-			{
-				_opaqueSubMeshes.push(subMesh);
-			}
+            _transparentSubMeshes.push(subMesh);
         } 
 		else if (material.needAlphaTesting()) // Alpha test
 		{ 

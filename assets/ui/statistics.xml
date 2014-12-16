@@ -20,6 +20,10 @@
 		<text text="Active particles:" />
 		<text text="" id="particleCountTF" />
 	</hbox>
+	<hbox>
+		<text text="Active Skeleton:" />
+		<text text="" id="skeletonCountTF" />
+	</hbox>
 	<spacer />
 	
 	<hbox>

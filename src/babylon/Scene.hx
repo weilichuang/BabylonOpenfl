@@ -125,6 +125,7 @@ class Scene
 	public var layers:Array<Layer>;
 	
 	// Skeletons
+	public var skeletonsEnabled:Bool = true;
 	public var skeletons:Array<Skeleton>;
 	
 	// Lens flares
@@ -208,6 +209,10 @@ class Scene
 	// Procedural textures
 	public var proceduralTexturesEnabled:Bool = true;
 	public var _proceduralTextures:Array<ProceduralTexture> = [];
+	
+	public var forcePointsCloud:Bool = false;
+	
+	public var _cachedMaterial: Material;
 
 	public function new(engine:Engine) 
 	{
@@ -311,6 +316,16 @@ class Scene
 		this._outlineRenderer = new OutlineRenderer(this);
 
 		this.attachControl();
+	}
+	
+	public function getCachedMaterial(): Material
+	{
+		return this._cachedMaterial;
+	}
+	
+	public function resetCachedMaterial(): Void 
+	{
+		this._cachedMaterial = null;
 	}
 
 	public function getStageWidth():Int
@@ -1153,7 +1168,7 @@ class Scene
 	
 	private function _activeMesh(mesh: AbstractMesh): Void 
 	{
-		if (mesh.skeleton != null)
+		if (mesh.skeleton != null && this.skeletonsEnabled)
 		{
 			this._activeSkeletons.pushNoDuplicate(mesh.skeleton);
 		}
@@ -1227,6 +1242,8 @@ class Scene
 		{
             var skeleton:Skeleton = _activeSkeletons.data[skeletonIndex];
             skeleton.prepare();
+			
+			statistics.activeBones++;
         }
 
         // Render targets
@@ -1364,14 +1381,14 @@ class Scene
 					if (areIntersecting && currentIntersectionInProgress == -1 && 
 						action.trigger == ActionManager.OnIntersectionEnterTrigger )
 					{
-						actionManager.processTrigger(ActionManager.OnIntersectionEnterTrigger, ActionEvent.CreateNew(sourceMesh));
+						action._executeCurrent(ActionEvent.CreateNew(sourceMesh));
 						sourceMesh._intersectionsInProgress.push(otherMesh);
 
 					} 
 					else if (!areIntersecting && currentIntersectionInProgress > -1 && 
 							action.trigger == ActionManager.OnIntersectionExitTrigger )
 					{
-						actionManager.processTrigger(ActionManager.OnIntersectionExitTrigger, ActionEvent.CreateNew(sourceMesh));
+						action._executeCurrent(ActionEvent.CreateNew(sourceMesh));
 
 						var indexOfOther = sourceMesh._intersectionsInProgress.indexOf(otherMesh);
 
@@ -1391,9 +1408,8 @@ class Scene
 		var startDate = Lib.getTimer();
 		
 		this.statistics.reset();
-		
 		engine.resetDrawCalls();
-
+		this.resetCachedMaterial();
 		this._meshesForIntersections.reset();
 		
 		// Actions
@@ -1478,7 +1494,7 @@ class Scene
 		}
         
         // Clear
-        engine.clear(this.clearColor, this.autoClear || this.forceWireframe, true);
+        engine.clear(this.clearColor, this.autoClear || this.forceWireframe || this.forcePointsCloud, true);
         
         // Shadows
 		if (shadowsEnabled)

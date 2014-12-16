@@ -34,6 +34,7 @@ class SubMesh
 	public var _lastColliderTransformMatrix:Matrix = new Matrix();
 		
 	public var _distanceToCamera:Float = 0;
+	public var _alphaIndex:Int = 0;
 	public var _renderId:Int = -1;
 	
 	public var _id:Int = -1;

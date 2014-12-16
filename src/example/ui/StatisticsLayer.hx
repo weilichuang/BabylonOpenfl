@@ -28,6 +28,8 @@ class StatisticsLayer extends XMLController
 		
 		particleCountTF.text = scene.statistics.activeParticles + "";
 		
+		skeletonCountTF.text = scene.statistics.activeBones + "";
+		
 		frameDurationTF.text = scene.statistics.lastFrameDuration +"ms";
 		
 		drawCallTF.text = scene.engine.getDrawCalls() + "";

@@ -56,7 +56,6 @@ class FireProceduralTexture extends ProceduralTexture
 	private var _time: Float = 0.0;
 	private var _speed: Vector2 = new Vector2(0.5, 0.3);
 	private var _shift: Float = 1.6;
-	private var _alpha: Float = 0.0;
 	private var _autoGenerateTime: Bool = true;
 	private var _fireColors: Array<Color3>;
 	private var _alphaThreshold:Float = 0.5;
@@ -81,10 +80,9 @@ class FireProceduralTexture extends ProceduralTexture
 	
 	public function updateShaderUniforms():Void
 	{
-		this.setFloat("iGlobalTime", this._time);
+		this.setFloat("time", this._time);
 		this.setVector2("speed", this._speed);
 		this.setFloat("shift", this._shift);
-		this.setFloat("alpha", this._alpha);
 
 		this.setColor3("c1", this._fireColors[0]);
 		this.setColor3("c2", this._fireColors[1]);
@@ -153,18 +151,6 @@ class FireProceduralTexture extends ProceduralTexture
 		this._shift = value;
 		this.updateShaderUniforms();
 		return this._shift;
-	}
-	
-	public function get_alpha(): Float 
-	{
-		return this._alpha;
-	}
-
-	public function set_alpha(value: Float):Float
-	{
-		this._alpha = value;
-		this.updateShaderUniforms();
-		return this._alpha;
 	}
 	
 	public function get_alphaThreshold(): Float 

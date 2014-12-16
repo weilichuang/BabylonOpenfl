@@ -896,10 +896,20 @@ class BabylonFileLoader implements ISceneLoaderPlugin
 			mesh.showSubMeshesBoundingBox = parsedMesh.showSubMeshesBoundingBox;
 		}
 		
+		if (parsedMesh.applyFog != null) 
+		{
+            mesh.applyFog = parsedMesh.applyFog;
+        }
+		
 		if (parsedMesh.pickable != null) 
 		{
 			mesh.isPickable = parsedMesh.pickable;
 		}
+		
+		if (parsedMesh.alphaIndex != null)
+		{
+            mesh.alphaIndex = parsedMesh.alphaIndex;
+        }
         
 		if (parsedMesh.receiveShadows != null) 
 		{

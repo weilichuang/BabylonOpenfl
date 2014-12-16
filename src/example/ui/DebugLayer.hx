@@ -24,6 +24,10 @@ class DebugLayer extends XMLController
             this.scene.forceWireframe = wireframeCB.selected;
         };
 		
+		pointsCloudCB.onClick = function(e) {
+            this.scene.forcePointsCloud = pointsCloudCB.selected;
+        };
+		
 		boundingBoxCB.onClick = function(e) {
             this.scene.forceShowBoundingBoxes = boundingBoxCB.selected;
         };
@@ -90,6 +94,7 @@ class DebugLayer extends XMLController
 		demo.showStatistics(statisticsCB.selected);
 		this.scene.forceWireframe = wireframeCB.selected;
 		this.scene.forceShowBoundingBoxes = boundingBoxCB.selected;
+		this.scene.forcePointsCloud = pointsCloudCB.selected;
 		StandardMaterial.DiffuseTextureEnabled = diffuseCB.selected;
 		StandardMaterial.AmbientTextureEnabled = ambientCB.selected;
 		StandardMaterial.SpecularTextureEnabled = specularCB.selected;

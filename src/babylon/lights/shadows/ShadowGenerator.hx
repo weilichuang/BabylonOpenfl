@@ -162,7 +162,7 @@ class ShadowGenerator
 			}
 			
 			// Bones
-			var useBones:Bool = mesh.skeleton != null && 
+			var useBones:Bool = mesh.skeleton != null && _scene.skeletonsEnabled &&
 								mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
 								mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind);
 			if (useBones)
@@ -220,6 +220,7 @@ class ShadowGenerator
         var attribs:Array<String> = [VertexBuffer.PositionKind];
 		
 		var mesh = subMesh.getMesh();
+		var scene = mesh.getScene();
 		var material:Material = subMesh.getMaterial();
 		
 		// Alpha test
@@ -238,7 +239,7 @@ class ShadowGenerator
 			}
 		}
 			
-        if (mesh.skeleton != null && 
+        if (mesh.skeleton != null && scene.skeletonsEnabled &&
 			mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
 			mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind)) 
 		{

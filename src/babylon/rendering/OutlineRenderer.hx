@@ -46,7 +46,7 @@ class OutlineRenderer
 		this._effect.setMatrix("viewProjection", _scene.getTransformMatrix());
 
 		// Bones
-		var useBones:Bool = mesh.skeleton != null && 
+		var useBones:Bool = mesh.skeleton != null && _scene.skeletonsEnabled &&
 							mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) &&
 							mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind);
 		if (useBones)

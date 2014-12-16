@@ -6,6 +6,7 @@
 			<checkbox text="Statistics" id="statisticsCB" selected="false" />
 			<checkbox text="Bounding boxes" id="boundingBoxCB" selected="false" />
 			<checkbox text="Wireframe" id="wireframeCB" selected="false" />
+			<checkbox text="PointsCloud" id="pointsCloudCB" selected="false" />
 			<spacer height="5" />
 			
 			<text text="Texture Channels:" />

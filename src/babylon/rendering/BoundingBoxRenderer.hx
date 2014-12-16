@@ -104,6 +104,7 @@ class BoundingBoxRenderer
 			{
 				// Back
 				engine.setDepthFunctionToGreaterOrEqual();
+				this._scene.resetCachedMaterial();
 				this._colorShader.setColor4("color", this.backColor);
 				this._colorShader.bind(worldMatrix, null);
 
@@ -113,6 +114,7 @@ class BoundingBoxRenderer
 
 			// Front
 			engine.setDepthFunctionToLess();
+			this._scene.resetCachedMaterial();
 			this._colorShader.setColor4("color", this.frontColor);
 			this._colorShader.bind(worldMatrix, null);
 

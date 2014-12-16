@@ -12,6 +12,7 @@ import babylon.materials.textures.RenderTargetTexture;
 import babylon.math.Color3;
 import babylon.math.FastMath;
 import babylon.math.Matrix;
+import babylon.math.Plane;
 import babylon.mesh.AbstractMesh;
 import babylon.mesh.Mesh;
 import babylon.mesh.VertexBuffer;
@@ -239,7 +240,7 @@ class StandardMaterial extends Material
 		}
 		
 		// Point size
-		if (this.pointsCloud) 
+		if (this.pointsCloud || _scene.forcePointsCloud) 
 		{
 			defines.push("#define POINTSIZE");
 		}
@@ -438,7 +439,7 @@ class StandardMaterial extends Material
 				}
             }
 			
-            if (mesh.skeleton != null && 
+            if (mesh.skeleton != null && _scene.skeletonsEnabled &&
 				mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
 				mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind)) 
 			{
@@ -466,6 +467,8 @@ class StandardMaterial extends Material
         if (this._cachedDefines != join) 
 		{
             this._cachedDefines = join;
+			
+			_scene.resetCachedMaterial();
 
             var shaderName:String = "default";
 			// Legacy browser patch
@@ -536,122 +539,140 @@ class StandardMaterial extends Material
 			
         // Matrices        
         this.bindOnlyWorldMatrix(world);
-        _effect.setMatrix("viewProjection", this._scene.getTransformMatrix());
+        _effect.setMatrix("viewProjection", _scene.getTransformMatrix());
 
         // Bones
-        if (mesh.skeleton != null && 
+        if (mesh.skeleton != null && _scene.skeletonsEnabled &&
 			mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
 			mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind))
 		{
             _effect.setMatrices("mBones", mesh.skeleton.getTransformMatrices());
         }
 		
-		// Fresnel
-		if (this.diffuseFresnelParameters != null && this.diffuseFresnelParameters.isEnabled)
+		if (_scene.getCachedMaterial() != this)
 		{
-			this._effect.setColor4("diffuseLeftColor", this.diffuseFresnelParameters.leftColor, this.diffuseFresnelParameters.power);
-			this._effect.setColor4("diffuseRightColor", this.diffuseFresnelParameters.rightColor, this.diffuseFresnelParameters.bias);
-		}
-
-		if (this.opacityFresnelParameters != null && this.opacityFresnelParameters.isEnabled)
-		{
-			this._effect.setColor4("opacityParts", new Color3(this.opacityFresnelParameters.leftColor.toLuminance(), this.opacityFresnelParameters.rightColor.toLuminance(), this.opacityFresnelParameters.bias), this.opacityFresnelParameters.power);
-		}
-
-		if (this.reflectionFresnelParameters != null && this.reflectionFresnelParameters.isEnabled) 
-		{
-			this._effect.setColor4("reflectionLeftColor", this.reflectionFresnelParameters.leftColor, this.reflectionFresnelParameters.power);
-			this._effect.setColor4("reflectionRightColor", this.reflectionFresnelParameters.rightColor, this.reflectionFresnelParameters.bias);
-		}
-
-		if (this.emissiveFresnelParameters != null && this.emissiveFresnelParameters.isEnabled) 
-		{
-			this._effect.setColor4("emissiveLeftColor", this.emissiveFresnelParameters.leftColor, this.emissiveFresnelParameters.power);
-			this._effect.setColor4("emissiveRightColor", this.emissiveFresnelParameters.rightColor, this.emissiveFresnelParameters.bias);
-		}
-
-        // Textures        
-        if (this.diffuseTexture != null && StandardMaterial.DiffuseTextureEnabled)
-		{
-            _effect.setTexture("diffuseSampler", this.diffuseTexture);
-            _effect.setFloat2("vDiffuseInfos", this.diffuseTexture.coordinatesIndex, this.diffuseTexture.level);
-            _effect.setMatrix("diffuseMatrix", this.diffuseTexture.getTextureMatrix());
-        }
-
-        if (this.ambientTexture != null && StandardMaterial.AmbientTextureEnabled)
-		{
-            _effect.setTexture("ambientSampler", this.ambientTexture);
-
-            _effect.setFloat2("vAmbientInfos", this.ambientTexture.coordinatesIndex, this.ambientTexture.level);
-            _effect.setMatrix("ambientMatrix", this.ambientTexture.getTextureMatrix());
-        }
-
-        if (this.opacityTexture != null && StandardMaterial.OpacityTextureEnabled)
-		{
-            _effect.setTexture("opacitySampler", this.opacityTexture);
-
-            _effect.setFloat2("vOpacityInfos", this.opacityTexture.coordinatesIndex, this.opacityTexture.level);
-            _effect.setMatrix("opacityMatrix", this.opacityTexture.getTextureMatrix());
-        }
-
-        if (this.reflectionTexture != null && StandardMaterial.ReflectionTextureEnabled)
-		{
-            if (this.reflectionTexture.isCube)
+			// Fresnel
+			if (this.diffuseFresnelParameters != null && this.diffuseFresnelParameters.isEnabled)
 			{
-                _effect.setTexture("reflectionCubeSampler", this.reflectionTexture);
-            } 
-			else 
+				this._effect.setColor4("diffuseLeftColor", this.diffuseFresnelParameters.leftColor, this.diffuseFresnelParameters.power);
+				this._effect.setColor4("diffuseRightColor", this.diffuseFresnelParameters.rightColor, this.diffuseFresnelParameters.bias);
+			}
+
+			if (this.opacityFresnelParameters != null && this.opacityFresnelParameters.isEnabled)
 			{
-                _effect.setTexture("reflection2DSampler", this.reflectionTexture);
-            }
+				this._effect.setColor4("opacityParts", new Color3(this.opacityFresnelParameters.leftColor.toLuminance(), this.opacityFresnelParameters.rightColor.toLuminance(), this.opacityFresnelParameters.bias), this.opacityFresnelParameters.power);
+			}
 
-            _effect.setMatrix("reflectionMatrix", this.reflectionTexture.getReflectionTextureMatrix());
-            _effect.setFloat3("vReflectionInfos", this.reflectionTexture.coordinatesMode, this.reflectionTexture.level, this.reflectionTexture.isCube ? 1.0 : 0.0);	
-        }
+			if (this.reflectionFresnelParameters != null && this.reflectionFresnelParameters.isEnabled) 
+			{
+				this._effect.setColor4("reflectionLeftColor", this.reflectionFresnelParameters.leftColor, this.reflectionFresnelParameters.power);
+				this._effect.setColor4("reflectionRightColor", this.reflectionFresnelParameters.rightColor, this.reflectionFresnelParameters.bias);
+			}
 
-        if (this.emissiveTexture != null && StandardMaterial.EmissiveTextureEnabled)
-		{
-            _effect.setTexture("emissiveSampler", this.emissiveTexture);
+			if (this.emissiveFresnelParameters != null && this.emissiveFresnelParameters.isEnabled) 
+			{
+				this._effect.setColor4("emissiveLeftColor", this.emissiveFresnelParameters.leftColor, this.emissiveFresnelParameters.power);
+				this._effect.setColor4("emissiveRightColor", this.emissiveFresnelParameters.rightColor, this.emissiveFresnelParameters.bias);
+			}
 
-            _effect.setFloat2("vEmissiveInfos", this.emissiveTexture.coordinatesIndex, this.emissiveTexture.level);
-            _effect.setMatrix("emissiveMatrix", this.emissiveTexture.getTextureMatrix());
-        }
+			// Textures        
+			if (this.diffuseTexture != null && StandardMaterial.DiffuseTextureEnabled)
+			{
+				_effect.setTexture("diffuseSampler", this.diffuseTexture);
+				_effect.setFloat2("vDiffuseInfos", this.diffuseTexture.coordinatesIndex, this.diffuseTexture.level);
+				_effect.setMatrix("diffuseMatrix", this.diffuseTexture.getTextureMatrix());
+			}
 
-        if (this.specularTexture != null && StandardMaterial.SpecularTextureEnabled)
-		{
-            _effect.setTexture("specularSampler", this.specularTexture);
+			if (this.ambientTexture != null && StandardMaterial.AmbientTextureEnabled)
+			{
+				_effect.setTexture("ambientSampler", this.ambientTexture);
 
-            _effect.setFloat2("vSpecularInfos", this.specularTexture.coordinatesIndex, this.specularTexture.level);
-            _effect.setMatrix("specularMatrix", this.specularTexture.getTextureMatrix());
-        }
+				_effect.setFloat2("vAmbientInfos", this.ambientTexture.coordinatesIndex, this.ambientTexture.level);
+				_effect.setMatrix("ambientMatrix", this.ambientTexture.getTextureMatrix());
+			}
 
-        if (this.bumpTexture != null && 
-			_scene.getEngine().getCaps().standardDerivatives && 
-			StandardMaterial.BumpTextureEnabled)
-		{
-            _effect.setTexture("bumpSampler", this.bumpTexture);
+			if (this.opacityTexture != null && StandardMaterial.OpacityTextureEnabled)
+			{
+				_effect.setTexture("opacitySampler", this.opacityTexture);
 
-            _effect.setFloat2("vBumpInfos", this.bumpTexture.coordinatesIndex, 1.0 / this.bumpTexture.level);
-            _effect.setMatrix("bumpMatrix", this.bumpTexture.getTextureMatrix());
-        }
+				_effect.setFloat2("vOpacityInfos", this.opacityTexture.coordinatesIndex, this.opacityTexture.level);
+				_effect.setMatrix("opacityMatrix", this.opacityTexture.getTextureMatrix());
+			}
 
-        // Colors
-        _scene.ambientColor.multiplyToRef(this.ambientColor, this._globalAmbientColor);
+			if (this.reflectionTexture != null && StandardMaterial.ReflectionTextureEnabled)
+			{
+				if (this.reflectionTexture.isCube)
+				{
+					_effect.setTexture("reflectionCubeSampler", this.reflectionTexture);
+				} 
+				else 
+				{
+					_effect.setTexture("reflection2DSampler", this.reflectionTexture);
+				}
+
+				_effect.setMatrix("reflectionMatrix", this.reflectionTexture.getReflectionTextureMatrix());
+				_effect.setFloat3("vReflectionInfos", this.reflectionTexture.coordinatesMode, this.reflectionTexture.level, this.reflectionTexture.isCube ? 1.0 : 0.0);	
+			}
+
+			if (this.emissiveTexture != null && StandardMaterial.EmissiveTextureEnabled)
+			{
+				_effect.setTexture("emissiveSampler", this.emissiveTexture);
+
+				_effect.setFloat2("vEmissiveInfos", this.emissiveTexture.coordinatesIndex, this.emissiveTexture.level);
+				_effect.setMatrix("emissiveMatrix", this.emissiveTexture.getTextureMatrix());
+			}
+
+			if (this.specularTexture != null && StandardMaterial.SpecularTextureEnabled)
+			{
+				_effect.setTexture("specularSampler", this.specularTexture);
+
+				_effect.setFloat2("vSpecularInfos", this.specularTexture.coordinatesIndex, this.specularTexture.level);
+				_effect.setMatrix("specularMatrix", this.specularTexture.getTextureMatrix());
+			}
+
+			if (this.bumpTexture != null && 
+				_scene.getEngine().getCaps().standardDerivatives && 
+				StandardMaterial.BumpTextureEnabled)
+			{
+				_effect.setTexture("bumpSampler", this.bumpTexture);
+
+				_effect.setFloat2("vBumpInfos", this.bumpTexture.coordinatesIndex, 1.0 / this.bumpTexture.level);
+				_effect.setMatrix("bumpMatrix", this.bumpTexture.getTextureMatrix());
+			}
+			
+			// Clip plane
+			if (_scene.clipPlane != null)
+			{
+				var clipPlane:Plane = _scene.clipPlane;
+				this._effect.setFloat4("vClipPlane", clipPlane.normal.x, clipPlane.normal.y, clipPlane.normal.z, clipPlane.d);
+			}
+			
+			// Point size
+			if (this.pointsCloud || _scene.forcePointsCloud) 
+			{
+				this._effect.setFloat("pointSize", this.pointSize);
+			}
+
+			// Colors
+			_scene.ambientColor.multiplyToRef(this.ambientColor, this._globalAmbientColor);
+			
+			// Scaling down colors according to emissive
+			this._scaledDiffuse.r = this.diffuseColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
+			this._scaledDiffuse.g = this.diffuseColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
+			this._scaledDiffuse.b = this.diffuseColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
+
+			_effect.setVector3("vEyePosition", this._scene.activeCamera.position);
+			_effect.setColor3("vAmbientColor", this._globalAmbientColor);
+			_effect.setColor4("vSpecularColor", this._scaledSpecular, this.specularPower);
+			_effect.setColor3("vEmissiveColor", this.emissiveColor);
+		}
 		
-		// Scaling down colors according to emissive
-		this._scaledDiffuse.r = this.diffuseColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
-		this._scaledDiffuse.g = this.diffuseColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
-		this._scaledDiffuse.b = this.diffuseColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
-
+		// Scaling down color according to emissive
 		this._scaledSpecular.r = this.specularColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
 		this._scaledSpecular.g = this.specularColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
 		this._scaledSpecular.b = this.specularColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
-
-        _effect.setVector3("vEyePosition", this._scene.activeCamera.position);
-        _effect.setColor3("vAmbientColor", this._globalAmbientColor);
-        _effect.setColor4("vDiffuseColor", this._scaledDiffuse, this.alpha * mesh.visibility);
-        _effect.setColor4("vSpecularColor", this._scaledSpecular, this.specularPower);
-        _effect.setColor3("vEmissiveColor", this.emissiveColor);
+		
+		_effect.setColor4("vDiffuseColor", this._scaledDiffuse, this.alpha * mesh.visibility);
 				
 		//TODO 添加材质是否接受光照
         if (_scene.lightsEnabled) 
@@ -712,31 +733,21 @@ class StandardMaterial extends Material
             }
         }
 
-        if (_scene.clipPlane != null)
-		{
-			var clipPlane = _scene.clipPlane;
-            _effect.setFloat4("vClipPlane", clipPlane.normal.x, clipPlane.normal.y, clipPlane.normal.z, clipPlane.d);
-        }
-
         // View
 		var fogInfo = this._scene.fogInfo;
-        if (fogInfo.fogMode != FogInfo.FOGMODE_NONE || this.reflectionTexture != null)
+        if ( (mesh.applyFog && fogInfo.fogMode != FogInfo.FOGMODE_NONE) || this.reflectionTexture != null)
 		{
             _effect.setMatrix("view", this._scene.getViewMatrix());
         }
 
         // Fog
-        if (fogInfo.fogMode != FogInfo.FOGMODE_NONE)
+        if (mesh.applyFog && fogInfo.fogMode != FogInfo.FOGMODE_NONE)
 		{
             _effect.setFloat4("vFogInfos", fogInfo.fogMode, fogInfo.fogStart, fogInfo.fogEnd, fogInfo.fogDensity);
             _effect.setColor3("vFogColor", fogInfo.fogColor);
         }
 		
-		// Point size
-		if (this.pointsCloud) 
-		{
-			this._effect.setFloat("pointSize", this.pointSize);
-		}
+		super.bind(world, mesh);
     }
 	
 	public function getAnimatables():Array<Dynamic>

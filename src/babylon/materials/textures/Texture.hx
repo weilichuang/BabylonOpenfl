@@ -185,6 +185,8 @@ class Texture extends BaseTexture
 			_cachedTextureMatrix = Matrix.Zero();
 			_projectionModeMatrix = Matrix.Zero();
 		}
+		
+		this._cachedCoordinatesMode = this.coordinatesMode;
 
 		switch (coordinatesMode)
 		{

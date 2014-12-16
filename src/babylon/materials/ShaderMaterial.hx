@@ -146,7 +146,18 @@ class ShaderMaterial extends Material
 
 	override public function isReady(mesh:AbstractMesh = null, useInstances:Bool = false): Bool
 	{
-		var engine:Engine = getScene().getEngine();
+		var scene = this.getScene();
+		var engine:Engine = scene.getEngine();
+		
+		if (!this.checkReadyOnEveryCall) 
+		{
+			if (this._renderId == scene.getRenderId())
+			{
+				return true;
+			}
+		}
+
+		var previousEffect = this._effect;
 
 		_effect = engine.createEffect(_shaderPath,
 			_options.attributes,
@@ -158,97 +169,122 @@ class ShaderMaterial extends Material
 		{
 			return false;
 		}
+		
+		if (previousEffect != this._effect)
+		{
+			scene.resetCachedMaterial();
+		}
+
+		this._renderId = scene.getRenderId();
 
 		return true;
+	}
+	
+	override public function bindOnlyWorldMatrix(world: Matrix): Void 
+	{
+		var scene = this.getScene();
+
+		if (this._options.uniforms.indexOf("world") != -1)
+		{
+			this._effect.setMatrix("world", world);
+		}
+
+		if (this._options.uniforms.indexOf("worldView") != -1) 
+		{
+			world.multiplyToRef(scene.getViewMatrix(), this._cachedWorldViewMatrix);
+			this._effect.setMatrix("worldView", this._cachedWorldViewMatrix);
+		}
+
+		if (this._options.uniforms.indexOf("worldViewProjection") != -1) 
+		{
+			this._effect.setMatrix("worldViewProjection", world.multiply(scene.getTransformMatrix()));
+		}
 	}
 
 	override public function bind(world: Matrix, mesh:Mesh): Void
 	{
+		// Std values
+		this.bindOnlyWorldMatrix(world);
+			
 		var scene:Scene = getScene();
+		if (scene.getCachedMaterial() != this)
+		{
+			var uniforms = _options.uniforms;
+			
+			if (uniforms.indexOf("view") != -1)
+			{
+				_effect.setMatrix("view", scene.getViewMatrix());
+			}
+
+			if (uniforms.indexOf("projection") != -1)
+			{
+				_effect.setMatrix("projection", scene.getProjectionMatrix());
+			}
+
+			if (uniforms.indexOf("viewProjection") != -1) 
+			{
+				_effect.setMatrix("viewProjection", scene.getTransformMatrix());
+			}
+
+			// Texture
+			var keys = _textures.keys();
+			for (name in keys)
+			{
+				_effect.setTexture(name, _textures.get(name));
+			}
+
+			// Float    
+			keys = _floats.keys();
+			for (name in keys)
+			{
+				_effect.setFloat(name, _floats.get(name));
+			}
+
+			// Float s   
+			keys = _floatsArrays.keys();
+			for (name in keys)
+			{
+				_effect.setArray(name, _floatsArrays.get(name));
+			}
+
+			// Color3        
+			keys = _colors3.keys();
+			for (name in keys)
+			{
+				_effect.setColor3(name, _colors3.get(name));
+			}
+
+			// Color4     
+			keys = _colors4.keys();
+			for (name in keys)
+			{
+				var color = _colors4.get(name);
+				_effect.setFloat4(name, color.r, color.g, color.b, color.a);
+			}
+
+			// Vector2 
+			keys = _vectors2.keys();
+			for (name in keys)
+			{
+				_effect.setVector2(name, _vectors2.get(name));
+			}
+
+			// Vector3        
+			keys = _vectors3.keys();
+			for (name in keys)
+			{
+				_effect.setVector3(name, _vectors3.get(name));
+			}
+
+			// Matrix     
+			keys = _matrices.keys();
+			for (name in keys)
+			{
+				_effect.setMatrix(name, _matrices.get(name));
+			}
+		}
 		
-		var uniforms = _options.uniforms;
-		if (uniforms.indexOf("world") != -1)
-		{
-			_effect.setMatrix("world", world);
-		}
-
-		if (uniforms.indexOf("view") != -1)
-		{
-			_effect.setMatrix("view", scene.getViewMatrix());
-		}
-
-		if (uniforms.indexOf("worldView") != -1)
-		{
-			world.multiplyToRef(scene.getViewMatrix(), _cachedWorldViewMatrix);
-			_effect.setMatrix("worldView", _cachedWorldViewMatrix);
-		}
-
-		if (uniforms.indexOf("projection") != -1)
-		{
-			_effect.setMatrix("projection", scene.getProjectionMatrix());
-		}
-
-		if (uniforms.indexOf("worldViewProjection") != -1) 
-		{
-			_effect.setMatrix("worldViewProjection", world.multiply(scene.getTransformMatrix()));
-		}
-
-		// Texture
-		var keys = _textures.keys();
-		for (name in keys)
-		{
-			_effect.setTexture(name, _textures.get(name));
-		}
-
-		// Float    
-		keys = _floats.keys();
-		for (name in keys)
-		{
-			_effect.setFloat(name, _floats.get(name));
-		}
-
-		// Float s   
-		keys = _floatsArrays.keys();
-		for (name in keys)
-		{
-			_effect.setArray(name, _floatsArrays.get(name));
-		}
-
-		// Color3        
-		keys = _colors3.keys();
-		for (name in keys)
-		{
-			_effect.setColor3(name, _colors3.get(name));
-		}
-
-		// Color4     
-		keys = _colors4.keys();
-		for (name in keys)
-		{
-			var color = _colors4.get(name);
-			_effect.setFloat4(name, color.r, color.g, color.b, color.a);
-		}
-
-		// Vector2 
-		keys = _vectors2.keys();
-		for (name in keys)
-		{
-			_effect.setVector2(name, _vectors2.get(name));
-		}
-
-		// Vector3        
-		keys = _vectors3.keys();
-		for (name in keys)
-		{
-			_effect.setVector3(name, _vectors3.get(name));
-		}
-
-		// Matrix     
-		keys = _matrices.keys();
-		for (name in keys)
-		{
-			_effect.setMatrix(name, _matrices.get(name));
-		}
+		super.bind(world, null);
 	}
 
 	override public function dispose(forceDisposeEffect:Bool = false): Void

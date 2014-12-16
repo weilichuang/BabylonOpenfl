@@ -15,19 +15,11 @@ class Statistics
 	public var renderDuration:Int;
 	public var particlesDuration:Int;
 	public var spritesDuration:Int;
+	public var activeBones:Int;
 
 	public function new() 
 	{
-		this.totalVertices = 0;
-        this.activeVertices = 0;
-        this.activeParticles = 0;
-		
-		this.lastFrameDuration = 0;
-        this.evaluateActiveMeshesDuration = 0;
-        this.renderTargetsDuration = 0;
-        this.renderDuration = 0;
-		this.spritesDuration = 0;
-		this.particlesDuration = 0;
+		reset();
 	}
 
 	public function reset():Void
@@ -42,6 +34,7 @@ class Statistics
         this.renderDuration = 0;
 		this.spritesDuration = 0;
 		this.particlesDuration = 0;
+		this.activeBones = 0;
 	}
 	
 }
