@@ -41,24 +41,24 @@ class GrassProceduralTexture extends ProceduralTexture
 		this.setColor3("groundColor", this._groundColor);
 	}
 	
-	public function get_grassColors(): Array<Color3> 
+	private function get_grassColors(): Array<Color3> 
 	{
 		return this._grassColors;
 	}
 
-	public function set_grassColors(value: Array<Color3>):Array<Color3>
+	private function set_grassColors(value: Array<Color3>):Array<Color3>
 	{
 		this._grassColors = value;
 		this.updateShaderUniforms();
 		return _grassColors;
 	}
 	
-	public function get_groundColor(): Color3 
+	private function get_groundColor(): Color3 
 	{
 		return this._groundColor;
 	}
 
-	public function set_groundColor(value: Color3):Color3
+	private function set_groundColor(value: Color3):Color3
 	{
 		this._groundColor.copyFrom(value);
 		this.updateShaderUniforms();

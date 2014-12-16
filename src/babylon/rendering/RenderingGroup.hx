@@ -105,6 +105,17 @@ class RenderingGroup
 				{
 					return -1;
 				}
+				
+				// Then distance to camera
+				if (a._distanceToCamera < b._distanceToCamera)
+				{
+					return 1;
+				}
+				if (a._distanceToCamera > b._distanceToCamera) 
+				{
+					return -1;
+				}
+					
                 return 0;
             });
 

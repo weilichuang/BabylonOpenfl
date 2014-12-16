@@ -15,12 +15,11 @@ class CloudProceduralTexture extends ProceduralTexture
 	public var skyColor(get, set):Color3;
 	public var cloudColor(get, set):Color3;
 
-	public function new(name:String, size:Int, scene:Scene, fallbackTexture:Texture=null, generateMipMaps:Bool=false) 
+	public function new(name:String, size:Int, scene:Scene, fallbackTexture:Texture = null, generateMipMaps:Bool = false) 
 	{
 		super(name, size, "cloud", scene, fallbackTexture, generateMipMaps);
 		
 		this.updateShaderUniforms();
-
 		this.refreshRate = 0;
 	}
 	
@@ -30,11 +29,12 @@ class CloudProceduralTexture extends ProceduralTexture
 		this.setColor3("cloudColor", this._cloudColor);
 	}
 	
-	public function get_skyColor(): Color3 {
+	private function get_skyColor(): Color3
+	{
 		return this._skyColor;
 	}
 
-	public function set_skyColor(value: Color3):Color3
+	private function set_skyColor(value: Color3):Color3
 	{
 		this._skyColor.copyFrom(value);
 		this.updateShaderUniforms();
@@ -42,12 +42,12 @@ class CloudProceduralTexture extends ProceduralTexture
 	}
 
 
-	public function get_cloudColor(): Color3 
+	private function get_cloudColor(): Color3 
 	{
 		return this._cloudColor;
 	}
 
-	public function set_cloudColor(value: Color3):Color3
+	private function set_cloudColor(value: Color3):Color3
 	{
 		this._cloudColor.copyFrom(value);
 		this.updateShaderUniforms();

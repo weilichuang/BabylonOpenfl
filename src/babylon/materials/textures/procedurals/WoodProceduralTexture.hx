@@ -24,11 +24,12 @@ class WoodProceduralTexture extends ProceduralTexture
 		this.setColor3("woodColor", this._woodColor);
 	}
 	
-	public function get_ampScale(): Float {
+	private function get_ampScale(): Float 
+	{
 		return this._ampScale;
 	}
 
-	public function set_ampScale(value: Float):Float
+	private function set_ampScale(value: Float):Float
 	{
 		this._ampScale = value;
 		this.updateShaderUniforms();
@@ -36,12 +37,12 @@ class WoodProceduralTexture extends ProceduralTexture
 	}
 
 
-	public function get_woodColor(): Color3 
+	private function get_woodColor(): Color3 
 	{
 		return this._woodColor;
 	}
 
-	public function set_woodColor(value: Color3):Color3
+	private function set_woodColor(value: Color3):Color3
 	{
 		this._woodColor.copyFrom(value);
 		this.updateShaderUniforms();

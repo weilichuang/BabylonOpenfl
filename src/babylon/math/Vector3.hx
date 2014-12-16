@@ -514,5 +514,25 @@ class Vector3
 		center.scaleInPlace(0.5);
 		return center;
 	}
+	
+	public static function UnprojectFromTransform(source: Vector3, 
+												viewportWidth: Float, 
+												viewportHeight: Float, 
+												world: Matrix, transform: Matrix): Vector3
+	{
+		var matrix = world.multiply(transform);
+		matrix.invert();
+		source.x = source.x / viewportWidth * 2 - 1;
+		source.y = -(source.y / viewportHeight * 2 - 1);
+		var vector = Vector3.TransformCoordinates(source, matrix);
+		var num = source.x * matrix.m[3] + source.y * matrix.m[7] + source.z * matrix.m[11] + matrix.m[15];
+
+		if (Tools.WithinEpsilon(num, 1.0))
+		{
+			vector = vector.scale(1.0 / num);
+		}
+
+		return vector;
+	}
 		
 }

@@ -17,7 +17,6 @@ import babylon.mesh.AbstractMesh;
 import babylon.mesh.Mesh;
 import babylon.mesh.VertexBuffer;
 import babylon.Scene;
-import babylon.tools.Tools;
 
 using StringTools;
 
@@ -246,7 +245,7 @@ class StandardMaterial extends Material
 		}
 
         // Fog
-        if (fogEnabled && _scene.fogInfo.fogMode != FogInfo.FOGMODE_NONE)
+        if (mesh != null && mesh.applyFog && fogEnabled && _scene.fogInfo.fogMode != FogInfo.FOGMODE_NONE)
 		{
             defines.push("#define FOG");
             fallbacks.addFallback(1, "FOG");
@@ -534,9 +533,6 @@ class StandardMaterial extends Material
 	
 	override public function bind(world:Matrix, mesh:Mesh):Void
 	{
-		if (mesh == null)
-			return;
-			
         // Matrices        
         this.bindOnlyWorldMatrix(world);
         _effect.setMatrix("viewProjection", _scene.getTransformMatrix());
@@ -657,9 +653,9 @@ class StandardMaterial extends Material
 			_scene.ambientColor.multiplyToRef(this.ambientColor, this._globalAmbientColor);
 			
 			// Scaling down colors according to emissive
-			this._scaledDiffuse.r = this.diffuseColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
-			this._scaledDiffuse.g = this.diffuseColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
-			this._scaledDiffuse.b = this.diffuseColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
+			this._scaledSpecular.r = this.specularColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
+			this._scaledSpecular.g = this.specularColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
+			this._scaledSpecular.b = this.specularColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
 
 			_effect.setVector3("vEyePosition", this._scene.activeCamera.position);
 			_effect.setColor3("vAmbientColor", this._globalAmbientColor);
@@ -668,9 +664,9 @@ class StandardMaterial extends Material
 		}
 		
 		// Scaling down color according to emissive
-		this._scaledSpecular.r = this.specularColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
-		this._scaledSpecular.g = this.specularColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
-		this._scaledSpecular.b = this.specularColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
+		this._scaledDiffuse.r = this.diffuseColor.r * FastMath.clamp(1.0 - this.emissiveColor.r);
+		this._scaledDiffuse.g = this.diffuseColor.g * FastMath.clamp(1.0 - this.emissiveColor.g);
+		this._scaledDiffuse.b = this.diffuseColor.b * FastMath.clamp(1.0 - this.emissiveColor.b);
 		
 		_effect.setColor4("vDiffuseColor", this._scaledDiffuse, this.alpha * mesh.visibility);
 				
@@ -735,7 +731,7 @@ class StandardMaterial extends Material
 
         // View
 		var fogInfo = this._scene.fogInfo;
-        if ( (mesh.applyFog && fogInfo.fogMode != FogInfo.FOGMODE_NONE) || this.reflectionTexture != null)
+        if ((mesh.applyFog && fogInfo.fogMode != FogInfo.FOGMODE_NONE) || this.reflectionTexture != null)
 		{
             _effect.setMatrix("view", this._scene.getViewMatrix());
         }

@@ -1,4 +1,4 @@
-﻿varying vec2 vPosition;
+varying vec2 vPosition;
 varying vec2 vUV;
 
 uniform float numberOfBricksHeight;

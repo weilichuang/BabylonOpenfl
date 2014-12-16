@@ -1,6 +1,6 @@
-package materials.textures.procedurals;
-import math.Color3;
-import math.Vector2;
+package babylon.materials.textures.procedurals;
+import babylon.math.Color3;
+import babylon.math.Vector2;
 
 class FireProceduralTexture extends ProceduralTexture
 {
@@ -62,9 +62,8 @@ class FireProceduralTexture extends ProceduralTexture
 	
 	public var fireColors(get, set):Array<Color3>;
 	public var time(get, set):Float;
-	public var speed(get, set):Float;
+	public var speed(get, set):Vector2;
 	public var shift(get, set):Float;
-	public var alpha(get, set):Float;
 	public var alphaThreshold(get, set):Float;
 
 	public function new(name:String, size:Int, scene:Scene, fallbackTexture:Texture = null, generateMipMaps:Bool = false)
@@ -73,8 +72,6 @@ class FireProceduralTexture extends ProceduralTexture
 		
 		this._fireColors = FireProceduralTexture.RedFireColors();
 		this.updateShaderUniforms();
-
-		// Use 0 to render just once, 1 to render on every frame, 2 to render every two frames and so on...
 		this.refreshRate = 1;
 	}
 	
@@ -104,12 +101,12 @@ class FireProceduralTexture extends ProceduralTexture
 		super.render(useCameraPostProcess);
 	}
 	
-	public function get_fireColors(): Array<Color3>
+	private function get_fireColors(): Array<Color3>
 	{
 		return this._fireColors;
 	}
 
-	public function set_fireColors(value: Array<Color3>):Array<Color3>
+	private function set_fireColors(value: Array<Color3>):Array<Color3>
 	{
 		this._fireColors = value;
 		this.updateShaderUniforms();
@@ -117,43 +114,43 @@ class FireProceduralTexture extends ProceduralTexture
 	}
 
 
-	public function get_time(): Float 
+	private function get_time(): Float 
 	{
 		return this._time;
 	}
 
-	public function set_time(value: Float):Float
+	private function set_time(value: Float):Float
 	{
 		this._time = value;
 		this.updateShaderUniforms();
 		return this._time;
 	}
 	
-	public function get_speed(): Vector2 
+	private function get_speed(): Vector2 
 	{
 		return this._speed;
 	}
 
-	public function set_speed(value: Vector2):Vector2
+	private function set_speed(value: Vector2):Vector2
 	{
 		this._speed = value;
 		this.updateShaderUniforms();
 		return this._speed;
 	}
 	
-	public function get_shift(): Float 
+	private function get_shift(): Float 
 	{
 		return this._shift;
 	}
 
-	public function set_shift(value: Float):Float
+	private function set_shift(value: Float):Float
 	{
 		this._shift = value;
 		this.updateShaderUniforms();
 		return this._shift;
 	}
 	
-	public function get_alphaThreshold(): Float 
+	private function get_alphaThreshold(): Float 
 	{
 		return this._alphaThreshold;
 	}

@@ -27,12 +27,12 @@ class RoadProceduralTexture extends ProceduralTexture
 		this.setColor3("roadColor", this._roadColor);
 	}
 	
-	public function get_roadColor(): Color3 
+	private function get_roadColor(): Color3 
 	{
 		return this._roadColor;
 	}
 
-	public function set_roadColor(value: Color3):Color3
+	private function set_roadColor(value: Color3):Color3
 	{
 		this._roadColor.copyFrom(value);
 		this.updateShaderUniforms();

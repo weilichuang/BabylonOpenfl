@@ -50,7 +50,7 @@ class AbstractMesh extends Node implements IDispose
 	
 	public var infiniteDistance:Bool = false;
 	public var isVisible:Bool = true;
-	public var applyFog:Bool = false;
+	public var applyFog:Bool = true;
 	
 	public var alphaIndex:Int = MathUtils.INT32_MAX;
 	

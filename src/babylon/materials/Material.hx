@@ -7,7 +7,6 @@ import babylon.math.Matrix;
 import babylon.mesh.AbstractMesh;
 import babylon.mesh.Mesh;
 import babylon.Scene;
-import babylon.tools.SmartArray;
 
 class Material
 {

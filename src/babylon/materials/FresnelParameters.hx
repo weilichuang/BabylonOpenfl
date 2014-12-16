@@ -12,7 +12,7 @@ class FresnelParameters
 	public function new() 
 	{
 		this.isEnabled = true;
-		this.leftColor = new Color3(1,1,1);
+		this.leftColor = new Color3(1, 1, 1);
 		this.rightColor = new Color3(0, 0, 0);
 		this.bias = 0;
 		this.power = 1;

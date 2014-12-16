@@ -61,7 +61,7 @@ class Effect
 		ShadersStore.set("roadPixelShader", CompileTime.readFile("babylon/materials/shaders/road.frag"));
 		ShadersStore.set("rockPixelhader", CompileTime.readFile("babylon/materials/shaders/rock.frag"));
 		ShadersStore.set("woodPixelShader", CompileTime.readFile("babylon/materials/shaders/wood.frag"));
-		ShadersStore.set("brickPixelhader", CompileTime.readFile("babylon/materials/shaders/brick.frag"));
+		ShadersStore.set("brickPixelShader", CompileTime.readFile("babylon/materials/shaders/brick.frag"));
 		ShadersStore.set("marblePixelShader", CompileTime.readFile("babylon/materials/shaders/marble.frag"));
 		ShadersStore.set("anaglyphPixelShader", CompileTime.readFile("babylon/materials/shaders/anaglyph.frag"));
 	}
@@ -124,12 +124,12 @@ class Effect
 		});	
 	}
 	
-	public function isReady():Bool
+	public inline function isReady():Bool
 	{
         return _isReady;
     }
 	
-	public function getProgram():GLProgram
+	public inline function getProgram():GLProgram
 	{
         return _program;
     }
@@ -139,12 +139,12 @@ class Effect
         return _attributesNames;
     }
 	
-	public function getAttributeLocation(index:Int):Int
+	public inline function getAttributeLocation(index:Int):Int
 	{
         return _attributes[index];
     }
 	
-	public function getAttribute(index:Int):Int
+	public inline function getAttribute(index:Int):Int
 	{
         return _attributes[index];
     }
@@ -155,20 +155,19 @@ class Effect
         return _attributes[index];
     }
 	
-	public function getAttributesCount():Int
+	public inline function getAttributesCount():Int
 	{
         return _attributes.length;
     }
 	
-	public function getUniformIndex(uniformName:String):Int
+	public inline function getUniformIndex(uniformName:String):Int
 	{
         return _uniformsNames.indexOf(uniformName);
     }
 	
-	public function getUniform(uniformName:String):GLUniformLocation 
+	public inline function getUniform(uniformName:String):GLUniformLocation 
 	{	 
-		var location = _uniforms[_uniformsNames.indexOf(uniformName)];
-        return location;
+		return _uniforms[_uniformsNames.indexOf(uniformName)];
     }
 	
 	public function getSamplers():Array<String>
@@ -183,10 +182,11 @@ class Effect
 	
 	public function _loadVertexShader(vertex:String, callbackFn:String->Void):Void
 	{
+		var key = vertex + "VertexShader";
         // Is in local store ?
-        if (Effect.ShadersStore.exists(vertex + "VertexShader"))
+        if (Effect.ShadersStore.exists(key))
 		{
-            callbackFn(Effect.ShadersStore.get(vertex + "VertexShader"));
+            callbackFn(Effect.ShadersStore.get(key));
             return;
         }
 
@@ -196,10 +196,11 @@ class Effect
 	
 	public function _loadFragmentShader(fragment:String, callbackFn:String->Void):Void
 	{
+		var key = fragment + "PixelShader";
         // Is in local store ?
-        if (Effect.ShadersStore.exists(fragment + "PixelShader")) 
+        if (Effect.ShadersStore.exists(key)) 
 		{
-            callbackFn(Effect.ShadersStore.get(fragment + "PixelShader"));
+            callbackFn(Effect.ShadersStore.get(key));
             return;
         }
         
@@ -269,30 +270,34 @@ class Effect
         }
     }
 	
-	public function bindTexture(channel:String, texture:BabylonGLTexture):Void
+	public inline function bindTexture(channel:String, texture:BabylonGLTexture):Void
 	{
         _engine.bindTexture(_samplers.indexOf(channel), texture);
     }
 	
-	public function setTexture(channel:String, texture:BaseTexture):Void
+	public inline function setTexture(channel:String, texture:BaseTexture):Void
 	{
         _engine.setTexture(_samplers.indexOf(channel), texture);
     }
 	
-	public function setTextureFromPostProcess(channel:String, postProcess:PostProcess):Void
+	public inline function setTextureFromPostProcess(channel:String, postProcess:PostProcess):Void
 	{
         _engine.setTextureFromPostProcess(_samplers.indexOf(channel), postProcess);
     }
 	
-	//public function _cacheMatrix = function (uniformName, matrix) {
-    //    if (!_valueCache[uniformName]) {
-    //        _valueCache[uniformName] = new BABYLON.Matrix();
-    //    }
+	public function _cacheMatrix(uniformName, matrix:Matrix):Void
+	{
+        if (!_valueCache.exists(uniformName))
+		{
+            _valueCache.set(uniformName,[]);
+        }
 
-    //    for (var index = 0; index < 16; index++) {
-    //        _valueCache[uniformName].m[index] = matrix.m[index];
-    //    }
-    //};
+		var caches:Array<Float> = _valueCache.get(uniformName);
+		for (i in 0...16)
+		{
+			caches[i] = matrix.m[i];
+		}
+    }
 
     public function _cacheFloat2(uniformName:String, x:Float, y:Float)
 	{
@@ -351,10 +356,25 @@ class Effect
 	
     public function setMatrix(uniformName:String, matrix:Matrix):Void
 	{
-        //if (_valueCache[uniformName] && _valueCache[uniformName].equals(matrix))
-        //    return;
+        if (_valueCache.exists(uniformName))
+		{
+			var array:Array<Float> = _valueCache.get(uniformName);
+			
+			var isEqual:Bool = true;
+			for (i in 0...16)
+			{
+				if (array[i] != matrix.m[i])
+				{
+					isEqual = false;
+					break;
+				}
+			}
+			
+			if(isEqual)
+				return;
+		}
 
-        //_cacheMatrix(uniformName, matrix);
+        _cacheMatrix(uniformName, matrix);
         _engine.setMatrix(getUniform(uniformName), matrix);
     }
 

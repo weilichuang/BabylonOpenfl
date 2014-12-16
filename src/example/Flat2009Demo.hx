@@ -10,7 +10,7 @@ class Flat2009Demo extends BaseDemo
     override function onInit():Void
     {
     	SceneLoader.Load(scene, "scenes/Flat2009/", "Flat2009.babylon", function() {
-			//scene.createOrUpdateSelectionOctree();
+			scene.createOrUpdateSelectionOctree();
     		scene.activeCamera = scene.cameras[0];
     		if (scene.activeCamera != null) {
 				scene.activeCamera.maxZ = 3000;

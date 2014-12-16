@@ -174,6 +174,11 @@ class BaseDemo extends Sprite
 		{
 			statisicLayer.refreshStatis();
 		}
+		
+		if (joystickui != null)
+		{
+			joystickui.visible = scene.activeCamera != null && Std.is(scene.activeCamera, FreeCamera);
+		}
 	}
 
 	private function onClickSetting(event:MouseEvent):Void

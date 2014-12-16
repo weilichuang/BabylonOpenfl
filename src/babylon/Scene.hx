@@ -82,8 +82,8 @@ class Scene
 	// Define this parameter if you are using multiple cameras and you want to specify which one should be used for pointer position
 	public var cameraToUseForPointers: Camera = null; 
 	
-	private var _pointerX: Float;
-	private var _pointerY: Float;
+	private var _pointerX: Float = 0;
+	private var _pointerY: Float = 0;
 	private var _meshUnderPointer: AbstractMesh;
 	private var _pointerOverMesh: AbstractMesh;
 	
@@ -149,7 +149,7 @@ class Scene
 	public var customRenderTargets:Array<RenderTargetTexture>;
 	
 	// Delay loading
-	public var useDelayedTextureLoading:Bool;
+	public var useDelayedTextureLoading:Bool = false;
 	
 	// Imported meshes
 	public var importedMeshesFiles:Array<String> = new Array<String>();
@@ -166,10 +166,10 @@ class Scene
 	
 	public var statistics:Statistics;
 	
-	private var _animationRatio:Float;
+	private var _animationRatio:Float = 0;
 	private var _animationStartDate:Int = -1;
 	
-	private var _renderId:Int;
+	private var _renderId:Int = 0;
 
 	public var _toBeDisposed:SmartArray<IDispose>;
 	
@@ -273,8 +273,6 @@ class Scene
         this.customRenderTargets = [];
 
 		this.statistics = new Statistics();
-
-        this._renderId = 0;
 
         this._toBeDisposed = new SmartArray<IDispose>();
 

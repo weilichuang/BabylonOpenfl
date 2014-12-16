@@ -30,9 +30,9 @@ class EasingFunction implements IEasingFunction
 		return _easingMode;
 	}
 	
-	public function easeInCore(gradient:Int):Int
+	public function easeInCore(gradient:Float):Float
 	{
-		
+		return 0;
 	}
 	
 	/* INTERFACE babylon.animations.IEasingFunction */
@@ -59,6 +59,11 @@ class EasingFunction implements IEasingFunction
 
 class CircleEase extends EasingFunction implements IEasingFunction
 {
+	public function new()
+	{
+		super();
+	}
+	
 	override public function easeInCore(gradient:Float):Float
 	{
 		gradient = Math.max(0, Math.min(1, gradient));
@@ -68,6 +73,13 @@ class CircleEase extends EasingFunction implements IEasingFunction
 
 class BackEase extends EasingFunction implements IEasingFunction
 {
+	public var amplitude:Float;
+	public function new(amplitude:Float = 1)
+	{
+		super();
+		this.amplitude = amplitude;
+	}
+	
 	override public function easeInCore(gradient:Float):Float
 	{
 		var num = Math.max(0, this.amplitude);
@@ -81,6 +93,7 @@ class BounceEase extends EasingFunction implements IEasingFunction
 	public var bounciness:Float;
 	public function new(bounces:Float = 3, bounciness:Float = 2)
 	{
+		super();
 		this.bounces = bounces;
 		this.bounciness = bounciness;
 	}
@@ -110,6 +123,11 @@ class BounceEase extends EasingFunction implements IEasingFunction
 
 class CubicEase extends EasingFunction implements IEasingFunction
 {
+	public function new()
+	{
+		super();
+	}
+	
 	override public function easeInCore(gradient:Float):Float
 	{
 		return (gradient * gradient * gradient);
@@ -122,6 +140,8 @@ class ElasticEase extends EasingFunction implements IEasingFunction
 	public var springiness:Float;
 	public function new(oscillations: Float = 3, springiness: Float = 3)
 	{
+		super();
+		
 		this.oscillations = oscillations;
 		this.springiness = springiness;
 	}
@@ -149,6 +169,7 @@ class ExponentialEase extends EasingFunction implements IEasingFunction
 	public var exponent:Float;
 	public function new(exponent:Float = 2)
 	{
+		super();
 		this.exponent = exponent;
 	}
 	
@@ -168,6 +189,8 @@ class PowerEase extends EasingFunction implements IEasingFunction
 	
 	public function new(power:Float = 2)
 	{
+		super();
+		
 		this.power = power;
 	}
 	
@@ -180,6 +203,11 @@ class PowerEase extends EasingFunction implements IEasingFunction
 
 class QuadraticEase extends EasingFunction implements IEasingFunction
 {
+	public function new()
+	{
+		super();
+	}
+	
 	override public function easeInCore(gradient:Float):Float
 	{
 		return (gradient * gradient);
@@ -188,6 +216,11 @@ class QuadraticEase extends EasingFunction implements IEasingFunction
 
 class QuarticEase extends EasingFunction implements IEasingFunction 
 {
+	public function new()
+	{
+		super();
+	}
+	
 	override public function easeInCore(gradient:Float):Float
 	{
 		return (gradient * gradient * gradient * gradient);
@@ -196,6 +229,11 @@ class QuarticEase extends EasingFunction implements IEasingFunction
 
 class QuinticEase extends EasingFunction implements IEasingFunction 
 {
+	public function new()
+	{
+		super();
+	}
+	
 	override public function easeInCore(gradient:Float):Float
 	{
 		return (gradient * gradient * gradient * gradient * gradient);
@@ -204,6 +242,11 @@ class QuinticEase extends EasingFunction implements IEasingFunction
 
 class SineEase extends EasingFunction implements IEasingFunction 
 {
+	public function new()
+	{
+		super();
+	}
+	
 	override public function easeInCore(gradient:Float):Float
 	{
 		return (1.0 - Math.sin(1.5707963267948966 * (1.0 - gradient)));

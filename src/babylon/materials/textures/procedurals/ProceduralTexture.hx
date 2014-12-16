@@ -12,10 +12,6 @@ import babylon.mesh.BabylonGLBuffer;
 import babylon.Scene;
 import haxe.ds.StringMap;
 
-/**
- * ...
- * 
- */
 class ProceduralTexture extends Texture
 {
 	private var _size: Int;
@@ -61,6 +57,8 @@ class ProceduralTexture extends Texture
 		this.setFragment(fragment);
 		
 		this._fallbackTexture = fallbackTexture;
+		
+		this._texture = scene.getEngine().createRenderTargetTexture(size, size, {generateMipMaps:generateMipMaps});
 		
 		//VBO
 		var vertices:Array<Float> = [1., 1, -1, 1, -1, -1, 1, -1];

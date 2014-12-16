@@ -32,18 +32,18 @@ class BrickProceduralTexture extends ProceduralTexture
 	
 	public function updateShaderUniforms():Void
 	{
-		this.setColor3("numberOfBricksHeight", this._numberOfBricksHeight);
-		this.setColor3("numberOfBricksWidth", this._numberOfBricksWidth);
+		this.setFloat("numberOfBricksHeight", this._numberOfBricksHeight);
+		this.setFloat("numberOfBricksWidth", this._numberOfBricksWidth);
 		this.setColor3("brickColor", this._brickColor);
 		this.setColor3("jointColor", this._jointColor);
 	}
 	
-	public function get_numberOfBricksHeight(): Int
+	private function get_numberOfBricksHeight(): Int
 	{
 		return this._numberOfBricksHeight;
 	}
 
-	public function set_numberOfBricksHeight(value: Int):Int
+	private function set_numberOfBricksHeight(value: Int):Int
 	{
 		this._numberOfBricksHeight = value;
 		this.updateShaderUniforms();
@@ -51,24 +51,24 @@ class BrickProceduralTexture extends ProceduralTexture
 	}
 
 
-	public function get_numberOfBricksWidth(): Int 
+	private function get_numberOfBricksWidth(): Int 
 	{
 		return this._numberOfBricksWidth;
 	}
 
-	public function set_numberOfBricksWidth(value: Int):Int
+	private function set_numberOfBricksWidth(value: Int):Int
 	{
 		this._numberOfBricksWidth = value;
 		this.updateShaderUniforms();
 		return this._numberOfBricksWidth;
 	}
 	
-	public function get_brickColor(): Color3 
+	private function get_brickColor(): Color3 
 	{
 		return this._brickColor;
 	}
 
-	public function set_brickColor(value: Color3):Color3
+	private function set_brickColor(value: Color3):Color3
 	{
 		this._brickColor.copyFrom(value);
 		this.updateShaderUniforms();
@@ -76,12 +76,12 @@ class BrickProceduralTexture extends ProceduralTexture
 	}
 
 
-	public function get_jointColor(): Color3 
+	private function get_jointColor(): Color3 
 	{
 		return this._jointColor;
 	}
 
-	public function set_jointColor(value: Color3):Color3
+	private function set_jointColor(value: Color3):Color3
 	{
 		this._jointColor.copyFrom(value);
 		this.updateShaderUniforms();
