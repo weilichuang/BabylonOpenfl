@@ -160,6 +160,11 @@ class Effect
         return _attributes.length;
     }
 	
+	public inline function getAttributes():Array<Int>
+	{
+        return _attributes;
+    }
+	
 	public inline function getUniformIndex(uniformName:String):Int
 	{
         return _uniformsNames.indexOf(uniformName);

@@ -56,6 +56,10 @@ class DebugLayer extends XMLController
             StandardMaterial.ReflectionTextureEnabled = reflectionCB.selected;
         };
 		
+		animationsCB.onClick = function(e) {
+            scene.shadowsEnabled = animationsCB.selected;
+        };
+		
 		shadowsCB.onClick = function(e) {
             scene.shadowsEnabled = shadowsCB.selected;
         };
@@ -92,23 +96,25 @@ class DebugLayer extends XMLController
 	public function applyConfig():Void
 	{
 		demo.showStatistics(statisticsCB.selected);
-		this.scene.forceWireframe = wireframeCB.selected;
-		this.scene.forceShowBoundingBoxes = boundingBoxCB.selected;
-		this.scene.forcePointsCloud = pointsCloudCB.selected;
-		StandardMaterial.DiffuseTextureEnabled = diffuseCB.selected;
-		StandardMaterial.AmbientTextureEnabled = ambientCB.selected;
-		StandardMaterial.SpecularTextureEnabled = specularCB.selected;
-		StandardMaterial.EmissiveTextureEnabled = emissiveCB.selected;
-		StandardMaterial.OpacityTextureEnabled = opacityCB.selected;
-		StandardMaterial.ReflectionTextureEnabled = reflectionCB.selected;
-		scene.shadowsEnabled = shadowsCB.selected;
-		scene.particlesEnabled = particlesCB.selected;
-		scene.postProcessesEnabled = postprocessesCB.selected;
-		scene.collisionsEnabled = collisionsCB.selected;
-		scene.lightsEnabled = lightsCB.selected;
-		scene.lensFlaresEnabled = lensflaresCB.selected;
-		scene.renderTargetsEnabled = rendertargetsCB.selected;
-		scene.proceduralTexturesEnabled = proceduraltexturesCB.selected;
+		wireframeCB.selected = scene.forceWireframe;
+		boundingBoxCB.selected = scene.forceShowBoundingBoxes;
+		pointsCloudCB.selected = scene.forcePointsCloud;
+		diffuseCB.selected = StandardMaterial.DiffuseTextureEnabled;
+		ambientCB.selected = StandardMaterial.AmbientTextureEnabled;
+		specularCB.selected = StandardMaterial.SpecularTextureEnabled;
+		emissiveCB.selected = StandardMaterial.EmissiveTextureEnabled;
+		opacityCB.selected = StandardMaterial.OpacityTextureEnabled;
+		reflectionCB.selected = StandardMaterial.ReflectionTextureEnabled;
+		
+		animationsCB.selected = scene.shadowsEnabled;
+		shadowsCB.selected = scene.shadowsEnabled;
+		particlesCB.selected = scene.particlesEnabled;
+		postprocessesCB.selected = scene.postProcessesEnabled;
+		collisionsCB.selected = scene.collisionsEnabled;
+		lightsCB.selected = scene.lightsEnabled;
+		lensflaresCB.selected = scene.lensFlaresEnabled;
+		rendertargetsCB.selected = scene.renderTargetsEnabled;
+		proceduraltexturesCB.selected = scene.proceduralTexturesEnabled;
 	}
 	
 }

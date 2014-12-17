@@ -6,6 +6,7 @@ import babylon.cameras.Camera;
 import babylon.collisions.Collider;
 import babylon.collisions.IntersectionInfo;
 import babylon.collisions.PickingInfo;
+import babylon.culling.BoundingBox;
 import babylon.culling.BoundingInfo;
 import babylon.culling.BoundingSphere;
 import babylon.culling.octrees.Octree;
@@ -706,18 +707,18 @@ class AbstractMesh extends Node implements IDispose
 	*/
 	public function createOrUpdateSubmeshesOctree(maxCapacity:Int = 64, maxDepth:Int = 2): Octree<SubMesh> 
 	{
-		if (this._submeshesOctree == null)
+		if (_submeshesOctree == null)
 		{
-			this._submeshesOctree = new Octree<SubMesh>(Octree.CreationFuncForSubMeshes, maxCapacity, maxDepth);
+			_submeshesOctree = new Octree<SubMesh>(Octree.CreationFuncForSubMeshes, maxCapacity, maxDepth);
 		}
 
 		this.computeWorldMatrix(true);            
 
 		// Update octree
-		var bbox = this.getBoundingInfo().boundingBox;
-		this._submeshesOctree.update(bbox.minimumWorld, bbox.maximumWorld, this.subMeshes);
+		var bbox:BoundingBox = this.getBoundingInfo().boundingBox;
+		_submeshesOctree.update(bbox.minimumWorld, bbox.maximumWorld, this.subMeshes);
 
-		return this._submeshesOctree;
+		return _submeshesOctree;
 	}
 
 	// Collisions
@@ -733,6 +734,7 @@ class AbstractMesh extends Node implements IDispose
 			subMesh._lastColliderTransformMatrix.copyFrom(transformMatrix);
 			subMesh._lastColliderWorldVertices = [];
 			subMesh._trianglePlanes = [];
+			
 			var start:Int = subMesh.verticesStart;
 			var end:Int = (subMesh.verticesStart + subMesh.verticesCount);
 			for (i in start...end)

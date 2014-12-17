@@ -71,6 +71,8 @@ class Scene
 	
 	public var clipPlane:Plane;
 	
+	public var animationsEnabled:Bool = true;
+	
 	// Keyboard
 	private var _onKeyDown: KeyboardEvent->Void;
 	private var _onKeyUp: KeyboardEvent->Void;
@@ -729,32 +731,39 @@ class Scene
 	
 	public function _animate():Void 
 	{
-        if (this._animationStartDate == -1)
-		{
-            this._animationStartDate = Lib.getTimer();
-        }
+		if (!animationsEnabled)
+			return;
 		
-        // Getting time
-        var delay = Lib.getTimer() - this._animationStartDate;
+		// Getting time
+		var delay:Int;
+        if (_animationStartDate == -1)
+		{
+            _animationStartDate = Lib.getTimer();
+			delay = 0;
+        }
+		else
+		{
+			delay = Lib.getTimer() - _animationStartDate;
+		}
 
 		var index:Int = 0;
-		while (index < this._activeAnimatables.length)
+		while (index < _activeAnimatables.length)
 		{
-            if (!this._activeAnimatables[index]._animate(delay)) 
+            if (!_activeAnimatables[index]._animate(delay)) 
 			{
-                this._activeAnimatables.splice(index, 1);
+                _activeAnimatables.splice(index, 1);
                 index--;
             }
 			index++;
         }
     }
 
-	public function getViewMatrix():Matrix 
+	public inline function getViewMatrix():Matrix 
 	{
 		return this._viewMatrix;
 	}
 	
-	public function getProjectionMatrix():Matrix 
+	public inline function getProjectionMatrix():Matrix 
 	{
 		return this._projectionMatrix;
 	}
@@ -774,11 +783,11 @@ class Scene
 	
 	public function getCameraByID(id: String): Camera
 	{
-		for (index in  0...this.cameras.length) 
+		for (index in  0...cameras.length) 
 		{
-			if (this.cameras[index].id == id) 
+			if (cameras[index].id == id) 
 			{
-				return this.cameras[index];
+				return cameras[index];
 			}
 		}
 
@@ -787,11 +796,11 @@ class Scene
 	
 	public function getCameraByName(name: String): Camera
 	{
-		for (index in  0...this.cameras.length) 
+		for (index in  0...cameras.length) 
 		{
-			if (this.cameras[index].name == name) 
+			if (cameras[index].name == name) 
 			{
-				return this.cameras[index];
+				return cameras[index];
 			}
 		}
 
@@ -800,10 +809,10 @@ class Scene
 	
 	public function activeCameraByID(id:String):Camera 
 	{
-		var camera = this.getCameraByID(id);
+		var camera = getCameraByID(id);
 		if (camera != null)
 		{
-			this.activeCamera = camera;
+			activeCamera = camera;
 			return camera;
 		}
 		
@@ -812,11 +821,11 @@ class Scene
 	
 	public function setActiveCameraByName(name: String): Camera 
 	{
-		var camera = this.getCameraByName(name);
+		var camera = getCameraByName(name);
 
 		if (camera != null)
 		{
-			this.activeCamera = camera;
+			activeCamera = camera;
 			return camera;
 		}
 
@@ -825,11 +834,11 @@ class Scene
 	
 	public function getMaterialByID(id:String):Material
 	{
-		for (index in 0...this.materials.length)
+		for (index in 0...materials.length)
 		{
-            if (this.materials[index].id == id)
+            if (materials[index].id == id)
 			{
-                return this.materials[index];
+                return materials[index];
             }
         }
 
@@ -838,11 +847,11 @@ class Scene
 	
 	public function getMaterialByName(name:String):Material
 	{
-		for (index in 0...this.materials.length)
+		for (index in 0...materials.length)
 		{
-            if (this.materials[index].name == name) 
+            if (materials[index].name == name) 
 			{
-                return this.materials[index];
+                return materials[index];
             }
         }
 
@@ -851,11 +860,11 @@ class Scene
 	
 	public function getLightByID(id:String):Light 
 	{
-		for (index in 0...this.lights.length)
+		for (index in 0...lights.length)
 		{
-            if (this.lights[index].id == id) 
+            if (lights[index].id == id) 
 			{
-                return this.lights[index];
+                return lights[index];
             }
         }
 
@@ -864,11 +873,11 @@ class Scene
 	
 	public function getLightByName(name:String):Light 
 	{
-		for (index in 0...this.lights.length)
+		for (index in 0...lights.length)
 		{
-            if (this.lights[index].name == name) 
+            if (lights[index].name == name) 
 			{
-                return this.lights[index];
+                return lights[index];
             }
         }
 
@@ -877,11 +886,11 @@ class Scene
 	
 	public function getGeometryByID(id:String):Geometry
 	{
-		for (index in 0...this._geometries.length)
+		for (index in 0..._geometries.length)
 		{
-            if (this._geometries[index].id == id)
+            if (_geometries[index].id == id)
 			{
-                return this._geometries[index];
+                return _geometries[index];
             }
         }
 
@@ -890,28 +899,28 @@ class Scene
 	
 	public function pushGeometry(geometry: Geometry, force: Bool = false): Bool
 	{
-		if (!force && this.getGeometryByID(geometry.id) != null) 
+		if (!force && getGeometryByID(geometry.id) != null) 
 		{
 			return false;
 		}
 
-		this._geometries.push(geometry);
+		_geometries.push(geometry);
 
 		return true;
 	}
 
 	public function getGeometries(): Array<Geometry> 
 	{
-		return this._geometries;
+		return _geometries;
 	}
 
 	public function getMeshByID(id:String):AbstractMesh
 	{
-		for (index in 0...this.meshes.length)
+		for (index in 0...meshes.length)
 		{
-            if (this.meshes[index].id == id)
+            if (meshes[index].id == id)
 			{
-                return this.meshes[index];
+                return meshes[index];
             }
         }
 
@@ -920,12 +929,12 @@ class Scene
 	
 	public function getLastMeshByID(id:String):AbstractMesh
 	{
-		var index:Int = this.meshes.length - 1;
+		var index:Int = meshes.length - 1;
 		while (index >= 0) 
 		{
-            if (this.meshes[index].id == id) 
+            if (meshes[index].id == id) 
 			{
-                return this.meshes[index];
+                return meshes[index];
             }
 			index--;
         }
@@ -935,32 +944,32 @@ class Scene
 	
 	public function getLastEntryByID(id:String):Dynamic 
 	{
-		var index:Int = this.meshes.length - 1;
+		var index:Int = meshes.length - 1;
 		while (index >= 0) 
 		{
-            if (this.meshes[index].id == id) 
+            if (meshes[index].id == id) 
 			{
-                return this.meshes[index];
+                return meshes[index];
             }
 			index--;
         }
 
-		index = this.cameras.length - 1;
+		index = cameras.length - 1;
 		while (index >= 0)
 		{
-            if (this.cameras[index].id == id) 
+            if (cameras[index].id == id) 
 			{
-                return this.cameras[index];
+                return cameras[index];
             }
 			index--;
         }
         
-		index = this.lights.length - 1;
+		index = lights.length - 1;
 		while (index >= 0)
 		{
-            if (this.lights[index].id == id)
+            if (lights[index].id == id)
 			{
-                return this.lights[index];
+                return lights[index];
             }
 			index--;
         }
@@ -970,11 +979,11 @@ class Scene
 	
 	public function getMeshByName(name:String):AbstractMesh
 	{
-		for (index in 0...this.meshes.length) 
+		for (index in 0...meshes.length) 
 		{
-            if (this.meshes[index].name == name)
+            if (meshes[index].name == name)
 			{
-                return this.meshes[index];
+                return meshes[index];
             }
         }
 
@@ -988,12 +997,12 @@ class Scene
 	
 	public function getLastSkeletonByID(id:String):Skeleton
 	{
-		var index:Int = this.skeletons.length - 1;
+		var index:Int = skeletons.length - 1;
 		while (index >= 0)
 		{
-            if (this.skeletons[index].id == id)
+            if (skeletons[index].id == id)
 			{
-                return this.skeletons[index];
+                return skeletons[index];
             }
 			index--;
         }
@@ -1003,11 +1012,11 @@ class Scene
 	
 	public function getSkeletonByID(id:String):Skeleton
 	{
-		for (index in 0...this.skeletons.length)
+		for (index in 0...skeletons.length)
 		{
-            if (this.skeletons[index].id == id) 
+            if (skeletons[index].id == id) 
 			{
-                return this.skeletons[index];
+                return skeletons[index];
             }
         }
 
@@ -1016,11 +1025,11 @@ class Scene
 	
 	public function getSkeletonByName(name:String):Skeleton 
 	{
-		for (index in 0...this.skeletons.length)
+		for (index in 0...skeletons.length)
 		{
-            if (this.skeletons[index].name == name) 
+            if (skeletons[index].name == name) 
 			{
-                return this.skeletons[index];
+                return skeletons[index];
             }
         }
 
@@ -1029,7 +1038,7 @@ class Scene
 
 	public function _evaluateSubMesh(subMesh:SubMesh, mesh:AbstractMesh):Void
 	{
-		if (mesh.subMeshes.length == 1 || subMesh.isInFrustrum(this._frustumPlanes)) 
+		if (mesh.subMeshes.length == 1 || subMesh.isInFrustrum(_frustumPlanes)) 
 		{
             var material:Material = subMesh.getMaterial();
 			
@@ -1053,7 +1062,7 @@ class Scene
 
                 // Dispatch
                 statistics.activeVertices += subMesh.verticesCount;
-                this._renderingManager.dispatch(subMesh);
+                _renderingManager.dispatch(subMesh);
             }
         }
 	}

@@ -62,17 +62,17 @@ class SubMesh
 			this.refreshBoundingInfo();
 	}
 	
-	public function getBoundingInfo():BoundingInfo 
+	public inline function getBoundingInfo():BoundingInfo 
 	{
         return _boundingInfo;
     }
 	
-	public function getMesh():AbstractMesh
+	public inline function getMesh():AbstractMesh
 	{
         return _mesh;
     }
 	
-	public function getRenderingMesh():Mesh
+	public inline function getRenderingMesh():Mesh
 	{
         return _renderingMesh;
     }

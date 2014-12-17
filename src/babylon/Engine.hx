@@ -79,9 +79,6 @@ class Engine
 	
 	public var cullBackFaces:Bool = true;
 	
-	//public var renderEvenInBackground:Bool = true;
-	//private var _windowIsBackground:Bool = false;
-	
 	private var _hardwareScalingLevel:Int;
 	private var _caps:EngineCapabilities;
 	
@@ -102,7 +99,7 @@ class Engine
 	private var _currentEffect:Effect;
 	private var _compiledEffects:Map<String, Effect>;
 	
-	private var _vertexAttribArrays:Array<Int>;
+	private var _vertexAttribArrays:Array<Int> = [];
 	
 	private var _cachedViewport:Viewport;
 	private var _cachedVertexBuffers:Dynamic;  
@@ -1013,9 +1010,6 @@ class Engine
 	
 	public function disableVertexAttribArray():Void
 	{
-		if (_vertexAttribArrays == null)
-			return;
-			
 		for (i in 0..._vertexAttribArrays.length)
 		{
 			var loc:Int = _vertexAttribArrays[i];
@@ -1045,21 +1039,46 @@ class Engine
         // Use program
         GL.useProgram(effect.getProgram());
 		
-		if (_vertexAttribArrays == null)
-			_vertexAttribArrays = [];
+		//disableVertexAttribArray();
+        //for (i in 0...attributesCount) 
+		//{
+            //// Attributes
+            //var order:Int = effect.getAttribute(i);
+            //if (order >= 0)
+			//{
+				//_vertexAttribArrays.push(order);
+				//GL.enableVertexAttribArray(order);
+            //}
+        //}
 		
-		disableVertexAttribArray();
-		
-        for (index in 0...attributesCount) 
+		//only active not actived vertex attribute
+        for (i in 0...attributesCount) 
 		{
             // Attributes
-            var order:Int = effect.getAttribute(index);
+            var order:Int = effect.getAttribute(i);
             if (order >= 0)
 			{
-				_vertexAttribArrays.push(order);
-                GL.enableVertexAttribArray(order);
+				var index:Int = _vertexAttribArrays.indexOf(order);
+				if (index == -1)
+				{
+					GL.enableVertexAttribArray(order);
+					
+				}
+				else
+				{
+					_vertexAttribArrays.splice(index, 1);
+				}
             }
         }
+		
+		//only disable not used vertex attribute
+		for (i in 0..._vertexAttribArrays.length) 
+		{
+			GL.disableVertexAttribArray(_vertexAttribArrays[i]);
+        }
+		
+		_vertexAttribArrays = effect.getAttributes().slice(0);
+		
 
         this._currentEffect = effect;
 		

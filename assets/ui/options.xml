@@ -20,6 +20,7 @@
 			<spacer height="5" />
 			
 			<text text="Options:" />
+			<checkbox text="Animations" id="animationsCB" selected="true" />
 			<checkbox text="Shadows" id="shadowsCB" selected="true" />
 			<checkbox text="Particles" id="particlesCB" selected="true" />
 			<checkbox text="Post processes" id="postprocessesCB" selected="true" />
