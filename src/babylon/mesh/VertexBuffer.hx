@@ -110,7 +110,7 @@ class VertexBuffer
        this.create(data);
     }
 	
-	public function updateDirectly(data:Array<Float>):Void
+	public function updateDirectly(data:Array<Float>, offset:Int = 0):Void
 	{
 		if (this._buffer == null) 
 		{
@@ -119,7 +119,7 @@ class VertexBuffer
 
 		if (this._updatable) // update buffer
 		{ 
-			this._engine.updateDynamicVertexBuffer(this._buffer, data);
+			this._engine.updateDynamicVertexBuffer(this._buffer, data, offset);
 			this._data = null;
 		}
 	}

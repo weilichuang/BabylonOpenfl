@@ -31,18 +31,13 @@ class BoundingSphere
         this.update(Matrix.IDENTITY);
 	}
 	
+	private static var tmpVec:Vector3 = new Vector3();
 	public function update(world:Matrix):Void
 	{
-		var tempVar:TempVars = TempVars.getTempVars();
-		var tmpVec:Vector3 = tempVar.vect1;
-		
         Vector3.TransformCoordinatesToRef(this.center, world, this.centerWorld);
 		Vector3.TransformNormalFromFloatsToRef(1.0, 1.0, 1.0, world, tmpVec);
 		
-		var tr:Vector3 = tmpVec;
-        this.radiusWorld = Math.max(FastMath.fabs(tr.x), Math.max(FastMath.fabs(tr.y), FastMath.fabs(tr.z))) * this.radius;
-		
-		tempVar.release();
+        this.radiusWorld = Math.max(FastMath.fabs(tmpVec.x), Math.max(FastMath.fabs(tmpVec.y), FastMath.fabs(tmpVec.z))) * this.radius;
     }
 	
 	/**
@@ -84,12 +79,10 @@ class BoundingSphere
         var x = this.centerWorld.x - point.x;
         var y = this.centerWorld.y - point.y;
         var z = this.centerWorld.z - point.z;
-        var distance = Math.sqrt((x * x) + (y * y) + (z * z));
 		
-		//html5中不会inline
-		//var distance:Float = this.centerWorld.distanceTo(point);
-
-		if (FastMath.fabs(this.radiusWorld - distance) < Engine.Epsilon)
+        var distance = (x * x) + (y * y) + (z * z);
+		
+		if (FastMath.fabs(this.radiusWorld * this.radiusWorld - distance) < Engine.Epsilon)
             return false;
 
         return true;
@@ -100,15 +93,12 @@ class BoundingSphere
         var x = sphere0.centerWorld.x - sphere1.centerWorld.x;
         var y = sphere0.centerWorld.y - sphere1.centerWorld.y;
         var z = sphere0.centerWorld.z - sphere1.centerWorld.z;
-        var distance = Math.sqrt(x * x + y * y + z * z);
 		
-		//html5中不会inline
-		//var distance:Float = sphere0.centerWorld.distanceTo(sphere1.centerWorld);
-
-        if (sphere0.radiusWorld + sphere1.radiusWorld < distance)
-            return false;
-
-        return true;
+        var distanceSqured = x * x + y * y + z * z;
+		
+		var radius = sphere0.radiusWorld + sphere1.radiusWorld;
+		
+        return radius * radius >= distanceSqured;
     }
 	
 }

@@ -206,8 +206,7 @@ class Geometry implements IGetSetVerticesData
 		}
 	}
 	
-	public function updateVerticesDataDirectly(kind:String,
-										data:Array<Float>):Void 
+	public function updateVerticesDataDirectly(kind:String, data:Array<Float>, offset:Int):Void 
 	{
 		var vertexBuffer:VertexBuffer = this.getVertexBuffer(kind);
 
@@ -216,7 +215,7 @@ class Geometry implements IGetSetVerticesData
 			return;
 		}
 
-		vertexBuffer.updateDirectly(data);
+		vertexBuffer.updateDirectly(data, offset);
 	}
 
 	public function updateVerticesData(kind:String,
@@ -235,12 +234,13 @@ class Geometry implements IGetSetVerticesData
 
 		if (kind == VertexBuffer.PositionKind)
 		{
+			var stride:Int = vertexBuffer.getStrideSize();
+			
+			_totalVertices = Std.int(data.length / stride);
+				
 			var extend = {minimum:new Vector3(),maximum:new Vector3()};
-
 			if (updateExtends) 
 			{
-				var stride:Int = vertexBuffer.getStrideSize();
-				this._totalVertices = Std.int(data.length / stride);
 				extend = Tools.ExtractMinAndMax(data, 0, this._totalVertices);
 			}
 
@@ -259,7 +259,7 @@ class Geometry implements IGetSetVerticesData
 		}
 	}
 
-	public function setIndices(indices:Array<Int>):Void 
+	public function setIndices(indices:Array<Int>, totalVertices:Int = 0):Void 
 	{
 		if (this._indexBuffer != null)
 		{
@@ -271,6 +271,9 @@ class Geometry implements IGetSetVerticesData
 			{
 				this._indexBuffer = this._engine.createIndexBuffer(this._indices);
 			}
+			
+			if (totalVertices > 0)
+				this._totalVertices = totalVertices;
 
 			var meshes = this._meshes;
 			var numOfMeshes = meshes.length;

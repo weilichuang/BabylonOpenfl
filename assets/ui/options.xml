@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <vbox>
-	<scrollview id="theView" width="160" height="550">
+	<scrollview id="theView" width="160" height="600">
 		<vbox width="100%" id="theContainer">
 			<text text="General:" />
 			<checkbox text="Statistics" id="statisticsCB" selected="false" />
+			<checkbox text="MeshTree" id="meshTreeCB" selected="false" />
 			<checkbox text="Bounding boxes" id="boundingBoxCB" selected="false" />
-			<checkbox text="Wireframe" id="wireframeCB" selected="false" />
-			<checkbox text="PointsCloud" id="pointsCloudCB" selected="false" />
+			<listSelector id="renderMode" text="Triangle" selectedIndex="0" width="100%">
+                <array>Triangle,Wireframe,Point</array>
+            </listSelector>
 			<spacer height="5" />
 			
 			<text text="Texture Channels:" />
@@ -17,6 +19,7 @@
 			<checkbox text="Bump" id="bumpCB" selected="true" />
 			<checkbox text="Opacity" id="opacityCB" selected="true" />
 			<checkbox text="Reflection" id="reflectionCB" selected="true" />
+			<checkbox text="Fresnel" id="fresnelCB" selected="true" />
 			<spacer height="5" />
 			
 			<text text="Options:" />
@@ -29,6 +32,7 @@
 			<checkbox text="Lens flares" id="lensflaresCB" selected="true" />
 			<checkbox text="Render targets" id="rendertargetsCB" selected="true" />
 			<checkbox text="Procedural textures" id="proceduraltexturesCB" selected="true" />
+			<checkbox text="Fog" id="fogCB" selected="true" />
 		</vbox>
 	</scrollview>
 </vbox>

@@ -614,14 +614,14 @@ class AbstractMesh extends Node implements IDispose
 		return Vector3.TransformCoordinates(this.absolutePosition, camera.getViewMatrix());
 	}
 
-	public function getDistanceToCamera(camera: Camera = null): Vector3 
+	public function getDistanceToCamera(camera: Camera = null): Float 
 	{
 		if (camera == null)
 		{
 			camera = this.getScene().activeCamera;
 		}
 
-		return this.absolutePosition.subtract(camera.position);
+		return this.absolutePosition.subtract(camera.position).length();
 	}
 
 	// Physics

@@ -89,6 +89,7 @@ class Scene
 	private var _meshUnderPointer: AbstractMesh;
 	private var _pointerOverMesh: AbstractMesh;
 	
+	public var fogEnabled:Bool = true;
 	public var fogInfo:FogInfo;
 	
 	//---------Lights begin-------//
@@ -1061,7 +1062,7 @@ class Scene
                 }
 
                 // Dispatch
-                statistics.activeVertices += subMesh.verticesCount;
+                statistics.activeVertices += subMesh.indexCount;
                 _renderingManager.dispatch(subMesh);
             }
         }

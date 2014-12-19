@@ -32,6 +32,7 @@ class StandardMaterial extends Material
 	public static var EmissiveTextureEnabled:Bool = true;
 	public static var SpecularTextureEnabled:Bool = true;
 	public static var BumpTextureEnabled:Bool = true;
+	public static var FresnelEnabled:Bool = true;
 	
 	public var diffuseTexture:BaseTexture = null;
 	public var ambientTexture:BaseTexture = null;
@@ -245,7 +246,7 @@ class StandardMaterial extends Material
 		}
 
         // Fog
-        if (mesh != null && mesh.applyFog && fogEnabled && _scene.fogInfo.fogMode != FogInfo.FOGMODE_NONE)
+        if (_scene.fogEnabled && mesh != null && mesh.applyFog && fogEnabled && _scene.fogInfo.fogMode != FogInfo.FOGMODE_NONE)
 		{
             defines.push("#define FOG");
             fallbacks.addFallback(1, "FOG");
@@ -371,44 +372,48 @@ class StandardMaterial extends Material
             }
         }
 		
-		if ((this.diffuseFresnelParameters != null && this.diffuseFresnelParameters.isEnabled) ||
+		// Fresnel
+		if (StandardMaterial.FresnelEnabled)
+		{
+			if ((this.diffuseFresnelParameters != null && this.diffuseFresnelParameters.isEnabled) ||
 			(this.opacityFresnelParameters != null && this.opacityFresnelParameters.isEnabled) ||
 			(this.emissiveFresnelParameters != null && this.emissiveFresnelParameters.isEnabled) ||
 			(this.reflectionFresnelParameters != null && this.reflectionFresnelParameters.isEnabled))
-		{
-
-			var fresnelRank:Int = 1;
-
-			if (this.diffuseFresnelParameters != null && this.diffuseFresnelParameters.isEnabled)
 			{
-				defines.push("#define DIFFUSEFRESNEL");
-				fallbacks.addFallback(fresnelRank, "DIFFUSEFRESNEL");
-				fresnelRank++;
-			}
 
-			if (this.opacityFresnelParameters != null && this.opacityFresnelParameters.isEnabled)
-			{
-				defines.push("#define OPACITYFRESNEL");
-				fallbacks.addFallback(fresnelRank, "OPACITYFRESNEL");
-				fresnelRank++;
-			}
+				var fresnelRank:Int = 1;
 
-			if (this.reflectionFresnelParameters != null && this.reflectionFresnelParameters.isEnabled) 
-			{
-				defines.push("#define REFLECTIONFRESNEL");
-				fallbacks.addFallback(fresnelRank, "REFLECTIONFRESNEL");
-				fresnelRank++;
-			}
+				if (this.diffuseFresnelParameters != null && this.diffuseFresnelParameters.isEnabled)
+				{
+					defines.push("#define DIFFUSEFRESNEL");
+					fallbacks.addFallback(fresnelRank, "DIFFUSEFRESNEL");
+					fresnelRank++;
+				}
 
-			if (this.emissiveFresnelParameters != null && this.emissiveFresnelParameters.isEnabled)
-			{
-				defines.push("#define EMISSIVEFRESNEL");
-				fallbacks.addFallback(fresnelRank, "EMISSIVEFRESNEL");
-				fresnelRank++;
-			}
+				if (this.opacityFresnelParameters != null && this.opacityFresnelParameters.isEnabled)
+				{
+					defines.push("#define OPACITYFRESNEL");
+					fallbacks.addFallback(fresnelRank, "OPACITYFRESNEL");
+					fresnelRank++;
+				}
 
-			defines.push("#define FRESNEL");
-			fallbacks.addFallback(fresnelRank - 1, "FRESNEL");
+				if (this.reflectionFresnelParameters != null && this.reflectionFresnelParameters.isEnabled) 
+				{
+					defines.push("#define REFLECTIONFRESNEL");
+					fallbacks.addFallback(fresnelRank, "REFLECTIONFRESNEL");
+					fresnelRank++;
+				}
+
+				if (this.emissiveFresnelParameters != null && this.emissiveFresnelParameters.isEnabled)
+				{
+					defines.push("#define EMISSIVEFRESNEL");
+					fallbacks.addFallback(fresnelRank, "EMISSIVEFRESNEL");
+					fresnelRank++;
+				}
+
+				defines.push("#define FRESNEL");
+				fallbacks.addFallback(fresnelRank - 1, "FRESNEL");
+			}
 		}
 
 		// Attribs
@@ -548,28 +553,32 @@ class StandardMaterial extends Material
 		if (_scene.getCachedMaterial() != this)
 		{
 			// Fresnel
-			if (this.diffuseFresnelParameters != null && this.diffuseFresnelParameters.isEnabled)
+			if (StandardMaterial.FresnelEnabled) 
 			{
-				this._effect.setColor4("diffuseLeftColor", this.diffuseFresnelParameters.leftColor, this.diffuseFresnelParameters.power);
-				this._effect.setColor4("diffuseRightColor", this.diffuseFresnelParameters.rightColor, this.diffuseFresnelParameters.bias);
-			}
+				if (this.diffuseFresnelParameters != null && this.diffuseFresnelParameters.isEnabled)
+				{
+					this._effect.setColor4("diffuseLeftColor", this.diffuseFresnelParameters.leftColor, this.diffuseFresnelParameters.power);
+					this._effect.setColor4("diffuseRightColor", this.diffuseFresnelParameters.rightColor, this.diffuseFresnelParameters.bias);
+				}
 
-			if (this.opacityFresnelParameters != null && this.opacityFresnelParameters.isEnabled)
-			{
-				this._effect.setColor4("opacityParts", new Color3(this.opacityFresnelParameters.leftColor.toLuminance(), this.opacityFresnelParameters.rightColor.toLuminance(), this.opacityFresnelParameters.bias), this.opacityFresnelParameters.power);
-			}
+				if (this.opacityFresnelParameters != null && this.opacityFresnelParameters.isEnabled)
+				{
+					this._effect.setColor4("opacityParts", new Color3(this.opacityFresnelParameters.leftColor.toLuminance(), this.opacityFresnelParameters.rightColor.toLuminance(), this.opacityFresnelParameters.bias), this.opacityFresnelParameters.power);
+				}
 
-			if (this.reflectionFresnelParameters != null && this.reflectionFresnelParameters.isEnabled) 
-			{
-				this._effect.setColor4("reflectionLeftColor", this.reflectionFresnelParameters.leftColor, this.reflectionFresnelParameters.power);
-				this._effect.setColor4("reflectionRightColor", this.reflectionFresnelParameters.rightColor, this.reflectionFresnelParameters.bias);
-			}
+				if (this.reflectionFresnelParameters != null && this.reflectionFresnelParameters.isEnabled) 
+				{
+					this._effect.setColor4("reflectionLeftColor", this.reflectionFresnelParameters.leftColor, this.reflectionFresnelParameters.power);
+					this._effect.setColor4("reflectionRightColor", this.reflectionFresnelParameters.rightColor, this.reflectionFresnelParameters.bias);
+				}
 
-			if (this.emissiveFresnelParameters != null && this.emissiveFresnelParameters.isEnabled) 
-			{
-				this._effect.setColor4("emissiveLeftColor", this.emissiveFresnelParameters.leftColor, this.emissiveFresnelParameters.power);
-				this._effect.setColor4("emissiveRightColor", this.emissiveFresnelParameters.rightColor, this.emissiveFresnelParameters.bias);
+				if (this.emissiveFresnelParameters != null && this.emissiveFresnelParameters.isEnabled) 
+				{
+					this._effect.setColor4("emissiveLeftColor", this.emissiveFresnelParameters.leftColor, this.emissiveFresnelParameters.power);
+					this._effect.setColor4("emissiveRightColor", this.emissiveFresnelParameters.rightColor, this.emissiveFresnelParameters.bias);
+				}
 			}
+			
 
 			// Textures        
 			if (this.diffuseTexture != null && StandardMaterial.DiffuseTextureEnabled)
@@ -731,13 +740,13 @@ class StandardMaterial extends Material
 
         // View
 		var fogInfo = this._scene.fogInfo;
-        if ((mesh.applyFog && fogInfo.fogMode != FogInfo.FOGMODE_NONE) || this.reflectionTexture != null)
+        if ((_scene.fogEnabled && mesh.applyFog && fogInfo.fogMode != FogInfo.FOGMODE_NONE) || this.reflectionTexture != null)
 		{
             _effect.setMatrix("view", this._scene.getViewMatrix());
         }
 
         // Fog
-        if (mesh.applyFog && fogInfo.fogMode != FogInfo.FOGMODE_NONE)
+        if (_scene.fogEnabled && mesh.applyFog && fogInfo.fogMode != FogInfo.FOGMODE_NONE)
 		{
             _effect.setFloat4("vFogInfos", fogInfo.fogMode, fogInfo.fogStart, fogInfo.fogEnd, fogInfo.fogDensity);
             _effect.setColor3("vFogColor", fogInfo.fogColor);

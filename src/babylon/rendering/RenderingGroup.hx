@@ -5,6 +5,7 @@ import babylon.math.Vector3;
 import babylon.mesh.AbstractMesh;
 import babylon.mesh.SubMesh;
 import babylon.Scene;
+import openfl.gl.GLProgram;
 
 class RenderingGroup 
 {
@@ -16,14 +17,10 @@ class RenderingGroup
 	private var _transparentSubMeshes:Array<SubMesh>;
 	private var _alphaTestSubMeshes:Array<SubMesh>;
 	
-	private var _activeVertices:Int;
-
 	public function new(index:Int, scene:Scene)
 	{
 		this.index = index;
         this._scene = scene;
-		
-		this._activeVertices = 0;
 
         this._opaqueSubMeshes = new Array<SubMesh>();
         this._transparentSubMeshes = new Array<SubMesh>();
@@ -51,15 +48,54 @@ class RenderingGroup
 		
         var engine:Engine = _scene.getEngine();
         
+		var cameraPos:Vector3 = _scene.activeCamera.position;
+		
         var submesh:SubMesh = null;
+		
+		//
+		//for (subIndex in 0...opaqueSize)
+		//{
+			//submesh = _opaqueSubMeshes[subIndex];
+			//
+			//var center:Vector3 = submesh.getBoundingInfo().boundingSphere.centerWorld;
+			//
+			//var dx:Float = (center.x - cameraPos.x);
+			//var dy:Float = (center.y - cameraPos.y);
+			//var dz:Float = (center.z - cameraPos.z);
+			//
+			//submesh._distanceToCamera = dx * dx + dy * dx + dz * dz;
+		//}
+//
+		//_opaqueSubMeshes.sort(function (a:SubMesh, b:SubMesh):Int 
+		//{
+			//var programA:GLProgram = a.getMaterial().getEffect().getProgram();
+			//var programB:GLProgram = b.getMaterial().getEffect().getProgram();
+			//if (programA == programB)
+			//{
+				//return 0;
+			//}
+			//else
+			//{
+				//// Then distance to camera
+				//if (a._distanceToCamera < b._distanceToCamera)
+				//{
+					//return -1;
+				//}
+				//else if (a._distanceToCamera > b._distanceToCamera) 
+				//{
+					//return 1;
+				//}
+				//else
+				//{
+					//return 0;
+				//}
+			//}
+		//});
 		
 		// Opaque
         for (subIndex in 0...opaqueSize) 
 		{
             submesh = _opaqueSubMeshes[subIndex];
-			
-            _activeVertices += submesh.verticesCount;
-
             submesh.render();
         }
 
@@ -68,9 +104,6 @@ class RenderingGroup
         for (subIndex in 0...alphaTestSize)
 		{
             submesh = _alphaTestSubMeshes[subIndex];
-			
-            _activeVertices += submesh.verticesCount;
-
             submesh.render();
         }
         engine.setAlphaTesting(false);
@@ -91,7 +124,12 @@ class RenderingGroup
 				var center:Vector3 = submesh.getBoundingInfo().boundingSphere.centerWorld;
 				
 				submesh._alphaIndex = submesh.getMesh().alphaIndex;
-                submesh._distanceToCamera = center.subtract(_scene.activeCamera.position).lengthSquared();
+				
+                var dx:Float = (center.x - cameraPos.x);
+				var dy:Float = (center.y - cameraPos.y);
+				var dz:Float = (center.z - cameraPos.z);
+				
+				submesh._distanceToCamera = dx * dx + dy * dx + dz * dz;
             }
 
             _transparentSubMeshes.sort(function (a:SubMesh, b:SubMesh):Int 
@@ -124,9 +162,6 @@ class RenderingGroup
             for (subIndex in 0..._transparentSubMeshes.length)
 			{
                 submesh = _transparentSubMeshes[subIndex];
-				
-                _activeVertices += submesh.verticesCount;
-
                 submesh.render();
             }
             engine.setAlphaMode(Engine.ALPHA_DISABLE);

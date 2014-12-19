@@ -400,6 +400,24 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 		}
 	}
 	
+	public function updateVerticesDataDirectly(kind:String, data:Array<Float>, offset: Int = 0, makeItUnique: Bool = false):Void 
+	{
+		if (this._geometry == null)
+		{
+			return;
+		}
+		
+		if (!makeItUnique)
+		{
+			this._geometry.updateVerticesDataDirectly(kind, data, offset);
+		}
+		else
+		{
+			this.makeGeometryUnique();
+			this.updateVerticesDataDirectly(kind, data, offset, false);
+		}
+	}
+	
 	public function makeGeometryUnique():Void
 	{
 		if (this._geometry == null) 
@@ -411,7 +429,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 		geometry.applyToMesh(this);
 	}
 	
-	public function setIndices(indices:Array<Int>):Void
+	public function setIndices(indices:Array<Int>, totalVertices:Int = 0):Void
 	{
 		if (this._geometry == null)
 		{
@@ -424,7 +442,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 		}
 		else
 		{
-			this._geometry.setIndices(indices);
+			this._geometry.setIndices(indices, totalVertices);
 		}
 	}
 	

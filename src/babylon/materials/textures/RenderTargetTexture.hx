@@ -179,7 +179,7 @@ class RenderTargetTexture extends Texture
 					for (subIndex in 0...mesh.subMeshes.length)
 					{
 						var subMesh = mesh.subMeshes[subIndex];
-						scene.statistics.activeVertices += subMesh.verticesCount;
+						scene.statistics.activeVertices += subMesh.indexCount;
 						_renderingManager.dispatch(subMesh);
 					}
 				}

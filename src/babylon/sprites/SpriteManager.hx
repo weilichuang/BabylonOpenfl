@@ -128,7 +128,7 @@ class SpriteManager
         // Render
         var effect = this._effectBase;
 
-        if (this._scene.fogInfo.fogMode != FogInfo.FOGMODE_NONE && fogEnabled) 
+        if (_scene.fogEnabled && _scene.fogInfo.fogMode != FogInfo.FOGMODE_NONE && fogEnabled) 
 		{
             effect = this._effectFog;
         }
@@ -144,7 +144,7 @@ class SpriteManager
         
         // Fog
 		var fogInfo = this._scene.fogInfo;
-        if (fogInfo.fogMode != FogInfo.FOGMODE_NONE && fogEnabled)
+        if (_scene.fogEnabled && fogInfo.fogMode != FogInfo.FOGMODE_NONE && fogEnabled)
 		{
             effect.setFloat4("vFogInfos", fogInfo.fogMode, fogInfo.fogStart, fogInfo.fogEnd, fogInfo.fogDensity);
             effect.setColor3("vFogColor", fogInfo.fogColor);

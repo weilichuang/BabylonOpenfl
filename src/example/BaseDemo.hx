@@ -7,6 +7,7 @@ import babylon.materials.StandardMaterial;
 import babylon.Scene;
 import example.ui.DebugLayer;
 import example.ui.JoystickSimulator;
+import example.ui.MeshTreeLayer;
 import example.ui.StatisticsLayer;
 import haxe.ui.toolkit.controls.Button;
 import haxe.ui.toolkit.core.interfaces.IDisplayObject;
@@ -40,6 +41,7 @@ class BaseDemo extends Sprite
 
 	private var debugLayer:DebugLayer;
 	private var statisicLayer:StatisticsLayer;
+	private var meshTreeLayer:MeshTreeLayer;
 	
 	private var fps:TextField;
 
@@ -85,6 +87,12 @@ class BaseDemo extends Sprite
 			{
 				statisicLayer.view.x = stage.stageWidth - statisicLayer.view.width;
 				statisicLayer.view.y = stage.stageHeight - statisicLayer.view.height;
+			}
+			
+			if (meshTreeLayer != null)
+			{
+				meshTreeLayer.view.x = (stage.stageWidth - meshTreeLayer.view.width) * 0.5;
+				meshTreeLayer.view.y = (stage.stageHeight - meshTreeLayer.view.height) * 0.5;
 			}
 		}
     }
@@ -136,6 +144,10 @@ class BaseDemo extends Sprite
 		statisicLayer = new StatisticsLayer(this.scene);
 		rootUI.addChild(statisicLayer.view);
 		statisicLayer.view.visible = false;
+		
+		meshTreeLayer = new MeshTreeLayer(this, this.scene);
+		rootUI.addChild(meshTreeLayer.view);
+		meshTreeLayer.view.visible = false;
 
 		fps = new FPS(stage.stageWidth - 60, stage.stageHeight - 30, 0xFF0000);
 		var format:TextFormat = fps.defaultTextFormat;
@@ -209,6 +221,15 @@ class BaseDemo extends Sprite
 	public function showStatistics(value:Bool):Void
 	{
 		statisicLayer.view.visible = value;
+	}
+	
+	public function showMeshTree(value:Bool):Void
+	{
+		meshTreeLayer.view.visible = value;
+		if (value)
+		{
+			meshTreeLayer.refreshList();
+		}
 	}
 	
 	public function setDiffuseTextureEnabled(value:Bool):Void

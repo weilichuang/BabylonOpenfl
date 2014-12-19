@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<vbox>
+	<scrollview id="theView" width="400" height="500">
+		<vbox width="100%" id="meshBox">
+		</vbox>
+	</scrollview>
+</vbox>

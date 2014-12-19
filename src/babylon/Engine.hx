@@ -585,17 +585,17 @@ class Engine
         return new BabylonGLBuffer(vbo);
     }
 
-    public function updateDynamicVertexBuffer(vertexBuffer:BabylonGLBuffer, vertices:Dynamic, length:Int = 0):Void
+    public function updateDynamicVertexBuffer(vertexBuffer:BabylonGLBuffer, vertices:Dynamic, offset:Int = 0):Void
 	{
         GL.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer.buffer);
-        // Should be (vertices instanceof Float32Array ? vertices : new Float32Array(vertices)) but Chrome raises an Exception in this case :(
-        if (length != 0) 
+
+        if (Std.is(vertices,Float32Array)) 
 		{
-            GL.bufferSubData(GL.ARRAY_BUFFER, 0, new Float32Array(cast vertices, 0, length));
+            GL.bufferSubData(GL.ARRAY_BUFFER, offset, cast vertices);
         } 
 		else
 		{
-            GL.bufferSubData(GL.ARRAY_BUFFER, 0, new Float32Array(vertices));
+            GL.bufferSubData(GL.ARRAY_BUFFER, offset, new Float32Array(vertices));
         }
         
         _resetVertexBufferBinding();
@@ -929,12 +929,13 @@ class Engine
 	{
         var shader:GLShader = GL.createShader(type == "vertex" ? GL.VERTEX_SHADER : GL.FRAGMENT_SHADER);
 		
-		defines = "precision highp float;\n" + defines;
+		defines = "precision mediump float;\n" + defines;
 		
         GL.shaderSource(shader, defines + "\n" + source);
 		
         GL.compileShader(shader);
 		
+		#if debug
 		if (GL.getShaderParameter(shader, GL.COMPILE_STATUS) == 0)
 		{
 			if (type == "vertex")
@@ -944,6 +945,7 @@ class Engine
 				
 			Logger.warn("shaderInfoLog:" + GL.getShaderInfoLog(shader));
 		}
+		#end
 
         return shader;
     }
@@ -959,10 +961,12 @@ class Engine
 
         GL.linkProgram(shaderProgram);
 		
+		#if debug
 		if (GL.getProgramParameter(shaderProgram, GL.LINK_STATUS) == 0)
 		{
 			throw "Unable to initialize the shader program.";
 		}
+		#end
 
         GL.deleteShader(vertexShader);
         GL.deleteShader(fragmentShader);
@@ -1074,7 +1078,8 @@ class Engine
 		//only disable not used vertex attribute
 		for (i in 0..._vertexAttribArrays.length) 
 		{
-			GL.disableVertexAttribArray(_vertexAttribArrays[i]);
+			if(_vertexAttribArrays[i] >= 0)
+				GL.disableVertexAttribArray(_vertexAttribArrays[i]);
         }
 		
 		_vertexAttribArrays = effect.getAttributes().slice(0);

@@ -7,7 +7,7 @@ import haxe.ui.toolkit.core.XMLController;
 @:build(haxe.ui.toolkit.core.Macros.buildController ("assets/ui/options.xml"))
 class DebugLayer extends XMLController
 {
-	public var scene:Scene;
+	private var scene:Scene;
 	private var demo:BaseDemo;
 	public function new(demo:BaseDemo, scene:Scene) 
 	{
@@ -20,13 +20,23 @@ class DebugLayer extends XMLController
 			demo.showStatistics(statisticsCB.selected);
         };
 		
-		wireframeCB.onClick = function(e) {
-            this.scene.forceWireframe = wireframeCB.selected;
+		meshTreeCB.onClick = function(e) {
+			demo.showMeshTree(meshTreeCB.selected);
         };
 		
-		pointsCloudCB.onClick = function(e) {
-            this.scene.forcePointsCloud = pointsCloudCB.selected;
-        };
+		renderMode.onChange = function(e) {
+			switch(renderMode.selectedIndex) {
+				case 0:
+					scene.forceWireframe = false;
+					scene.forcePointsCloud = false;
+				case 1:
+					scene.forceWireframe = true;
+					scene.forcePointsCloud = false;
+				case 2:
+					scene.forcePointsCloud = true;
+					scene.forceWireframe = false;
+			}
+		};
 		
 		boundingBoxCB.onClick = function(e) {
             this.scene.forceShowBoundingBoxes = boundingBoxCB.selected;
@@ -54,6 +64,10 @@ class DebugLayer extends XMLController
 		
 		reflectionCB.onClick = function(e) {
             StandardMaterial.ReflectionTextureEnabled = reflectionCB.selected;
+        };
+		
+		fresnelCB.onClick = function(e) {
+            StandardMaterial.FresnelEnabled = fresnelCB.selected;
         };
 		
 		animationsCB.onClick = function(e) {
@@ -91,20 +105,26 @@ class DebugLayer extends XMLController
 		proceduraltexturesCB.onClick = function(e) {
             scene.proceduralTexturesEnabled = proceduraltexturesCB.selected;
         };
+		
+		fogCB.onClick = function(e) {
+            scene.fogEnabled = fogCB.selected;
+        };
 	}
 	
 	public function applyConfig():Void
 	{
 		demo.showStatistics(statisticsCB.selected);
-		wireframeCB.selected = scene.forceWireframe;
+		demo.showMeshTree(meshTreeCB.selected);
+		
+		renderMode.selectedIndex = scene.forcePointsCloud ? 2 : (scene.forceWireframe ? 1 : 0);
 		boundingBoxCB.selected = scene.forceShowBoundingBoxes;
-		pointsCloudCB.selected = scene.forcePointsCloud;
 		diffuseCB.selected = StandardMaterial.DiffuseTextureEnabled;
 		ambientCB.selected = StandardMaterial.AmbientTextureEnabled;
 		specularCB.selected = StandardMaterial.SpecularTextureEnabled;
 		emissiveCB.selected = StandardMaterial.EmissiveTextureEnabled;
 		opacityCB.selected = StandardMaterial.OpacityTextureEnabled;
 		reflectionCB.selected = StandardMaterial.ReflectionTextureEnabled;
+		fresnelCB.selected = StandardMaterial.FresnelEnabled;
 		
 		animationsCB.selected = scene.shadowsEnabled;
 		shadowsCB.selected = scene.shadowsEnabled;
@@ -115,6 +135,7 @@ class DebugLayer extends XMLController
 		lensflaresCB.selected = scene.lensFlaresEnabled;
 		rendertargetsCB.selected = scene.renderTargetsEnabled;
 		proceduraltexturesCB.selected = scene.proceduralTexturesEnabled;
+		fogCB.selected = scene.fogEnabled;
 	}
 	
 }
