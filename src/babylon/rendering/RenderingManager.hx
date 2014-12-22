@@ -60,7 +60,7 @@ class RenderingManager
 	
 	public function _renderSprites(index:Int):Void
 	{
-        if (this._scene.spriteManagers.length == 0)
+        if (_scene.spriteManagers.length == 0)
 		{
             return;
         }
@@ -104,20 +104,15 @@ class RenderingManager
             if (renderingGroup != null) 
 			{
                 this._clearDepthBuffer();
-                if (!renderingGroup.render(customRenderFunction, function():Void {
-                    if (renderSprites)
-					{
-                        this._renderSprites(index);
-					}
-                })){
+                if (!renderingGroup.render(customRenderFunction)){
                     this._renderingGroups.splice(index, 1);
                 }
-				else if (renderSprites)
-				{
-					this._renderSprites(index);
-				}
             } 
 			
+			if (renderSprites)
+			{
+				this._renderSprites(index);
+			}
             if (renderParticles)
 			{
                 this._renderParticles(index, activeMeshes);

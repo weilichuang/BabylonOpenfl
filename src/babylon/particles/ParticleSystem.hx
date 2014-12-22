@@ -461,7 +461,7 @@ class ParticleSystem implements IDispose
             this._appendParticleVertex(offset++, particle, 0, 1);
         }
 		
-        _scene.getEngine().updateDynamicVertexBuffer(_vertexBuffer, _vertices, particles.length * _vertexStrideSize);
+        _scene.getEngine().updateDynamicVertexBuffer(_vertexBuffer, _vertices);
 	}
 	
 	public function render():Int

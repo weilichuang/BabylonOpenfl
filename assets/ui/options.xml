@@ -4,7 +4,7 @@
 		<vbox width="100%" id="theContainer">
 			<text text="General:" />
 			<checkbox text="Statistics" id="statisticsCB" selected="false" />
-			<checkbox text="MeshTree" id="meshTreeCB" selected="false" />
+			<button text="MeshTree" id="meshTreeBtn" autoSize="true" />
 			<checkbox text="Bounding boxes" id="boundingBoxCB" selected="false" />
 			<listSelector id="renderMode" text="Triangle" selectedIndex="0" width="100%">
                 <array>Triangle,Wireframe,Point</array>

@@ -4,4 +4,9 @@
 		<vbox width="100%" id="meshBox">
 		</vbox>
 	</scrollview>
+	<hbox>
+		<button text="All Visible" id="visableBtn" autoSize="true" />
+		<button text="All Disable" id="diableBtn" autoSize="true" />
+		<button text="Hide MeshTree" id="hideBtn" autoSize="true" />
+	</hbox>
 </vbox>

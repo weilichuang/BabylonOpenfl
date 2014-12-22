@@ -5,6 +5,7 @@ import babylon.Scene;
 import example.BaseDemo;
 import haxe.ui.toolkit.containers.VBox;
 import haxe.ui.toolkit.controls.CheckBox;
+import haxe.ui.toolkit.core.interfaces.IDisplayObject;
 import haxe.ui.toolkit.core.XMLController;
 
 @:build(haxe.ui.toolkit.core.Macros.buildController ("assets/ui/meshtree.xml"))
@@ -16,8 +17,49 @@ class MeshTreeLayer extends XMLController
 	{
 		this.demo = demo;
 		this.scene = scene;
-		theView.style.backgroundAlpha = 0.8;
+		theView.style.backgroundAlpha = 0.5;
 		theView.style.backgroundColor = 0xffffff;
+		
+		
+		visableBtn.onClick = function(e) {
+            var meshes:Array<AbstractMesh> = scene.meshes;
+			for (i in 0...meshes.length)
+			{
+				var mesh:AbstractMesh = meshes[i];
+				mesh.isVisible = true;
+			}
+			
+			var children:Array<IDisplayObject> = meshBox.children;
+			for (i in 0...children.length)
+			{
+				if (Std.is(children[i], CheckBox))
+				{
+					cast(children[i], CheckBox).selected = true;
+				}
+			}
+        };
+		
+		diableBtn.onClick = function(e) {
+            var meshes:Array<AbstractMesh> = scene.meshes;
+			for (i in 0...meshes.length)
+			{
+				var mesh:AbstractMesh = meshes[i];
+				mesh.isVisible = false;
+			}
+
+			var children:Array<IDisplayObject> = meshBox.children;
+			for (i in 0...children.length)
+			{
+				if (Std.is(children[i], CheckBox))
+				{
+					cast(children[i], CheckBox).selected = false;
+				}
+			}
+        };
+		
+		hideBtn.onClick = function(e) {
+            demo.showMeshTree(false);
+        };
 	}
 	
 	public function refreshList():Void

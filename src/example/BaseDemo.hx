@@ -25,7 +25,10 @@ import openfl.display.FPS;
 import openfl.events.MouseEvent;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+
+#if !js
 import pgr.dconsole.DC;
+#end
 
 class BaseDemo extends Sprite
 {
@@ -167,9 +170,11 @@ class BaseDemo extends Sprite
 		joystickui.attachChontrol();
 		joystickui.setMoveHandle(onJoystickMove);
 		
+		#if !js
 		DC.init();
 		DC.log("Dconsole loading success.");
 		DC.registerObject(this, "global");
+		#end
 		
 		this.addEventListener(Event.ENTER_FRAME, onEnterframe);
 		
@@ -225,6 +230,9 @@ class BaseDemo extends Sprite
 	
 	public function showMeshTree(value:Bool):Void
 	{
+		if (meshTreeLayer.view.visible == value)
+			return;
+			
 		meshTreeLayer.view.visible = value;
 		if (value)
 		{

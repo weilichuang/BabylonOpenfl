@@ -27,12 +27,11 @@ class RenderingGroup
         this._alphaTestSubMeshes = new Array<SubMesh>();
 	}
 	
-	public function render(customRenderFunction:Dynamic = null, 
-							beforeTransparents:Dynamic = null):Bool 
+	public function render(customRenderFunction:Dynamic = null):Bool 
 	{
         if (customRenderFunction != null) 
 		{
-            customRenderFunction(_opaqueSubMeshes, _alphaTestSubMeshes, _transparentSubMeshes, beforeTransparents);
+            customRenderFunction(_opaqueSubMeshes, _alphaTestSubMeshes, _transparentSubMeshes);
             return true;
         }
 
@@ -107,11 +106,6 @@ class RenderingGroup
             submesh.render();
         }
         engine.setAlphaTesting(false);
-
-        if (beforeTransparents != null)
-		{
-            beforeTransparents();
-        }
 
         // Transparent
         if (transparentSize > 0)

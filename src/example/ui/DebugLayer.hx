@@ -16,12 +16,12 @@ class DebugLayer extends XMLController
 		theView.style.backgroundAlpha = 0.8;
 		theView.style.backgroundColor = 0xffffff;
 		
-		statisticsCB.onClick = function(e) {
+		statisticsCB.onChange = function(e) {
 			demo.showStatistics(statisticsCB.selected);
         };
 		
-		meshTreeCB.onClick = function(e) {
-			demo.showMeshTree(meshTreeCB.selected);
+		meshTreeBtn.onClick = function(e) {
+			demo.showMeshTree(true);
         };
 		
 		renderMode.onChange = function(e) {
@@ -38,75 +38,75 @@ class DebugLayer extends XMLController
 			}
 		};
 		
-		boundingBoxCB.onClick = function(e) {
+		boundingBoxCB.onChange = function(e) {
             this.scene.forceShowBoundingBoxes = boundingBoxCB.selected;
         };
 		
-		diffuseCB.onClick = function(e) {
+		diffuseCB.onChange = function(e) {
             StandardMaterial.DiffuseTextureEnabled = diffuseCB.selected;
         };
 		
-		ambientCB.onClick = function(e) {
+		ambientCB.onChange = function(e) {
             StandardMaterial.AmbientTextureEnabled = ambientCB.selected;
         };
 		
-		specularCB.onClick = function(e) {
+		specularCB.onChange = function(e) {
             StandardMaterial.SpecularTextureEnabled = specularCB.selected;
         };
 		
-		emissiveCB.onClick = function(e) {
+		emissiveCB.onChange = function(e) {
             StandardMaterial.EmissiveTextureEnabled = emissiveCB.selected;
         };
 		
-		opacityCB.onClick = function(e) {
+		opacityCB.onChange = function(e) {
             StandardMaterial.OpacityTextureEnabled = opacityCB.selected;
         };
 		
-		reflectionCB.onClick = function(e) {
+		reflectionCB.onChange = function(e) {
             StandardMaterial.ReflectionTextureEnabled = reflectionCB.selected;
         };
 		
-		fresnelCB.onClick = function(e) {
+		fresnelCB.onChange = function(e) {
             StandardMaterial.FresnelEnabled = fresnelCB.selected;
         };
 		
-		animationsCB.onClick = function(e) {
+		animationsCB.onChange = function(e) {
             scene.shadowsEnabled = animationsCB.selected;
         };
 		
-		shadowsCB.onClick = function(e) {
+		shadowsCB.onChange = function(e) {
             scene.shadowsEnabled = shadowsCB.selected;
         };
 		
-		particlesCB.onClick = function(e) {
+		particlesCB.onChange = function(e) {
             scene.particlesEnabled = particlesCB.selected;
         };
 		
-		postprocessesCB.onClick = function(e) {
+		postprocessesCB.onChange = function(e) {
             scene.postProcessesEnabled = postprocessesCB.selected;
         };
 		
-		collisionsCB.onClick = function(e) {
+		collisionsCB.onChange = function(e) {
             scene.collisionsEnabled = collisionsCB.selected;
         };
 		
-		lightsCB.onClick = function(e) {
+		lightsCB.onChange = function(e) {
             scene.lightsEnabled = lightsCB.selected;
         };
 		
-		lensflaresCB.onClick = function(e) {
+		lensflaresCB.onChange = function(e) {
             scene.lensFlaresEnabled = lensflaresCB.selected;
         };
 		
-		rendertargetsCB.onClick = function(e) {
+		rendertargetsCB.onChange = function(e) {
             scene.renderTargetsEnabled = rendertargetsCB.selected;
         };
 		
-		proceduraltexturesCB.onClick = function(e) {
+		proceduraltexturesCB.onChange = function(e) {
             scene.proceduralTexturesEnabled = proceduraltexturesCB.selected;
         };
 		
-		fogCB.onClick = function(e) {
+		fogCB.onChange = function(e) {
             scene.fogEnabled = fogCB.selected;
         };
 	}
@@ -114,7 +114,7 @@ class DebugLayer extends XMLController
 	public function applyConfig():Void
 	{
 		demo.showStatistics(statisticsCB.selected);
-		demo.showMeshTree(meshTreeCB.selected);
+		demo.showMeshTree(false);
 		
 		renderMode.selectedIndex = scene.forcePointsCloud ? 2 : (scene.forceWireframe ? 1 : 0);
 		boundingBoxCB.selected = scene.forceShowBoundingBoxes;
