@@ -22,6 +22,7 @@ import babylon.materials.textures.BaseTexture;
 import babylon.materials.textures.procedurals.ProceduralTexture;
 import babylon.materials.textures.RenderTargetTexture;
 import babylon.math.Color3;
+import babylon.math.FastMath;
 import babylon.math.Frustum;
 import babylon.math.Matrix;
 import babylon.math.Plane;
@@ -44,7 +45,6 @@ import babylon.rendering.RenderingManager;
 import babylon.sprites.SpriteManager;
 import babylon.tools.SmartArray;
 import babylon.tools.Tools;
-import babylon.utils.MathUtils;
 import haxe.Timer;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
@@ -1456,7 +1456,7 @@ class Scene
         }
         
         // Animations
-		var deltaTime:Float = MathUtils.fclamp(engine.getDeltaTime(), MinDeltaTime, MaxDeltaTime);
+		var deltaTime:Float = FastMath.clamp(engine.getDeltaTime(), MinDeltaTime, MaxDeltaTime);
         _animationRatio = deltaTime * (60.0 / 1000.0);
 		
         _animate();

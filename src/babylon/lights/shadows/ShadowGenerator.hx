@@ -7,6 +7,7 @@ import babylon.materials.Effect;
 import babylon.materials.Material;
 import babylon.materials.textures.RenderTargetTexture;
 import babylon.materials.textures.Texture;
+import babylon.math.FastMath;
 import babylon.math.Matrix;
 import babylon.math.Vector3;
 import babylon.mesh.InstancedMesh;
@@ -16,7 +17,6 @@ import babylon.mesh.SubMesh;
 import babylon.mesh.VertexBuffer;
 import babylon.Scene;
 import babylon.tools.SmartArray;
-import babylon.utils.MathUtils;
 
 class ShadowGenerator
 {
@@ -320,7 +320,7 @@ class ShadowGenerator
 
 	public function setDarkness(darkness: Float): Void 
 	{
-		this._darkness = MathUtils.fclamp(darkness, 0, 1);
+		this._darkness = FastMath.clamp(darkness, 0, 1);
 	}
 
 	public function setTransparencyShadow(value: Bool): Void 

@@ -15,7 +15,6 @@ import babylon.particles.ParticleSystem;
 import babylon.Scene;
 import babylon.tools.Tools;
 import babylon.utils.Logger;
-import babylon.utils.MathUtils;
 import haxe.Json;
 import openfl.utils.ByteArray;
 import openfl.utils.Float32Array;
@@ -358,7 +357,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 				break;
 			}
 			
-            SubMesh.CreateFromIndices(0, offset, MathUtils.min(subdivisionSize, totalIndices - offset), this);
+            SubMesh.CreateFromIndices(0, offset, FastMath.imin(subdivisionSize, totalIndices - offset), this);
 
             offset += subdivisionSize;
         }

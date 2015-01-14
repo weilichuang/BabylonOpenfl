@@ -1,5 +1,4 @@
 package babylon.math;
-import babylon.utils.MathUtils;
 
 class Vector2 
 {
@@ -161,8 +160,8 @@ class Vector2
 	
     public static inline function Clamp(value:Vector2, min:Vector2, max:Vector2):Vector2
 	{
-		var vx = MathUtils.fclamp(value.x, min.x, max.x);
-		var vy = MathUtils.fclamp(value.y, min.y, max.y);
+		var vx = FastMath.clamp(value.x, min.x, max.x);
+		var vy = FastMath.clamp(value.y, min.y, max.y);
 
         return new Vector2(vx, vy);
 	}

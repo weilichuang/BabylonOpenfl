@@ -10,6 +10,7 @@ import babylon.materials.textures.BaseTexture;
 import babylon.materials.textures.Texture;
 import babylon.materials.textures.VideoTexture;
 import babylon.math.Color3;
+import babylon.math.FastMath;
 import babylon.math.Matrix;
 import babylon.math.Viewport;
 import babylon.mesh.BabylonGLBuffer;
@@ -19,7 +20,6 @@ import babylon.tools.Tools;
 import babylon.utils.BitmapDataUtils;
 import babylon.utils.GLUtil;
 import babylon.utils.Logger;
-import babylon.utils.MathUtils;
 import openfl.display.BitmapData;
 import openfl.display.OpenGLView;
 import openfl.display.Stage;
@@ -1369,8 +1369,8 @@ class Engine
         var onLoadSuccess = function(bitmapData:BitmapData):Void
 		{
             //this.setTextureData(texture, img, noMipmap, invertY, scene, samplingMode);
-			var potWidth = MathUtils.getExponantOfTwo(bitmapData.width, _caps.maxTextureSize);
-			var potHeight = MathUtils.getExponantOfTwo(bitmapData.height, _caps.maxTextureSize);
+			var potWidth = FastMath.getExponantOfTwo(bitmapData.width, _caps.maxTextureSize);
+			var potHeight = FastMath.getExponantOfTwo(bitmapData.height, _caps.maxTextureSize);
 			var isPot = (bitmapData.width == potWidth && bitmapData.height == potHeight);
 			
 			var curBitmapData:BitmapData = bitmapData;
@@ -1441,8 +1441,8 @@ class Engine
 	{
         var texture:BabylonGLTexture = new BabylonGLTexture("", GL.createTexture());
 
-        width = MathUtils.getExponantOfTwo(Std.int(width), _caps.maxTextureSize);
-        height = MathUtils.getExponantOfTwo(Std.int(height), _caps.maxTextureSize);
+        width = FastMath.getExponantOfTwo(Std.int(width), _caps.maxTextureSize);
+        height = FastMath.getExponantOfTwo(Std.int(height), _caps.maxTextureSize);
 
         GL.bindTexture(GL.TEXTURE_2D, texture.data);
 		
@@ -1622,8 +1622,8 @@ class Engine
 			{
 				var img:BitmapData = bitmapDatas[i];				
 					
-				var potWidth = MathUtils.getExponantOfTwo(img.width, _caps.maxTextureSize);
-				var potHeight = MathUtils.getExponantOfTwo(img.height, _caps.maxTextureSize);
+				var potWidth = FastMath.getExponantOfTwo(img.width, _caps.maxTextureSize);
+				var potHeight = FastMath.getExponantOfTwo(img.height, _caps.maxTextureSize);
 				var isPot = (img.width == potWidth && img.height == potHeight);
 				_workingCanvas = img;
 				

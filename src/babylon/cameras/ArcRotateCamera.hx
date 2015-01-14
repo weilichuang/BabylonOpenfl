@@ -10,7 +10,6 @@ import babylon.mesh.Mesh;
 import babylon.mesh.MeshHelper;
 import babylon.Scene;
 import babylon.tools.Tools.BabylonMinMax;
-import babylon.utils.MathUtils;
 import openfl.display.DisplayObject;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
@@ -362,7 +361,7 @@ class ArcRotateCamera extends Camera
             this.alpha = this.upperAlphaLimit;
         }
 
-		this.beta = MathUtils.fclamp(this.beta, this.lowerBetaLimit, this.upperBetaLimit);
+		this.beta = FastMath.clamp(this.beta, this.lowerBetaLimit, this.upperBetaLimit);
 		
         if (this.lowerRadiusLimit != null && this.radius < this.lowerRadiusLimit)
 		{

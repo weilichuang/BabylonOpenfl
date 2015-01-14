@@ -5,9 +5,8 @@ import babylon.Engine;
 import babylon.materials.Effect;
 import babylon.materials.textures.BabylonGLTexture;
 import babylon.materials.textures.Texture;
+import babylon.math.FastMath;
 import babylon.Scene;
-import babylon.utils.MathUtils;
-
 
 class PostProcess 
 {
@@ -90,8 +89,8 @@ class PostProcess
         var desiredWidth:Int = Std.int((sourceTexture != null ? sourceTexture._width : scene.getStageWidth()) * this._renderRatio);
         var desiredHeight:Int = Std.int((sourceTexture != null ? sourceTexture._height : scene.getStageHeight()) * this._renderRatio);
 		
-		desiredWidth = MathUtils.getExponantOfTwo(desiredWidth, maxSize);
-		desiredHeight = MathUtils.getExponantOfTwo(desiredHeight, maxSize);
+		desiredWidth = FastMath.getExponantOfTwo(desiredWidth, maxSize);
+		desiredHeight = FastMath.getExponantOfTwo(desiredHeight, maxSize);
 		
         if (this.width != desiredWidth || this.height != desiredHeight)
 		{

@@ -5,12 +5,12 @@ import babylon.IDispose;
 import babylon.materials.Effect;
 import babylon.materials.textures.Texture;
 import babylon.math.Color4;
+import babylon.math.FastMath;
 import babylon.math.Matrix;
 import babylon.math.Vector3;
 import babylon.mesh.BabylonGLBuffer;
 import babylon.Scene;
 import babylon.tools.Tools;
-import babylon.utils.MathUtils;
 import openfl.utils.Float32Array;
 
 
@@ -200,18 +200,18 @@ class ParticleSystem implements IDispose
 		// Default behaviors
 		this.startDirectionFunction = function(emitPower: Float, worldMatrix: Matrix, directionToUpdate: Vector3): Void 
 		{
-			var randX = MathUtils.randomNumber(this.direction1.x, this.direction2.x);
-			var randY = MathUtils.randomNumber(this.direction1.y, this.direction2.y);
-			var randZ = MathUtils.randomNumber(this.direction1.z, this.direction2.z);
+			var randX = FastMath.randomNumber(this.direction1.x, this.direction2.x);
+			var randY = FastMath.randomNumber(this.direction1.y, this.direction2.y);
+			var randZ = FastMath.randomNumber(this.direction1.z, this.direction2.z);
 
 			Vector3.TransformNormalFromFloatsToRef(randX * emitPower, randY * emitPower, randZ * emitPower, worldMatrix, directionToUpdate);
 		};
 
 		this.startPositionFunction = function(worldMatrix: Matrix, positionToUpdate: Vector3): Void
 		{
-			var randX = MathUtils.randomNumber(this.minEmitBox.x, this.maxEmitBox.x);
-			var randY = MathUtils.randomNumber(this.minEmitBox.y, this.maxEmitBox.y);
-			var randZ = MathUtils.randomNumber(this.minEmitBox.z, this.maxEmitBox.z);
+			var randX = FastMath.randomNumber(this.minEmitBox.x, this.maxEmitBox.x);
+			var randY = FastMath.randomNumber(this.minEmitBox.y, this.maxEmitBox.y);
+			var randZ = FastMath.randomNumber(this.minEmitBox.z, this.maxEmitBox.z);
 
 			Vector3.TransformCoordinatesFromFloatsToRef(randX, randY, randZ, worldMatrix, positionToUpdate);
 		};
@@ -304,10 +304,6 @@ class ParticleSystem implements IDispose
         
         // Add new ones
         var worldMatrix:Matrix = null;
-		
-		//if(Reflect.getProperty(this.emitter,"x") != null)
-			//worldMatrix = Matrix.Translation(this.emitter.x, this.emitter.y, this.emitter.z);
-		
 		if(Reflect.getProperty(this.emitter,"position") != null)
 		{
             worldMatrix = this.emitter.getWorldMatrix();
@@ -327,9 +323,10 @@ class ParticleSystem implements IDispose
                 break;
             }
 
+			var particle:Particle;
             if (this._stockParticles.length != 0) 
 			{
-                var particle:Particle = this._stockParticles.pop();
+                particle = this._stockParticles.pop();
                 particle.age = 0;
             } 
 			else 
@@ -338,18 +335,18 @@ class ParticleSystem implements IDispose
             }
 			this.particles.push(particle);
 
-            var emitPower:Float = MathUtils.randomNumber(this.minEmitPower, this.maxEmitPower);
+            var emitPower:Float = FastMath.randomNumber(this.minEmitPower, this.maxEmitPower);
 			
 			this.startDirectionFunction(emitPower, worldMatrix, particle.direction);
 
-            particle.lifeTime = MathUtils.randomNumber(this.minLifeTime, this.maxLifeTime);
+            particle.lifeTime = FastMath.randomNumber(this.minLifeTime, this.maxLifeTime);
 
-            particle.size = MathUtils.randomNumber(this.minSize, this.maxSize);
-            particle.angularSpeed = MathUtils.randomNumber(this.minAngularSpeed, this.maxAngularSpeed);
+            particle.size = FastMath.randomNumber(this.minSize, this.maxSize);
+            particle.angularSpeed = FastMath.randomNumber(this.minAngularSpeed, this.maxAngularSpeed);
 
             this.startPositionFunction(worldMatrix, particle.position);
 			
-            var step = MathUtils.randomNumber(0, 1.0);
+            var step = FastMath.randomNumber(0, 1.0);
 
             Color4.LerpToRef(this.color1, this.color2, step, particle.color);
 

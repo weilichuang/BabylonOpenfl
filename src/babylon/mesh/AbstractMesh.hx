@@ -13,6 +13,7 @@ import babylon.culling.octrees.Octree;
 import babylon.IDispose;
 import babylon.materials.Material;
 import babylon.math.Color3;
+import babylon.math.FastMath;
 import babylon.math.Matrix;
 import babylon.math.Plane;
 import babylon.math.Quaternion;
@@ -23,7 +24,6 @@ import babylon.Node;
 import babylon.physics.PhysicsBodyCreationOptions;
 import babylon.physics.PhysicsEngine;
 import babylon.Scene;
-import babylon.utils.MathUtils;
 
 class AbstractMesh extends Node implements IDispose
 {
@@ -53,7 +53,7 @@ class AbstractMesh extends Node implements IDispose
 	public var isVisible:Bool = true;
 	public var applyFog:Bool = true;
 	
-	public var alphaIndex:Int = MathUtils.INT32_MAX;
+	public var alphaIndex:Int = FastMath.INT32_MAX;
 	
 	public var subMeshes: Array<SubMesh>;
 	
@@ -754,7 +754,7 @@ class AbstractMesh extends Node implements IDispose
 		// Octrees
 		if (this._submeshesOctree != null && this.useOctreeForCollisions)
 		{
-			var radius = collider.velocityWorldLength + MathUtils.max([collider.radius.x, collider.radius.y, collider.radius.z]);
+			var radius = collider.velocityWorldLength + FastMath.max([collider.radius.x, collider.radius.y, collider.radius.z]);
 			var intersections = this._submeshesOctree.intersects(collider.basePointWorld, radius);
 
 			len = intersections.length;

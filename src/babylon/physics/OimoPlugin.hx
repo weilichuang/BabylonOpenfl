@@ -1,5 +1,6 @@
 package babylon.physics;
 import babylon.culling.BoundingBox;
+import babylon.math.FastMath;
 import babylon.math.Matrix;
 import babylon.math.Quaternion;
 import babylon.math.Vector3;
@@ -7,7 +8,6 @@ import babylon.mesh.AbstractMesh;
 import babylon.mesh.Mesh;
 import babylon.physics.PhysicsBodyCreationOptions;
 import babylon.physics.PhysicsCompoundBodyPart;
-import babylon.utils.MathUtils;
 import com.element.oimo.math.Vec3;
 import com.element.oimo.physics.collision.shape.Shape;
 import com.element.oimo.physics.dynamics.RigidBody;
@@ -135,9 +135,9 @@ class OimoPlugin implements IPhysicsEnginePlugin
 					type: ['sphere'],
 					size: [size,size,size],
 					pos: [bbox.center.x, bbox.center.y, bbox.center.z],
-					rot: [mesh.rotation.x * MathUtils.DEGS_PER_RAD, 
-						mesh.rotation.y * MathUtils.DEGS_PER_RAD,
-						mesh.rotation.z * MathUtils.DEGS_PER_RAD],
+					rot: [mesh.rotation.x * FastMath.DEGS_PER_RAD, 
+						mesh.rotation.y * FastMath.DEGS_PER_RAD,
+						mesh.rotation.z * FastMath.DEGS_PER_RAD],
 					move: options.mass != 0,
 					config: options,
 					world: _world
@@ -161,9 +161,9 @@ class OimoPlugin implements IPhysicsEnginePlugin
 					type: ['box'],
 					size: [sizeX, sizeY, sizeZ],
 					pos: [bbox.center.x, bbox.center.y, bbox.center.z],
-					rot: [mesh.rotation.x * MathUtils.DEGS_PER_RAD, 
-						mesh.rotation.y  * MathUtils.DEGS_PER_RAD, 
-						mesh.rotation.z  * MathUtils.DEGS_PER_RAD],
+					rot: [mesh.rotation.x * FastMath.DEGS_PER_RAD, 
+						mesh.rotation.y  * FastMath.DEGS_PER_RAD, 
+						mesh.rotation.z  * FastMath.DEGS_PER_RAD],
 					move: options.mass != 0,
 					config: options,
 					world: _world
@@ -230,9 +230,9 @@ class OimoPlugin implements IPhysicsEnginePlugin
 					/* bug with oimo : sphere needs 3 sizes in this case */
 					size: [size, size, size],
 					pos: [mesh.position.x, mesh.position.y, mesh.position.z],
-					rot: [mesh.rotation.x * MathUtils.DEGS_PER_RAD, 
-						mesh.rotation.y * MathUtils.DEGS_PER_RAD, 
-						mesh.rotation.z * MathUtils.DEGS_PER_RAD]
+					rot: [mesh.rotation.x * FastMath.DEGS_PER_RAD, 
+						mesh.rotation.y * FastMath.DEGS_PER_RAD, 
+						mesh.rotation.z * FastMath.DEGS_PER_RAD]
 				};
 
 			case PhysicsEngine.PlaneImpostor,PhysicsEngine.BoxImpostor:
@@ -248,9 +248,9 @@ class OimoPlugin implements IPhysicsEnginePlugin
 					type: ['box'],
 					size: [sizeX, sizeY, sizeZ],
 					pos: [relativePosition.x, relativePosition.y, relativePosition.z],
-					rot: [mesh.rotation.x * MathUtils.DEGS_PER_RAD, 
-						mesh.rotation.y * MathUtils.DEGS_PER_RAD, 
-						mesh.rotation.z * MathUtils.DEGS_PER_RAD]
+					rot: [mesh.rotation.x * FastMath.DEGS_PER_RAD, 
+						mesh.rotation.y * FastMath.DEGS_PER_RAD, 
+						mesh.rotation.z * FastMath.DEGS_PER_RAD]
 				};
 		}
 
