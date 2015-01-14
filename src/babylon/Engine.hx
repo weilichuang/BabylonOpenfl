@@ -123,6 +123,12 @@ class Engine
 	
 	private var _drawCalls:Int = 0;
 	
+	// FPS
+    private var fpsRange:Float = 60.0;
+    private var previousFramesDuration:Array<Float> = [];
+    private var fps:Float = 60.0;
+    private var deltaTime:Float = 0.0;
+	
 	public function new(stage:Stage, antialias:Bool = true, options:Dynamic = null)
 	{
 		_stage = stage;
@@ -213,6 +219,46 @@ class Engine
         document.addEventListener("mozpointerlockchange", onPointerLockChange, false);
         document.addEventListener("webkitpointerlockchange", onPointerLockChange, false);*/
 	}
+	
+	public function getFps():Float
+	{
+        return fps;
+    }
+
+    public function getDeltaTime():Float 
+	{
+        return deltaTime;
+    }
+
+    private function _MeasureFps():Void
+	{
+        previousFramesDuration.push(Lib.getTimer());
+		
+        var length = previousFramesDuration.length;
+
+        if (length >= 2)
+		{
+            deltaTime = previousFramesDuration[length - 1] - previousFramesDuration[length - 2];
+        }
+
+        if (length >= fpsRange)
+		{
+            if (length > fpsRange)
+			{
+                previousFramesDuration.splice(0, 1);
+                length--;
+            }
+
+            var sum:Float = 0;
+			var count:Int = length - 1;
+            for (i in 0...count)
+			{
+                sum += previousFramesDuration[i + 1] - previousFramesDuration[i];
+            }
+
+            fps = 1000.0 / (sum / count);
+        }
+    }
 	
 	public function getAudioEngine():AudioEngine
 	{
@@ -472,7 +518,7 @@ class Engine
 
     public function beginFrame():Void
 	{
-		Tools._MeasureFps();
+		_MeasureFps();
 		
 		//openfl内部可能会修改gl state
 		GLUtil.resetGLStates();
@@ -789,6 +835,8 @@ class Engine
 		// Apply states
 		this.applyStates();
 		
+		this._drawCalls++;
+		
 		// Render
 		var indexFormat:Int = this._uintIndicesCurrentlySet ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
 		
@@ -801,14 +849,14 @@ class Engine
 		#end
 			
         GL.drawElements(useTriangles ? GL.TRIANGLES : GL.LINES, indexCount, indexFormat, indexStart * 2);
-		
-		this._drawCalls++;
     }
 	
 	public function drawPointClouds(verticesStart:Int, verticesCount:Int, instancesCount:Int = 0):Void
 	{
 		// Apply states
 		this.applyStates();
+		
+		this._drawCalls++;
 		
 		#if html5
 		if (instancesCount > 0)
@@ -819,7 +867,6 @@ class Engine
 		#end
 		
 		GL.drawArrays(GL.POINTS, verticesStart, verticesCount);
-		this._drawCalls++;
 	}
 	
 	public function releaseEffect(effect: Effect): Void
@@ -1272,6 +1319,32 @@ class Engine
 		bmp.draw(source, m);
 		return bmp;
 	}
+	
+	public function setSamplingMode(texture: BabylonGLTexture, samplingMode: Int): Void 
+	{
+		GL.bindTexture(GL.TEXTURE_2D, texture.data);
+
+		var magFilter = GL.NEAREST;
+		var minFilter = GL.NEAREST;
+
+		if (samplingMode == Texture.BILINEAR_SAMPLINGMODE)
+		{
+			magFilter = GL.LINEAR;
+			minFilter = GL.LINEAR;
+		} 
+		else if (samplingMode == Texture.TRILINEAR_SAMPLINGMODE)
+		{
+			magFilter = GL.LINEAR;
+			minFilter = GL.LINEAR_MIPMAP_LINEAR;
+		}
+
+		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, magFilter);
+		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, minFilter);
+
+		GL.bindTexture(GL.TEXTURE_2D, null);
+
+		texture.samplingMode = samplingMode;
+	}
 
     public function createTexture(url:String, 
 									noMipmap:Bool = false, 
@@ -1291,9 +1364,6 @@ class Engine
 			{
 				onError();
 			}
-			//var bitmapData:BitmapData = new BitmapData(128, 128, false, 0xff0000);
-//
-			//this.setTextureData(texture, bitmapData, noMipmap, invertY, scene, samplingMode);
 		}
 		            
         var onLoadSuccess = function(bitmapData:BitmapData):Void
@@ -1346,6 +1416,7 @@ class Engine
 			texture._width = potWidth;
 			texture._height = potHeight;
 			texture.isReady = true;
+			texture.samplingMode = samplingMode;
 			scene._removePendingData(texture);
 			
 			if (onLoad != null)
@@ -1388,6 +1459,7 @@ class Engine
         texture._height = height;
         texture.isReady = false;
         texture.generateMipMaps = generateMipMaps;
+		texture.samplingMode = samplingMode;
         texture.references = 1;
 
         _loadedTexturesCache.push(texture);
@@ -1512,6 +1584,7 @@ class Engine
         texture._height = height;
         texture.isReady = true;
         texture.generateMipMaps = generateMipMaps;
+		texture.samplingMode = samplingMode;
         texture.references = 1;
 		
         _activeTexturesCache = [];

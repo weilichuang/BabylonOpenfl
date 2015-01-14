@@ -22,6 +22,8 @@ class BabylonGLTexture
 	public var references:Int;
 	public var url:String;
 	
+	public var samplingMode:Int;
+	
 	public var _baseHeight:Int;
 	public var _baseWidth:Int;
 	public var _cachedWrapU:Int = -1;

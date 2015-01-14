@@ -6,6 +6,7 @@ import babylon.culling.BoundingSphere;
 import babylon.Engine;
 import babylon.materials.Effect;
 import babylon.materials.Material;
+import babylon.math.FastMath;
 import babylon.math.Matrix;
 import babylon.math.Plane;
 import babylon.math.Vector3;
@@ -530,8 +531,8 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 				
 				_batchCache.visibleInstances[subMeshId] = _visibleInstances.instances.get(renderId);
 
-				currentRenderId = _visibleInstances.defaultRenderId;
-				selfRenderId = _visibleInstances.selfDefaultRenderId;
+				currentRenderId = FastMath.imax(_visibleInstances.defaultRenderId, currentRenderId);
+				selfRenderId = FastMath.imax(_visibleInstances.selfDefaultRenderId, currentRenderId);
 			}
 
 			if (_batchCache.visibleInstances[subMeshId] != null && _batchCache.visibleInstances[subMeshId].length > 0)
@@ -989,7 +990,8 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 		result.subMeshes = newSubMeshes;
 		
 		// Geometry
-		this._geometry.applyToMesh(result);
+		if(this._geometry != null)
+			this._geometry.applyToMesh(result);
 		
 		// Parent
 		if (newParent != null)

@@ -2,6 +2,7 @@ package babylon.lights;
 
 import babylon.lights.shadows.ShadowGenerator;
 import babylon.materials.Effect;
+import babylon.math.Vector3;
 import babylon.mesh.AbstractMesh;
 import babylon.Node;
 import babylon.Scene;
@@ -45,6 +46,11 @@ class Light extends Node
 		this._includedOnlyMeshesIds = [];
         this.excludedMeshes = [];
 		this.includedOnlyMeshes = [];
+	}
+	
+	public function getAbsolutePosition(): Vector3
+	{
+		return Vector3.Zero();
 	}
 	
 	public function canAffectMesh(mesh: AbstractMesh): Bool 

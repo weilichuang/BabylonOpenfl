@@ -75,7 +75,7 @@ class Texture extends BaseTexture
 		if (url == null || url == "")
 			return;
 			
-		_texture = _getFromCache(url, noMipmap);
+		_texture = _getFromCache(url, noMipmap, _samplingMode);
 		
 		if (_texture == null)
 		{		
@@ -98,7 +98,7 @@ class Texture extends BaseTexture
         }
         
         this.delayLoadState = Engine.DELAYLOADSTATE_LOADED;
-        this._texture = _getFromCache(this.url, _noMipmap);
+        this._texture = _getFromCache(this.url, _noMipmap, _samplingMode);
 
         if (_texture == null)
 		{

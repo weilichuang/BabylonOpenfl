@@ -125,11 +125,19 @@ class Animation
 		this._easingFunction = easingFunction;
 	}
 	
+	private function _getKeyValue(value: Dynamic): Dynamic
+	{
+		if (Reflect.isFunction(value))
+		{
+			return value();
+		}
+		return value;
+	}
+	
 	/**
 	 * 如果Map存储类型使用Dynamic在cpp中会导致程序异常退出
 	 * 为什么放到一个函数中就不异常退出了？
 	 */
-	//好像没怎么改代码，又正常不退出了
 	private function initCacheMap():Void
 	{
 		this._offsetsCache = new Map<String,Dynamic>();
@@ -221,8 +229,8 @@ class Animation
 			// for each frame, we need the key just before the frame superior
             if (nextFrameInfo.frame >= currentFrame)
 			{
-                var startValue:Dynamic = frameInfo.value;
-                var endValue:Dynamic = nextFrameInfo.value;
+                var startValue:Dynamic = _getKeyValue(frameInfo.value);
+                var endValue:Dynamic = _getKeyValue(nextFrameInfo.value);
 
 				// gradient : percent of currentFrame between the frame inf and the frame sup
                 var gradient:Float;
@@ -303,7 +311,7 @@ class Animation
             }
         }
 		
-        return _keys[_keys.length - 1].value;
+        return _getKeyValue(_keys[_keys.length - 1].value);
     }
 	
 	private function getZeroValue(dataType:Int):Dynamic
@@ -387,7 +395,7 @@ class Animation
 		if (ratio > range && !loop)
 		{ 
 			returnValue = false;
-			highLimitValue = lastFrame.value;
+			highLimitValue = _getKeyValue(lastFrame.value);
 		} 
 		else 
 		{

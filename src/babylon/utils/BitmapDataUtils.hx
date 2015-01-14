@@ -22,21 +22,12 @@ class BitmapDataUtils
 		return result;
 	}
 	
-	public static function getPixelData(bitmapData:BitmapData):ArrayBufferView
+	public static inline function getPixelData(bitmapData:BitmapData):ArrayBufferView
 	{
 		#if html5
-		var pixelData = bitmapData.getPixels(bitmapData.rect).byteView;
-		//var p = bitmapData.getPixels(bitmapData.rect);
-        //var pixelData = new UInt8Array(p.length);
-        //p.position = 0;
-        //var i:UInt = 0;
-        //while (p.position < p.length) {
-            //pixelData[i] = p.readUnsignedByte();
-            //i++;
-        //}
+		return @:privateAccess (bitmapData.__image).data;
 		#else
-		var pixelData = new UInt8Array(BitmapData.getRGBAPixels(bitmapData));
+		return new UInt8Array(BitmapData.getRGBAPixels(bitmapData));
 		#end
-		return pixelData;
 	}
 }

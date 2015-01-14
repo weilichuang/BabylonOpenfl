@@ -393,6 +393,20 @@ class Scene
 	{
 		return meshes.remove(mesh);
 	}
+	
+	public function addCamera(camera: Camera):Void
+	{
+		this.cameras.push(camera);
+	}
+
+	public function removeCamera(camera: Camera):Void
+	{
+		var index = this.cameras.indexOf(camera);
+		if (index != -1)
+		{
+			this.cameras.splice(index, 1);
+		}
+	}
 
 	public inline function getEngine():Engine 
 	{
@@ -1442,7 +1456,7 @@ class Scene
         }
         
         // Animations
-		var deltaTime:Float = MathUtils.fclamp(Tools.deltaTime, MinDeltaTime, MaxDeltaTime);
+		var deltaTime:Float = MathUtils.fclamp(engine.getDeltaTime(), MinDeltaTime, MaxDeltaTime);
         _animationRatio = deltaTime * (60.0 / 1000.0);
 		
         _animate();

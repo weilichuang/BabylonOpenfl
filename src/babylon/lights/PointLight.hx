@@ -18,6 +18,11 @@ class PointLight extends Light
         this.position = position;
 	}
 	
+	override public function getAbsolutePosition(): Vector3
+	{
+		return this._transformedPosition != null ? this._transformedPosition : this.position;
+	}
+	
 	override public function transferToEffect(effect:Effect, uniformName0:String = "", uniformName1:String = ""):Void
 	{
         if (this.parent != null) 

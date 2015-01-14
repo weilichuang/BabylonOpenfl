@@ -24,6 +24,11 @@ class DirectionalLight extends Light
         this.specular = new Color3(1.0, 1.0, 1.0);
 	}
 	
+	override public function getAbsolutePosition(): Vector3
+	{
+		return this._transformedPosition != null ? this._transformedPosition : this.position;
+	}
+	
 	public function setDirectionToTarget(target: Vector3): Vector3
 	{
 		target.subtract(this.position, this.direction);

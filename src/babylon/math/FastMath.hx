@@ -27,6 +27,16 @@ class FastMath
 		return value > 0 ? value : -value;
 	}
 	
+	public static inline function imax(v1:Int,v2:Int):Int
+	{
+		return v1 > v2 ? v1 : v2;
+	}
+	
+	public static inline function imin(v1:Int,v2:Int):Int
+	{
+		return v1 < v2 ? v1 : v2;
+	}
+	
 	public static inline function clamp(value:Float, min:Float = 0, max:Float = 1):Float
 	{
 		if (value < min)

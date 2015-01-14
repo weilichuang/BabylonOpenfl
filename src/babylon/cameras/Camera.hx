@@ -51,7 +51,7 @@ class Camera extends Node
 
         this.position = position;
         
-        scene.cameras.push(this);
+        scene.addCamera(this);
         if (scene.activeCamera == null)
 		{
             scene.activeCamera = this;
@@ -371,8 +371,7 @@ class Camera extends Node
 	public function dispose():Void
 	{
 		// Remove from scene
-        var index = _scene.cameras.indexOf(this);
-        _scene.cameras.splice(index, 1);
+        _scene.removeCamera(this);
         
         // _postProcesses
         for (i in 0..._postProcessesTakenIndices.length)

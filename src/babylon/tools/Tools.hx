@@ -7,9 +7,7 @@ import assets.manager.misc.LoaderStatus;
 import babylon.math.Vector3;
 import babylon.utils.Logger;
 import openfl.display.BitmapData;
-import openfl.Lib;
 import openfl.utils.ByteArray;
-import openfl.utils.Timer;
 
 typedef BabylonMinMax = {
 	minimum: Vector3,
@@ -18,9 +16,6 @@ typedef BabylonMinMax = {
  
 class Tools 
 {
-	
-	//public static var timer:Timer;
-	
 	// World limits
 	public static function checkExtends(v:Vector3, min:Vector3, max:Vector3):Void
 	{
@@ -82,10 +77,10 @@ class Tools
         };
     }
 	
-	public static inline function WithinEpsilon(a:Float, b:Float):Bool 
+	public static inline function WithinEpsilon(a:Float, b:Float, epsilon: Float = 1.401298E-45):Bool 
 	{
         var num:Float = a - b;
-        return -1.401298E-45 <= num && num <= 1.401298E-45;
+        return -epsilon <= num && num <= epsilon;
     }
 	
 	public static function LoadFile(url:String, loadComplete:String->Void, loadError:String->Void = null):Void 
@@ -229,52 +224,6 @@ class Tools
             }
 			
 			Reflect.setField(destination, prop, Reflect.copy(sourceValue));			
-        }
-    }
-	
-	// FPS
-    public static var fpsRange:Float = 60.0;
-    public static var previousFramesDuration:Array<Float> = [];
-    public static var fps:Float = 60.0;
-    public static var deltaTime:Float = 0.0;
-
-    public static function GetFps():Float
-	{
-        return fps;
-    }
-
-    public static function GetDeltaTime():Float 
-	{
-        return deltaTime;
-    }
-
-    public static function _MeasureFps():Void
-	{
-        previousFramesDuration.push(Lib.getTimer());
-		
-        var length = previousFramesDuration.length;
-
-        if (length >= 2)
-		{
-            deltaTime = previousFramesDuration[length - 1] - previousFramesDuration[length - 2];
-        }
-
-        if (length >= fpsRange)
-		{
-            if (length > fpsRange)
-			{
-                previousFramesDuration.splice(0, 1);
-                length--;
-            }
-
-            var sum:Float = 0;
-			var count:Int = length - 1;
-            for (i in 0...count)
-			{
-                sum += previousFramesDuration[i + 1] - previousFramesDuration[i];
-            }
-
-            fps = 1000.0 / (sum / count);
         }
     }
 	

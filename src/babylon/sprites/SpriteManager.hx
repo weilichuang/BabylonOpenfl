@@ -103,7 +103,7 @@ class SpriteManager
         var baseSize = this._spriteTexture.getBaseSize();
 
         // Sprites
-        var deltaTime = Tools.deltaTime;
+        var deltaTime = engine.getDeltaTime();
         var max = Std.int(Math.min(this._capacity, this.sprites.length));
         var rowSize = baseSize.width / this.cellSize;
 

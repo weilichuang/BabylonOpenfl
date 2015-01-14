@@ -114,7 +114,7 @@ class BaseTexture
         return { width: _texture._baseWidth, height: _texture._baseHeight };
     }
 	
-	public function _getFromCache(url:String, noMipmap:Bool):BabylonGLTexture
+	public function _getFromCache(url:String, noMipmap:Bool, sampling:Int = 0):BabylonGLTexture
 	{
         var texturesCache:Array<BabylonGLTexture> = this.getScene().getEngine().getLoadedTexturesCache();
         for (index in 0...texturesCache.length)
@@ -123,8 +123,11 @@ class BaseTexture
 
             if (texturesCacheEntry.url == url && texturesCacheEntry.noMipmap == noMipmap) 
 			{
-                texturesCacheEntry.references++;
-                return texturesCacheEntry;
+				if (sampling > 0 || sampling == texturesCacheEntry.samplingMode)
+				{
+					texturesCacheEntry.references++;
+					return texturesCacheEntry;
+				}
             }
         }
 

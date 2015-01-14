@@ -47,6 +47,8 @@ class ParticleSystem implements IDispose
 
     public var blendMode:Int = 0;
 	
+	public var updateFunction: Array<Particle>->Void;
+	
 	public var forceDepthWrite:Bool = false;
 	
 	public var gravity:Vector3;
@@ -100,7 +102,8 @@ class ParticleSystem implements IDispose
 	public var emitterId(get, null):Dynamic;
 	private function get_emitterId():Dynamic 
 	{
-		if (Reflect.getProperty(this.emitter, "id") != null) {
+		if (Reflect.getProperty(this.emitter, "id") != null)
+		{
 			return Reflect.getProperty(this.emitter, "id");
 		} 
 		return null;
@@ -212,6 +215,39 @@ class ParticleSystem implements IDispose
 
 			Vector3.TransformCoordinatesFromFloatsToRef(randX, randY, randZ, worldMatrix, positionToUpdate);
 		};
+		
+		this.updateFunction = function(particles:Array<Particle>):Void
+		{
+			var index:Int = -1;
+			while (++index < particles.length)
+			{
+				var particle:Particle = particles[index];						
+				particle.age += _scaledUpdateSpeed;
+				
+				if (particle.age >= particle.lifeTime) 
+				{
+					_stockParticles.push(particles.splice(index, 1)[0]);
+					index--;
+					continue;
+				}
+				else 
+				{
+					particle.colorStep.scaleToRef(this._scaledUpdateSpeed, this._scaledColorStep);
+					particle.color.addInPlace(this._scaledColorStep);
+
+					if (particle.color.a < 0)
+						particle.color.a = 0;
+
+					particle.angle += particle.angularSpeed * this._scaledUpdateSpeed;
+						
+					particle.direction.scaleToRef(this._scaledUpdateSpeed, this._scaledDirection);
+					particle.position.addInPlace(this._scaledDirection);
+
+					this.gravity.scaleToRef(this._scaledUpdateSpeed, this._scaledGravity);
+					particle.direction.addInPlace(this._scaledGravity);
+				}
+			}
+		}
 	}
 	
 	public function getCapacity():Int
@@ -264,35 +300,7 @@ class ParticleSystem implements IDispose
         // Update current
         _alive = particles.length > 0;
 		
-		var index:Int = -1;
-		while (++index < particles.length)
-		{
-			particle = particles[index];						
-			particle.age += _scaledUpdateSpeed;
-
-			if (particle.age >= particle.lifeTime) 
-			{
-				_stockParticles.push(particles.splice(index, 1)[0]);
-				index--;
-				continue;
-			}
-			else 
-			{
-				particle.colorStep.scaleToRef(this._scaledUpdateSpeed, this._scaledColorStep);
-				particle.color.addInPlace(this._scaledColorStep);
-
-				if (particle.color.a < 0)
-					particle.color.a = 0;
-
-				particle.angle += particle.angularSpeed * this._scaledUpdateSpeed;
-					
-				particle.direction.scaleToRef(this._scaledUpdateSpeed, this._scaledDirection);
-				particle.position.addInPlace(this._scaledDirection);
-
-				this.gravity.scaleToRef(this._scaledUpdateSpeed, this._scaledGravity);
-				particle.direction.addInPlace(this._scaledGravity);
-			}
-		}
+		this.updateFunction(this.particles);
         
         // Add new ones
         var worldMatrix:Matrix = null;
@@ -300,12 +308,14 @@ class ParticleSystem implements IDispose
 		//if(Reflect.getProperty(this.emitter,"x") != null)
 			//worldMatrix = Matrix.Translation(this.emitter.x, this.emitter.y, this.emitter.z);
 		
-		//Logger.log("this.emitter.x=" + this.emitter.x);
-		//Logger.log("this.emitter.position=" + this.emitter.position);
 		if(Reflect.getProperty(this.emitter,"position") != null)
 		{
             worldMatrix = this.emitter.getWorldMatrix();
         } 
+		else
+		{
+			worldMatrix = Matrix.Translation(this.emitter.x, this.emitter.y, this.emitter.z);
+		}
 		
 		if (worldMatrix == null)
 			worldMatrix = new Matrix();
@@ -319,7 +329,7 @@ class ParticleSystem implements IDispose
 
             if (this._stockParticles.length != 0) 
 			{
-                particle = this._stockParticles.pop();
+                var particle:Particle = this._stockParticles.pop();
                 particle.age = 0;
             } 
 			else 

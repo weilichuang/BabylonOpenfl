@@ -1,4 +1,5 @@
 package babylon.cameras;
+import babylon.Engine;
 import babylon.math.FastMath;
 import babylon.math.Matrix;
 import babylon.math.Vector2;
@@ -107,7 +108,8 @@ class TargetCamera extends Camera
 	
 	public inline function _computeLocalCameraSpeed():Float
 	{
-		return this.speed * (Tools.deltaTime / (Tools.fps * 10.0));
+		var engine:Engine = getEngine();
+		return this.speed * (engine.getDeltaTime() / (engine.getFps() * 10.0));
     }
 	
 	public function setTarget(target:Vector3):Void

@@ -195,6 +195,14 @@ class SubMesh
 
             if (currentIntersectInfo != null) 
 			{
+				//Preventing selection of a face that is behind the ray's origin position.
+				//The problem is that if the origin point is INSIDE a mesh, the faces behind the point will be selected as well. The Distance received from the PickingInfo will still be positive, due to the new initialization in the scene pick function.
+				if (currentIntersectInfo.distance < 0 )
+				{
+					index += 3;
+					continue;
+				}
+				
                 if (fastCheck || intersectInfo == null || currentIntersectInfo.distance < intersectInfo.distance) 
 				{
                     intersectInfo = currentIntersectInfo;
