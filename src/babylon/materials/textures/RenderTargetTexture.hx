@@ -11,6 +11,8 @@ import babylon.tools.SmartArray;
 
 class RenderTargetTexture extends Texture
 {
+	public var refreshRate(get, set):Int;
+	
 	public var renderList:Array<AbstractMesh>;
 	public var renderParticles:Bool = true;
     public var renderSprites:Bool = false;
@@ -20,19 +22,22 @@ class RenderTargetTexture extends Texture
 	
 	public var customRenderFunction:Dynamic;
 	
+	public var activeCamera:Camera;
+	
+	@:dox(hide) 
+	public var _waitingRenderList:Array<String>;
+	
+	private var _generateMipMaps:Bool;
+	
 	private var _size:Int;
 	
-	public var _generateMipMaps:Bool;
-	
 	private var _renderingManager:RenderingManager;
-	
-	public var _waitingRenderList:Array<String>;
 	
 	private var _doNotChangeAspectRatio: Bool;
 	private var _currentRefreshId:Int = -1;
 	private var _refreshRate:Int = 1;
 	
-	public var activeCamera:Camera;
+	
 
 	public function new(name:String, size:Int, 
 						scene:Scene, generateMipMaps:Bool = false,
@@ -60,7 +65,7 @@ class RenderTargetTexture extends Texture
 		_currentRefreshId = -1;
 	}
 	
-	public var refreshRate(get, set):Int;
+	
 	private function get_refreshRate():Int
 	{
 		return _refreshRate;

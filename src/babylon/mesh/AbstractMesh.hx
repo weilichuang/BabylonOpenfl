@@ -176,6 +176,13 @@ class AbstractMesh extends Node implements IDispose
 		_collider = new Collider();
 	}
 	
+	public function isSkeletonsEnabled():Bool
+	{
+		return skeleton != null &&
+				isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
+				isVerticesDataPresent(VertexBuffer.MatricesWeightsKind);
+	}
+	
 	public function getLOD(camera:Camera, boundingSphere:BoundingSphere = null):AbstractMesh
 	{
 		return this;

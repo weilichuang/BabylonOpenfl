@@ -543,9 +543,7 @@ class StandardMaterial extends Material
         _effect.setMatrix("viewProjection", _scene.getTransformMatrix());
 
         // Bones
-        if (mesh.skeleton != null && _scene.skeletonsEnabled &&
-			mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
-			mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind))
+        if (_scene.skeletonsEnabled && mesh.isSkeletonsEnabled())
 		{
             _effect.setMatrices("mBones", mesh.skeleton.getTransformMatrices());
         }

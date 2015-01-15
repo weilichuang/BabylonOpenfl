@@ -613,7 +613,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 
 		engine.updateAndBindInstancesBuffer(this._worldMatricesInstancesBuffer, this._worldMatricesInstancesArray, offsetLocations);
 
-		this._draw(subMesh, fillMode, instancesCount);
+		_draw(subMesh, fillMode, instancesCount);
 
 		engine.unBindInstancesBuffer(this._worldMatricesInstancesBuffer, offsetLocations);
 	}

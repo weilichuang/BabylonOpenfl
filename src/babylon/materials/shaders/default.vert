@@ -1,15 +1,19 @@
 // Attributes
 attribute vec3 position;
 attribute vec3 normal;
+
 #ifdef UV1
 attribute vec2 uv;
 #endif
+
 #ifdef UV2
 attribute vec2 uv2;
 #endif
+
 #ifdef VERTEXCOLOR
 attribute vec4 color;
 #endif
+
 #ifdef BONES
 attribute vec4 matricesIndices;
 attribute vec4 matricesWeights;
@@ -91,22 +95,27 @@ varying float fFogDistance;
 #endif
 
 #ifdef SHADOWS
-#ifdef LIGHT0
-uniform mat4 lightMatrix0;
-varying vec4 vPositionFromLight0;
-#endif
-#ifdef LIGHT1
-uniform mat4 lightMatrix1;
-varying vec4 vPositionFromLight1;
-#endif
-#ifdef LIGHT2
-uniform mat4 lightMatrix2;
-varying vec4 vPositionFromLight2;
-#endif
-#ifdef LIGHT3
-uniform mat4 lightMatrix3;
-varying vec4 vPositionFromLight3;
-#endif
+
+	#ifdef LIGHT0
+	uniform mat4 lightMatrix0;
+	varying vec4 vPositionFromLight0;
+	#endif
+	
+	#ifdef LIGHT1
+	uniform mat4 lightMatrix1;
+	varying vec4 vPositionFromLight1;
+	#endif
+	
+	#ifdef LIGHT2
+	uniform mat4 lightMatrix2;
+	varying vec4 vPositionFromLight2;
+	#endif
+	
+	#ifdef LIGHT3
+	uniform mat4 lightMatrix3;
+	varying vec4 vPositionFromLight3;
+	#endif
+	
 #endif
 
 #ifdef REFLECTION
@@ -114,12 +123,12 @@ varying vec3 vPositionUVW;
 #endif
 
 void main(void) {
-	mat4 finalWorld;
-
+	
 #ifdef REFLECTION
 	vPositionUVW = position;
 #endif
 
+	mat4 finalWorld;
 #ifdef INSTANCES
 	finalWorld = mat4(world0, world1, world2, world3);
 #else
@@ -131,17 +140,20 @@ void main(void) {
 	mat4 m1 = mBones[int(matricesIndices.y)] * matricesWeights.y;
 	mat4 m2 = mBones[int(matricesIndices.z)] * matricesWeights.z;
 
-#ifdef BONES4
+	#ifdef BONES4
 	mat4 m3 = mBones[int(matricesIndices.w)] * matricesWeights.w;
 	finalWorld = finalWorld * (m0 + m1 + m2 + m3);
-#else
+	#else
 	finalWorld = finalWorld * (m0 + m1 + m2);
-#endif 
+	#endif 
 
 #endif
-	gl_Position = viewProjection * finalWorld * vec4(position, 1.0);
+	
+	vec4 t_pos = vec4(position, 1.0);
 
-	vec4 worldPos = finalWorld * vec4(position, 1.0);
+	gl_Position = viewProjection * finalWorld * t_pos;
+
+	vec4 worldPos = finalWorld * t_pos;
 	vPositionW = vec3(worldPos);
 	vNormalW = normalize(vec3(finalWorld * vec4(normal, 0.0)));
 
@@ -149,6 +161,7 @@ void main(void) {
 #ifndef UV1
 	vec2 uv = vec2(0., 0.);
 #endif
+
 #ifndef UV2
 	vec2 uv2 = vec2(0., 0.);
 #endif
@@ -231,18 +244,21 @@ void main(void) {
 
 	// Shadows
 #ifdef SHADOWS
-#ifdef LIGHT0
-	vPositionFromLight0 = lightMatrix0 * worldPos;
-#endif
-#ifdef LIGHT1
-	vPositionFromLight1 = lightMatrix1 * worldPos;
-#endif
-#ifdef LIGHT2
-	vPositionFromLight2 = lightMatrix2 * worldPos;
-#endif
-#ifdef LIGHT3
-	vPositionFromLight3 = lightMatrix3 * worldPos;
-#endif
+	#ifdef LIGHT0
+		vPositionFromLight0 = lightMatrix0 * worldPos;
+	#endif
+	
+	#ifdef LIGHT1
+		vPositionFromLight1 = lightMatrix1 * worldPos;
+	#endif
+	
+	#ifdef LIGHT2
+		vPositionFromLight2 = lightMatrix2 * worldPos;
+	#endif
+	
+	#ifdef LIGHT3
+		vPositionFromLight3 = lightMatrix3 * worldPos;
+	#endif
 #endif
 
 	// Vertex color

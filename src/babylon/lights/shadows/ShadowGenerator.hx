@@ -1,10 +1,10 @@
 package babylon.lights.shadows;
 
 import babylon.Engine;
-import babylon.IDispose;
 import babylon.lights.DirectionalLight;
 import babylon.materials.Effect;
 import babylon.materials.Material;
+import babylon.materials.textures.BaseTexture;
 import babylon.materials.textures.RenderTargetTexture;
 import babylon.materials.textures.Texture;
 import babylon.math.FastMath;
@@ -16,7 +16,6 @@ import babylon.mesh.Mesh;
 import babylon.mesh.SubMesh;
 import babylon.mesh.VertexBuffer;
 import babylon.Scene;
-import babylon.tools.SmartArray;
 
 class ShadowGenerator
 {
@@ -26,34 +25,6 @@ class ShadowGenerator
 		
 	public var useVarianceShadowMap(get,set):Bool;
 	public var usePoissonSampling(get, set):Bool;
-	
-	private function get_useVarianceShadowMap():Bool
-	{
-		return filter == FILTER_VARIANCESHADOWMAP;
-	}
-	
-	private function set_useVarianceShadowMap(value:Bool):Bool
-	{
-		if (value == true)
-			filter = FILTER_VARIANCESHADOWMAP;
-		else 
-			filter = FILTER_NONE;
-		return value;
-	}
-	
-	private function get_usePoissonSampling():Bool
-	{
-		return filter == FILTER_POISSONSAMPLING;
-	}
-	
-	private function set_usePoissonSampling(value:Bool):Bool
-	{
-		if (value == true)
-			filter = FILTER_POISSONSAMPLING;
-		else 
-			filter = FILTER_NONE;
-		return value;
-	}
 	
 	public var filter:Int = ShadowGenerator.FILTER_VARIANCESHADOWMAP;
 	
@@ -123,19 +94,49 @@ class ShadowGenerator
         };
 	}
 	
+	private function get_useVarianceShadowMap():Bool
+	{
+		return filter == FILTER_VARIANCESHADOWMAP;
+	}
+	
+	private function set_useVarianceShadowMap(value:Bool):Bool
+	{
+		if (value == true)
+			filter = FILTER_VARIANCESHADOWMAP;
+		else 
+			filter = FILTER_NONE;
+		return value;
+	}
+	
+	private function get_usePoissonSampling():Bool
+	{
+		return filter == FILTER_POISSONSAMPLING;
+	}
+	
+	private function set_usePoissonSampling(value:Bool):Bool
+	{
+		if (value == true)
+			filter = FILTER_POISSONSAMPLING;
+		else 
+			filter = FILTER_NONE;
+		return value;
+	}
+	
 	public function renderSubMesh(subMesh:SubMesh):Void
 	{
 		var mesh:Mesh = subMesh.getRenderingMesh();
 		
 		var world:Matrix = mesh.getWorldMatrix();
+		
 		var engine:Engine = _scene.getEngine();
 		
+		var material:Material = subMesh.getMaterial();
+		
 		//Culling
-		engine.setCullState(subMesh.getMaterial().backFaceCulling);
+		engine.setCullState(material.backFaceCulling);
 		
 		// Managing instances
 		var batch:InstancesBatch = mesh._getInstancesRenderList(subMesh._id);
-
 		if (batch.mustReturn)
 		{
 			return;
@@ -147,27 +148,24 @@ class ShadowGenerator
 		if (this.isReady(subMesh, hardwareInstancedRendering))
 		{
 			engine.enableEffect(_effect);
+			
 			mesh._bind(subMesh, _effect, Material.TriangleFillMode);
 			
-			var material = subMesh.getMaterial();
-			
-			this._effect.setMatrix("viewProjection", this.getTransformMatrix());
+			_effect.setMatrix("viewProjection", this.getTransformMatrix());
 			
 			// Alpha test
 			if (material != null && material.needAlphaTesting())
 			{
-				var alphaTeture = material.getAlphaTestTexture();
-				this._effect.setTexture("diffuseSampler", alphaTeture);
-				this._effect.setMatrix("diffuseMatrix", alphaTeture.getTextureMatrix());
+				var alphaTeture:BaseTexture = material.getAlphaTestTexture();
+				_effect.setTexture("diffuseSampler", alphaTeture);
+				_effect.setMatrix("diffuseMatrix", alphaTeture.getTextureMatrix());
 			}
 			
 			// Bones
-			var useBones:Bool = mesh.skeleton != null && _scene.skeletonsEnabled &&
-								mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
-								mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind);
+			var useBones:Bool = _scene.skeletonsEnabled && mesh.isSkeletonsEnabled();
 			if (useBones)
 			{
-				this._effect.setMatrices("mBones", mesh.skeleton.getTransformMatrices());
+				_effect.setMatrices("mBones", mesh.skeleton.getTransformMatrices());
 			}
 			
 			if (hardwareInstancedRendering)
@@ -180,7 +178,7 @@ class ShadowGenerator
 			{
 				if (batch.renderSelf[subMesh._id]) 
 				{
-					this._effect.setMatrix("world", mesh.getWorldMatrix());
+					_effect.setMatrix("world", mesh.getWorldMatrix());
 
 					// Draw
 					mesh._draw(subMesh, Material.TriangleFillMode);
@@ -193,7 +191,7 @@ class ShadowGenerator
 					{
 						var instance:InstancedMesh = instances[instanceIndex];
 
-						this._effect.setMatrix("world", instance.getWorldMatrix());
+						_effect.setMatrix("world", instance.getWorldMatrix());
 
 						// Draw
 						mesh._draw(subMesh, Material.TriangleFillMode);
@@ -204,7 +202,7 @@ class ShadowGenerator
 		else
 		{
 			// Need to reset refresh rate of the shadowMap
-			this._shadowMap.resetRefreshCounter();
+			_shadowMap.resetRefreshCounter();
 		}
 	}
 	
@@ -239,9 +237,7 @@ class ShadowGenerator
 			}
 		}
 			
-        if (mesh.skeleton != null && scene.skeletonsEnabled &&
-			mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
-			mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind)) 
+        if (scene.skeletonsEnabled && mesh.isSkeletonsEnabled()) 
 		{
             attribs.push(VertexBuffer.MatricesIndicesKind);
             attribs.push(VertexBuffer.MatricesWeightsKind);
@@ -270,7 +266,7 @@ class ShadowGenerator
                 ["diffuseSampler"], join);
         }
 
-        return this._effect.isReady();
+        return _effect.isReady();
     }
 	
 	public function getShadowMap():RenderTargetTexture 
@@ -335,6 +331,10 @@ class ShadowGenerator
 			this._shadowMap.dispose();
 			this._shadowMap = null;
 		}
+		
+		_light = null;
+		_scene = null;
+		_effect = null;
     }
 	
 }

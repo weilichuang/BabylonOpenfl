@@ -10,10 +10,6 @@ import babylon.mesh.SubMesh;
 import babylon.mesh.VertexBuffer;
 import babylon.Scene;
 
-/**
- * ...
- * 
- */
 class OutlineRenderer
 {
 	private var _scene: Scene;
@@ -46,9 +42,7 @@ class OutlineRenderer
 		this._effect.setMatrix("viewProjection", _scene.getTransformMatrix());
 
 		// Bones
-		var useBones:Bool = mesh.skeleton != null && _scene.skeletonsEnabled &&
-							mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) &&
-							mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind);
+		var useBones:Bool = _scene.skeletonsEnabled && mesh.isSkeletonsEnabled();
 		if (useBones)
 		{
 			this._effect.setMatrices("mBones", mesh.skeleton.getTransformMatrices());
@@ -122,9 +116,7 @@ class OutlineRenderer
 		}
 
 		// Bones
-		if (mesh.skeleton != null && 
-			mesh.isVerticesDataPresent(VertexBuffer.MatricesIndicesKind) && 
-			mesh.isVerticesDataPresent(VertexBuffer.MatricesWeightsKind)) 
+		if (_scene.skeletonsEnabled && mesh.isSkeletonsEnabled()) 
 		{
 			attribs.push(VertexBuffer.MatricesIndicesKind);
 			attribs.push(VertexBuffer.MatricesWeightsKind);
@@ -147,13 +139,13 @@ class OutlineRenderer
 		if (this._cachedDefines != join)
 		{
 			this._cachedDefines = join;
-			this._effect = this._scene.getEngine().createEffect("outline",
+			_effect = _scene.getEngine().createEffect("outline",
 				attribs,
 				["world", "mBones", "viewProjection", "diffuseMatrix", "offset", "color"],
 				["diffuseSampler"], join);
 		}
 
-		return this._effect.isReady();
+		return _effect.isReady();
 	}
 	
 }

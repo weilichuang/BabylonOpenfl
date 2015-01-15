@@ -2,14 +2,11 @@ package example;
 
 import babylon.cameras.ArcRotateCamera;
 import babylon.lights.DirectionalLight;
-import babylon.lights.PointLight;
 import babylon.lights.shadows.ShadowGenerator;
 import babylon.materials.StandardMaterial;
-import babylon.materials.textures.CubeTexture;
 import babylon.materials.textures.Texture;
 import babylon.math.Color3;
 import babylon.math.Vector3;
-import babylon.mesh.Mesh;
 import babylon.mesh.MeshHelper;
 import openfl.Lib;
 
