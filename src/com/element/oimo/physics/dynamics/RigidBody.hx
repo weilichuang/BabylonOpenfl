@@ -87,6 +87,9 @@ class RigidBody
 	 */
 	public var orientation:Quaternion;
 	
+	public var newOrientation:Quaternion;
+	public var controlRot:Bool = false;
+	
 	/**
 	 * スリープ直前での重心のワールド座標です。
 	 * <strong>この変数は外部から変更しないでください。</strong>
@@ -261,6 +264,9 @@ class RigidBody
 		inverseLocalInertia = new Mat33();
 		allowSleep = true;
 		sleepTime = 0;
+		
+		newOrientation = new Quaternion();
+		controlRot = false;
 	}
 	
 	/**
@@ -504,8 +510,22 @@ class RigidBody
 			case BODY_STATIC: 
 				linearVelocity.setTo(0, 0, 0);
 				angularVelocity.setTo(0, 0, 0);
+				
+				if (this.controlRot)
+				{
+                    this.orientation.copyFrom(this.newOrientation);
+                    this.controlRot = false;
+                }
 
 			case BODY_DYNAMIC: 
+				
+				if (this.controlRot)
+				{
+                    this.angularVelocity.setTo(0, 0, 0);
+                    this.orientation.copyFrom(this.newOrientation);
+                    this.controlRot = false;
+                }
+				
 				//position
 				position.x += linearVelocity.x * timeStep;
 				position.y += linearVelocity.y * timeStep;
@@ -673,6 +693,12 @@ class RigidBody
 		this.position.setTo(x * OimoPhysics.INV_SCALE, y * OimoPhysics.INV_SCALE, z * OimoPhysics.INV_SCALE);
         this.linearVelocity.setTo(0,0,0);
         this.angularVelocity.setTo(0,0,0);
+    }
+	
+	public function setQuaternion(x:Float, y:Float, z:Float, w:Float):Void
+	{ 
+        this.newOrientation.setTo(x, y, z, w);
+        this.controlRot = true;
     }
 	
     public function setOrientation(x:Float, y:Float, z:Float):Void

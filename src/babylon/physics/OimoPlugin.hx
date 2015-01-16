@@ -120,6 +120,15 @@ class OimoPlugin implements IPhysicsEnginePlugin
 		switch (impostor)
 		{
 			case PhysicsEngine.SphereImpostor:
+				
+				var initialRotation:Quaternion = null;
+				if (mesh.rotationQuaternion != null)
+				{
+					initialRotation = mesh.rotationQuaternion.clone();
+					mesh.rotationQuaternion = new Quaternion(0, 0, 0, 1);
+					mesh.computeWorldMatrix(true);
+				}
+				
 				bbox = mesh.getBoundingInfo().boundingBox;
 				var radiusX:Float = bbox.maximumWorld.x - bbox.minimumWorld.x;
 				var radiusY:Float = bbox.maximumWorld.y - bbox.minimumWorld.y;
@@ -129,6 +138,14 @@ class OimoPlugin implements IPhysicsEnginePlugin
 
 				// The delta between the mesh position and the mesh bounding box center
 				var deltaPosition:Vector3 = mesh.position.subtract(bbox.center);
+				
+				// Transform delta position with the rotation
+				if (initialRotation != null) 
+				{
+					var m:Matrix = new Matrix();
+					initialRotation.toRotationMatrix(m);
+					deltaPosition = Vector3.TransformCoordinates(deltaPosition, m);
+				}
 
 				body = new OimoBody( {
 					name:mesh.name,
@@ -142,9 +159,25 @@ class OimoPlugin implements IPhysicsEnginePlugin
 					config: options,
 					world: _world
 				});
+				
+				// Restore rotation
+				if (initialRotation != null)
+				{
+					body.setQuaternion(initialRotation.x,initialRotation.y,initialRotation.z,initialRotation.w);
+				}
+				
 				_registeredMeshes.push( { mesh:mesh, body:body, delta:  deltaPosition } );
 
-			case PhysicsEngine.PlaneImpostor,PhysicsEngine.BoxImpostor:
+			case PhysicsEngine.PlaneImpostor, PhysicsEngine.BoxImpostor:
+				
+				var initialRotation:Quaternion = null;
+				if (mesh.rotationQuaternion != null)
+				{
+					initialRotation = mesh.rotationQuaternion.clone();
+					mesh.rotationQuaternion = new Quaternion(0, 0, 0, 1);
+					mesh.computeWorldMatrix(true);
+				}
+				
 				bbox = mesh.getBoundingInfo().boundingBox;
 				var min:Vector3 = bbox.minimumWorld;
 				var max:Vector3 = bbox.maximumWorld;
@@ -155,6 +188,14 @@ class OimoPlugin implements IPhysicsEnginePlugin
 
 				// The delta between the mesh position and the mesh boudning box center
 				var deltaPosition:Vector3 = mesh.position.subtract(bbox.center);
+				
+				// Transform delta position with the rotation
+				if (initialRotation != null) 
+				{
+					var m:Matrix = new Matrix();
+					initialRotation.toRotationMatrix(m);
+					deltaPosition = Vector3.TransformCoordinates(deltaPosition, m);
+				}
 
 				body = new OimoBody( {
 					name:mesh.name,
@@ -168,6 +209,12 @@ class OimoPlugin implements IPhysicsEnginePlugin
 					config: options,
 					world: _world
 				});
+				
+				// Restore rotation
+				if (initialRotation != null)
+				{
+					body.setQuaternion(initialRotation.x,initialRotation.y,initialRotation.z,initialRotation.w);
+				}
 
 				_registeredMeshes.push( { mesh:mesh, body:body, delta:  deltaPosition } );
 		}

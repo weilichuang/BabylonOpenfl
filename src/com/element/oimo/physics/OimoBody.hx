@@ -142,4 +142,9 @@ class OimoBody
 		world.addRigidBody(this.body);
 	}
 	
+	public function setQuaternion(x:Float, y:Float, z:Float, w:Float):Void
+	{
+        this.body.setQuaternion(x, y, z, w);
+    }
+	
 }

@@ -6,7 +6,7 @@
 	<meta title="babylonhx" package="com.babylon.engine" version="1.0.0" company="" />
 	
 	<!-- output -->
-	<app main="example.WindowCafeSceneDemo" file="WindowCafeSceneDemo" path="bin" />
+	<app main="example.PhysicsDemo" file="PhysicsDemo" path="bin" />
 	
 	<window background="#000000" fps="0" if="html5" />
 	<window background="#000000" fps="60" unless="html5" />

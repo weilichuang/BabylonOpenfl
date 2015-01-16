@@ -140,6 +140,11 @@ class InstancedMesh extends AbstractMesh
 	override public function getLOD(camera: Camera, boundingSphere:BoundingSphere = null): AbstractMesh 
 	{
 		this._currentLOD = cast this.sourceMesh.getLOD(this.getScene().activeCamera, this.getBoundingInfo().boundingSphere);
+		
+		if (this._currentLOD == this.sourceMesh) 
+		{
+			return this;
+		}
 
 		return this._currentLOD;
 	}
