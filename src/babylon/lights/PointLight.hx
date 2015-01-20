@@ -41,11 +41,6 @@ class PointLight extends Light
 		}
     }
 	
-	override private function get_shadowGenerator():ShadowGenerator 
-	{
-        return null;
-    }
-	
 	override public function _getWorldMatrix():Matrix 
 	{
 		this._worldMatrix.setTranslation(this.position);

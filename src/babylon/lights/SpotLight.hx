@@ -6,13 +6,14 @@ import babylon.math.Color3;
 import babylon.math.Matrix;
 import babylon.math.Vector3;
 
-class SpotLight extends Light 
+class SpotLight extends Light implements IShadowLight
 {
 	public var direction:Vector3;
 	public var angle:Float;
 	public var exponent:Float;
 	
-	private var _transformedPosition:Vector3;
+	public var transformedPosition:Vector3;
+	
 	private var _transformedDirection:Vector3;
 
 	private var _normalizeDirection:Vector3;
@@ -31,7 +32,7 @@ class SpotLight extends Light
 	
 	override public function getAbsolutePosition(): Vector3
 	{
-		return this._transformedPosition != null ? this._transformedPosition : this.position;
+		return this.transformedPosition != null ? this.transformedPosition : this.position;
 	}
 	
 	public function setDirectionToTarget(target: Vector3): Vector3
@@ -41,27 +42,36 @@ class SpotLight extends Light
 		return this.direction;
 	}
 	
+	public function computeTransformedPosition():Bool
+	{
+        if (this.parent != null)
+		{
+            if (this.transformedPosition == null)
+			{
+                this.transformedPosition = Vector3.Zero();
+            }
+
+            Vector3.TransformCoordinatesToRef(this.position, this.parent.getWorldMatrix(), this.transformedPosition);
+            return true;
+        }
+
+        return false;
+    }
+	
 	override public function transferToEffect(effect:Effect, uniformName0:String = "", uniformName1:String = ""):Void
 	{
-        var normalizeDirection:Vector3;
-        
         if (this.parent != null)
 		{
             if (this._transformedDirection == null)
 			{
                 this._transformedDirection = Vector3.Zero();
             }
-            if (this._transformedPosition == null) 
-			{
-                this._transformedPosition = Vector3.Zero();
-            }
             
-            var parentWorldMatrix:Matrix = this.parent.getWorldMatrix();
+			this.computeTransformedPosition();
+            
+            Vector3.TransformNormalToRef(this.direction, parent.getWorldMatrix(), this._transformedDirection);
 
-            Vector3.TransformCoordinatesToRef(this.position, parentWorldMatrix, this._transformedPosition);
-            Vector3.TransformNormalToRef(this.direction, parentWorldMatrix, this._transformedDirection);
-
-            effect.setFloat4(uniformName0, this._transformedPosition.x, this._transformedPosition.y, this._transformedPosition.z, this.exponent);
+            effect.setFloat4(uniformName0, this.transformedPosition.x, this.transformedPosition.y, this.transformedPosition.z, this.exponent);
             
 			this._normalizeDirection.copyFrom(this._transformedDirection);
 			this._normalizeDirection.normalize();

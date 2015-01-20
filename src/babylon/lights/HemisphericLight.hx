@@ -25,11 +25,6 @@ class HemisphericLight extends Light
 		this._normalizeDirection = new Vector3();
 	}
 	
-	override private function get_shadowGenerator():ShadowGenerator 
-	{
-        return null;
-    }
-	
 	override public function transferToEffect(effect:Effect, uniformName0:String = "", uniformName1:String = ""):Void
 	{
 		_normalizeDirection.copyFrom(this.direction);

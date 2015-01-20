@@ -2,6 +2,7 @@ package babylon.lights.shadows;
 
 import babylon.Engine;
 import babylon.lights.DirectionalLight;
+import babylon.lights.IShadowLight;
 import babylon.materials.Effect;
 import babylon.materials.Material;
 import babylon.materials.textures.BaseTexture;
@@ -28,7 +29,7 @@ class ShadowGenerator
 	
 	public var filter:Int = ShadowGenerator.FILTER_VARIANCESHADOWMAP;
 	
-	private var _light:DirectionalLight;
+	private var _light:IShadowLight;
 	private var _scene:Scene;
 	
 	private var _shadowMap:RenderTargetTexture;
@@ -47,7 +48,7 @@ class ShadowGenerator
 	private var _cachedDirection:Vector3;
 	private var _targetPosition:Vector3;
 	
-	public function new(mapSize:Int, light:DirectionalLight)
+	public function new(mapSize:Int, light:IShadowLight)
 	{
 		this._light = light;
         this._scene = light.getScene();
@@ -274,7 +275,7 @@ class ShadowGenerator
         return this._shadowMap;
     }
 	
-	public function getLight():DirectionalLight
+	public function getLight():IShadowLight
 	{
         return this._light;
     }
@@ -285,9 +286,9 @@ class ShadowGenerator
         var lightPosition:Vector3 = _light.position;
         var lightDirection:Vector3 = _light.direction;
         
-        if (_light._computeTransformedPosition()) 
+        if (_light.computeTransformedPosition()) 
 		{
-            lightPosition = _light._transformedPosition;
+            lightPosition = _light.transformedPosition;
         }
 
         if (!lightPosition.equals(this._cachedPosition) || 

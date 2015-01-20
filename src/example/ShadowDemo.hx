@@ -3,6 +3,7 @@ package example;
 import babylon.cameras.ArcRotateCamera;
 import babylon.lights.DirectionalLight;
 import babylon.lights.shadows.ShadowGenerator;
+import babylon.lights.SpotLight;
 import babylon.materials.StandardMaterial;
 import babylon.materials.textures.Texture;
 import babylon.math.Color3;
@@ -34,8 +35,8 @@ class ShadowDemo extends BaseDemo
 		Std.instance(lightSphere.material,StandardMaterial).emissiveColor = new Color3(1, 1, 0);
 
 		// light2
-		var light2 = new DirectionalLight("dir02", new Vector3(-1, -2, -1), scene);
-		light2.position = new Vector3(30, 40, 20);
+		var light2 = new SpotLight("spotLight02", new Vector3(30, 40, 20), new Vector3(-1, -2, -1), 60, 1, scene);
+		//light2.position = new Vector3(30, 40, 20);
 		light2.intensity = 0.5;
 
 		var lightSphere2 = MeshHelper.CreateSphere("sphere", 10, 2, scene);
