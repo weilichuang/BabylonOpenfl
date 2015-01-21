@@ -11,7 +11,7 @@ haxelib install hxtemplo
 haxelib install hxargs
 haxelib install markdown
 
-than run command:
+then run command:
 
 openfl build html5 -xml
-haxelib run dox -i bin/html5/ -o Documentation/ -in babylon -in com
+haxelib run dox -i bin/html5/ -o Documentation/ -in babylon -in com -ex com.yagp --title BabylonOpenfl

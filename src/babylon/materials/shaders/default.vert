@@ -78,7 +78,7 @@ uniform float pointSize;
 #endif
 
 // Output
-varying vec3 vPositionW;
+varying vec3 vPositionW; //worldPosition
 varying vec3 vNormalW;
 
 #ifdef VERTEXCOLOR

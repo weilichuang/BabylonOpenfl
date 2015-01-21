@@ -38,7 +38,7 @@
     <option noInlineOnDebug="True" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="False" />
-    <option additional="--remap flash:openfl&#xA;#--macro keep(&quot;example.WindowCafeSceneDemo&quot;)&#xA;-debug " />
+    <option additional="--remap flash:openfl&#xA;#--macro keep(&quot;example.FogDemo&quot;)&#xA;-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
