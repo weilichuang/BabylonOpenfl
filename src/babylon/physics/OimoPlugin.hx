@@ -350,7 +350,7 @@ class OimoPlugin implements IPhysicsEnginePlugin
 
 				var center:Vector3 = mesh.getBoundingInfo().boundingBox.center;
 				body.setPosition(center.x, center.y, center.z);
-				body.setOrientation(mesh.rotation.x, mesh.rotation.y, mesh.rotation.z);
+				body.setRotation(mesh.rotation.x, mesh.rotation.y, mesh.rotation.z);
 				return;
 			}
 			// Case where the parent has been updated
@@ -364,7 +364,7 @@ class OimoPlugin implements IPhysicsEnginePlugin
 
 				body = registeredMesh.body.body;
 				body.setPosition(absolutePosition.x, absolutePosition.y, absolutePosition.z);
-				body.setOrientation(absoluteRotation.x, absoluteRotation.y, absoluteRotation.z);
+				body.setRotation(absoluteRotation.x, absoluteRotation.y, absoluteRotation.z);
 				return;
 			}
 		}

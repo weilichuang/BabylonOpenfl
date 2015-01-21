@@ -16,6 +16,39 @@ class ActionManager
 	public static inline var OnIntersectionExitTrigger:Int = 9;
 	public static inline var OnKeyDownTrigger:Int = 10;
     public static inline var OnKeyUpTrigger:Int = 11;
+	
+	public static function getTriggerByName(name:String):Int
+	{
+		switch(name)
+		{
+			case "NothingTrigger":
+				return 0;
+			case "OnPickTrigger":
+				return 1;
+			case "OnLeftPickTrigger":
+				return 2;
+			case "OnRightPickTrigger":
+				return 3;
+			case "OnCenterPickTrigger":
+				return 4;
+			case "OnPointerOverTrigger":
+				return 5;
+			case "OnPointerOutTrigger":
+				return 6;
+			case "OnEveryFrameTrigger":
+				return 7;
+			case "OnIntersectionEnterTrigger":
+				return 8;
+			case "OnIntersectionExitTrigger":
+				return 9;
+			case "OnKeyDownTrigger":
+				return 10;
+			case "OnKeyUpTrigger":
+				return 11;
+			default:
+				return -1;
+		}
+	}
 		
 	private var _scene:Scene;
 	

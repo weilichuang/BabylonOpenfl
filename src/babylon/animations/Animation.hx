@@ -2,6 +2,7 @@ package babylon.animations;
 
 import babylon.animations.Animation.BabylonFrame;
 import babylon.math.Color3;
+import babylon.math.Matrix;
 import babylon.math.Quaternion;
 import babylon.math.Vector2;
 import babylon.math.Vector3;
@@ -188,6 +189,27 @@ class Animation
 		return Color3.Lerp(startValue, endValue, gradient);
     }
 	
+	public function matrixInterpolate(startValue: Matrix, endValue: Matrix, gradient: Float): Matrix 
+	{
+		var startScale:Vector3 = new Vector3(0, 0, 0);
+		var startRotation:Quaternion = new Quaternion();
+		var startTranslation:Vector3 = new Vector3(0, 0, 0);
+		startValue.decompose(startScale, startRotation, startTranslation);
+
+		var endScale:Vector3 = new Vector3(0, 0, 0);
+		var endRotation:Quaternion = new Quaternion();
+		var endTranslation:Vector3 = new Vector3(0, 0, 0);
+		endValue.decompose(endScale, endRotation, endTranslation);
+
+		var resultScale:Vector3 = this.vector3Interpolate(startScale, endScale, gradient);
+		var resultRotation:Quaternion = this.quaternionInterpolate(startRotation, endRotation, gradient);
+		var resultTranslation:Vector3 = this.vector3Interpolate(startTranslation, endTranslation, gradient);
+
+		var result:Matrix = Matrix.Compose(resultScale, resultRotation, resultTranslation);
+
+		return result;
+	}
+	
 	public function clone():Animation 
 	{
         var clone = new Animation(this.name, this.targetPropertyPath.join("."), this.framePerSecond, this.dataType, this.loopMode);
@@ -303,9 +325,10 @@ class Animation
                         switch (loopMode)
 						{
                             case Animation.ANIMATIONLOOPMODE_CYCLE, 
-								Animation.ANIMATIONLOOPMODE_CONSTANT, 
-								Animation.ANIMATIONLOOPMODE_RELATIVE:
-                                return startValue.clone();
+								Animation.ANIMATIONLOOPMODE_CONSTANT:
+									return matrixInterpolate(cast startValue, cast endValue, gradient);
+							case Animation.ANIMATIONLOOPMODE_RELATIVE:
+									return startValue.clone();
                         }
                 }
             }

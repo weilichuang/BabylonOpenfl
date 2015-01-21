@@ -1,17 +1,7 @@
 package com.element.oimo.math;
 
-/**
- * ...
- * @author 
- */
 class MathUtil
 {
-
-	public function new() 
-	{
-		
-	}
-	
 	public static inline function dotProduct(ax:Float, ay:Float, az:Float, bx:Float, by:Float, bz:Float):Float
 	{
 		return ax * bx + ay * by + az * bz;

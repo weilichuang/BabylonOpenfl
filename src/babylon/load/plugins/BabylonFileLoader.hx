@@ -1,5 +1,9 @@
 package babylon.load.plugins;
 
+import babylon.actions.Action;
+import babylon.actions.ActionManager;
+import babylon.actions.Condition;
+import babylon.actions.ValueCondition;
 import babylon.animations.Animation;
 import babylon.bones.Bone;
 import babylon.bones.Skeleton;
@@ -35,6 +39,7 @@ import babylon.math.Matrix;
 import babylon.math.Quaternion;
 import babylon.math.Vector2;
 import babylon.math.Vector3;
+import babylon.math.Vector4;
 import babylon.mesh.AbstractMesh;
 import babylon.mesh.Geometry;
 import babylon.mesh.InstancedMesh;
@@ -947,6 +952,12 @@ class BabylonFileLoader implements ISceneLoaderPlugin
             mesh.hasVertexAlpha = parsedMesh.hasVertexAlpha;
         }
 		
+		// Actions
+        if (parsedMesh.actions != null)
+		{
+            mesh._waitingActions = parsedMesh.actions;
+        }
+		
         // Geometry
         if (StringUtil.isValid(parsedMesh.delayLoadingFile))
 		{
@@ -1095,6 +1106,139 @@ class BabylonFileLoader implements ISceneLoaderPlugin
         }
 
         return mesh;
+    }
+	
+	//TODO need test
+	private function parseActions(parsedActions:Dynamic, object:AbstractMesh, scene: Scene):Void
+	{
+        object.actionManager = new ActionManager(scene);
+		
+		function parseParameter(name:String, value:String, target:Dynamic, propertyPath:String):Dynamic
+		{
+			var split:Array<String> = value.split(",");
+
+            if (split.length == 1) 
+			{
+                var num:Float = Std.parseFloat(split[0]);
+                if (Math.isNaN(num))
+                    return split[0];
+                else
+                    return num;
+            }
+
+            var effectiveTarget:Array<String> = propertyPath.split(".");
+            for (i in 0...effectiveTarget.length) 
+			{
+                target = Reflect.field(target, effectiveTarget[i]);
+            }
+
+            if (split.length == 3)
+			{
+                var values:Array<Float> = [Std.parseFloat(split[0]), Std.parseFloat(split[1]), Std.parseFloat(split[2])];
+                if (Std.is(target,Vector3))
+                    return Vector3.FromArray(values);
+                else
+                    return Color3.FromArray(values);
+            }
+            else if (split.length == 4)
+			{
+                var values = [Std.parseFloat(split[0]), Std.parseFloat(split[1]), Std.parseFloat(split[2]), Std.parseFloat(split[3])];
+                if (Std.is(target,Vector4))
+                    return Vector4.FromArray(values);
+                else
+                    return Color4.FromArray(values);
+            }
+			
+			return null;
+		}
+		
+        // traverse graph per trigger
+        function traverse(parsedAction:Dynamic, trigger:Dynamic, condition:Condition, action:Action, actionManager:ActionManager):Void
+		{
+            var parameters:Array<Dynamic> = [];
+			var target: Dynamic = null;
+            var propertyPath: Dynamic = null;
+
+            // Parameters
+            if (parsedAction.type == 2)
+                parameters.push(actionManager);
+            else
+                parameters.push(trigger);
+
+			var properties:Array<Dynamic> = parsedAction.properties;
+            for (i in 0...properties.length) 
+			{
+				var property:Dynamic = properties[i];
+				
+                var value:Dynamic = property.value;
+                if (property.name == "target")
+				{
+                    value = scene.getNodeByName(value);
+					target = value;
+                }
+                else if (property.name != "propertyPath") 
+				{
+                    if (value == "false" || value == "true")
+                        value = (value == "true");
+                    else if (parsedAction.type == 2 && property.name == "operator")
+                        value = ValueCondition.getConditionByName(value);
+                    else
+                        value = parseParameter(property.name, value, target, propertyPath);
+                }
+				else
+				{
+					propertyPath = value;
+				}
+                parameters.push(value);
+            }
+			
+            parameters.push(condition);
+
+            // If interpolate value action
+            if (parsedAction.name == "InterpolateValueAction") 
+			{
+                var param = parameters[parameters.length - 2];
+                parameters[parameters.length - 1] = param;
+                parameters[parameters.length - 2] = condition;
+            }
+
+            // Action or condition
+            var newAction:Dynamic = Type.createInstance(Type.resolveClass(parsedActions.name), parameters);
+            if (Std.is(newAction, Condition))
+			{
+                condition = newAction;
+                newAction = action;
+            } 
+			else 
+			{
+                condition = null;
+                if (action != null)
+                    action.then(newAction);
+                else
+                    actionManager.registerAction(newAction);
+            }
+
+            for (i in 0...parsedAction.children.length)
+                traverse(parsedAction.children[i], trigger, condition, newAction, actionManager);
+        }
+
+        // triggers
+        for (i in 0...parsedActions.children.length)
+		{
+            var triggerParams: Dynamic;
+            var trigger:Dynamic = parsedActions.children[i];
+
+            if (trigger.properties.length > 0)
+			{
+                triggerParams = { trigger: ActionManager.getTriggerByName(trigger.name), 
+									parameter: scene.getMeshByName(trigger.properties[0].value) };
+            }
+            else
+                triggerParams = ActionManager.getTriggerByName(trigger.name);
+
+            for (j in 0...trigger.children.length)
+                traverse(trigger.children[j], triggerParams, null, null, object.actionManager);
+        }
     }
 	
 	private function isDescendantOf(mesh:Dynamic, names:Dynamic, hierarchyIds:Array<String>):Bool
@@ -1743,6 +1887,12 @@ class BabylonFileLoader implements ISceneLoaderPlugin
 			{
 				mesh.parent = scene.getLastEntryByID(mesh._waitingParentId);
 				mesh._waitingParentId = null;
+			}
+			
+			if (mesh._waitingActions != null)
+			{
+				parseActions(mesh._waitingActions, mesh, scene);
+				mesh._waitingActions = null;
 			}
 		}
 		

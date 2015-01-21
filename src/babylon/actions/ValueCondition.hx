@@ -6,6 +6,23 @@ class ValueCondition extends Condition
 	public static inline var IsDifferent:Int = 1;
 	public static inline var IsGreater:Int = 2;
 	public static inline var IsLesser:Int = 3;
+	
+	public static function getConditionByName(name:String):Int
+	{
+		switch(name)
+		{
+			case "IsEqual":
+				return 0;
+			case "IsDifferent":
+				return 1;
+			case "IsGreater":
+				return 2;
+			case "IsLesser":
+				return 3;
+			default:
+				return -1;
+		}
+	}
 
 	private var _target: Dynamic;
 	private var _property: String;

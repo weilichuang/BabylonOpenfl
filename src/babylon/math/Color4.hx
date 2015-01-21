@@ -40,6 +40,14 @@ class Color4
         this.b = b;
         this.a = a;
 	}
+	
+	public inline function copyFrom(source:Color4):Void  
+	{
+		this.r = source.r;
+        this.g = source.g;
+        this.b = source.b;
+        this.a = source.a;
+	}
 
 	public inline function addInPlace(right:Color4):Void
 	{

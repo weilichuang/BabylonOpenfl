@@ -1,10 +1,6 @@
 package babylon.math;
 import openfl.utils.Float32Array;
 
-/**
- * ...
- * 
- */
 class Vector4
 {
 	public var x:Float;
@@ -35,7 +31,7 @@ class Vector4
 		return result;
 	}
 
-	public function toArray(array: Array<Float>, index: Float = 0): Void
+	public function toArray(array: Array<Float>, index: Int = 0): Void
 	{
 		array[index] = this.x;
 		array[index + 1] = this.y;
@@ -130,7 +126,7 @@ class Vector4
 
 	public function equals(otherVector: Vector4): Bool 
 	{
-		return otherVector && this.x == otherVector.x && this.y == otherVector.y && this.z == otherVector.z && this.w == otherVector.w;
+		return otherVector != null && this.x == otherVector.x && this.y == otherVector.y && this.z == otherVector.z && this.w == otherVector.w;
 	}
 
 	public function equalsWithEpsilon(otherVector: Vector4): Bool

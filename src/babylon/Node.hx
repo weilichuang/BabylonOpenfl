@@ -27,8 +27,9 @@ class Node
 	
 	private var _worldMatrix:Matrix;
 	
+	@:dox(hide)
 	public var _waitingParentId: String;
-
+	
 	public function new(name:String,scene:Scene) 
 	{
 		this.name = name;

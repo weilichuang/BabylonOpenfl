@@ -179,11 +179,11 @@ class DepthCullingState
 		// Depth test
 		if (_isDepthTestDirty)
 		{
-			if (depthTest == true) 
+			if (depthTest) 
 			{
 				GL.enable(GL.DEPTH_TEST);
 			} 
-			else if (depthTest == false) 
+			else
 			{
 				GL.disable(GL.DEPTH_TEST);
 			}

@@ -37,7 +37,6 @@ import openfl.system.Capabilities;
 import openfl.utils.Float32Array;
 import openfl.utils.Int16Array;
 import openfl.utils.Int32Array;
-import openfl.utils.UInt8Array;
 
 class EngineCapabilities 
 {
@@ -79,6 +78,9 @@ class Engine
 	
 	public var cullBackFaces:Bool = true;
 	
+	//public var isFullscreen:Bool = false;
+	public var isPointerLock:Bool = false;
+	
 	private var _hardwareScalingLevel:Int;
 	private var _caps:EngineCapabilities;
 	
@@ -112,10 +114,7 @@ class Engine
 	
 	private var _stage:Stage;
 
-	public var _aspectRatio:Float;
-	
-	//public var isFullscreen:Bool;
-	public var isPointerLock:Bool;
+	private var _aspectRatio:Float;
 	
 	private var _uintIndicesCurrentlySet:Bool = false;
 	
@@ -138,11 +137,6 @@ class Engine
 			throw("GL not supported");
 		}
 
-        // Options
-        this.cullBackFaces = true;
-
-		this._runningLoop = false;
-
         // Textures
         this._workingContext = new OpenGLView();
 		_stage.addChild(this._workingContext);
@@ -150,7 +144,7 @@ class Engine
 		this._workingContext.addEventListener(OpenGLView.CONTEXT_RESTORED, onContextRestored);
 		
         // Viewport
-        this._hardwareScalingLevel = Std.int(1.0 / (Capabilities.pixelAspectRatio));
+        this._hardwareScalingLevel = Std.int(1.0 / Capabilities.pixelAspectRatio);
         this.resize();
 
         this.initEngineCaps();
@@ -169,9 +163,6 @@ class Engine
 		
 		_audioEngine = new AudioEngine();
 		
-        // Fullscreen
-        //this.isFullscreen = false;
-        
 		// TODO - remove
         /*var onFullscreenChange = function () {
             if (document.fullscreen !== undefined) {
@@ -256,7 +247,7 @@ class Engine
                 sum += previousFramesDuration[i + 1] - previousFramesDuration[i];
             }
 
-            fps = 1000.0 / (sum / count);
+            fps = 1000.0 * count / sum;
         }
     }
 	
@@ -430,7 +421,7 @@ class Engine
         this._runningLoop = false;
     }
 
-    public function _renderLoop(rect:Rectangle):Void
+    private function _renderLoop(rect:Rectangle):Void
 	{
 		//var shouldRender:Bool = true;
 		//if (!this.renderEvenInBackground && 

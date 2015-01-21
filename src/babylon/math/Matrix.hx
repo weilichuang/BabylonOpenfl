@@ -282,6 +282,59 @@ class Matrix
 			array[offset + index] = m[index];
 		}
 	}
+	
+	public function decompose(scale: Vector3, rotation: Quaternion, translation: Vector3):Bool
+	{
+		translation.x = this.m[12];
+		translation.y = this.m[13];
+		translation.z = this.m[14];
+
+		var xs = FastMath.Sign(this.m[0] * this.m[1] * this.m[2] * this.m[3]) < 0 ? -1 : 1;
+		var ys = FastMath.Sign(this.m[4] * this.m[5] * this.m[6] * this.m[7]) < 0 ? -1 : 1;
+		var zs = FastMath.Sign(this.m[8] * this.m[9] * this.m[10] * this.m[11]) < 0 ? -1 : 1;
+
+		scale.x = xs * Math.sqrt(this.m[0] * this.m[0] + this.m[1] * this.m[1] + this.m[2] * this.m[2]);
+		scale.y = ys * Math.sqrt(this.m[4] * this.m[4] + this.m[5] * this.m[5] + this.m[6] * this.m[6]);
+		scale.z = zs * Math.sqrt(this.m[8] * this.m[8] + this.m[9] * this.m[9] + this.m[10] * this.m[10]);
+
+		if (scale.x == 0 || scale.y == 0 || scale.z == 0)
+		{
+			rotation.x = 0;
+			rotation.y = 0;
+			rotation.z = 0;
+			rotation.w = 1;
+			return false;
+		}
+		
+		var sx:Float = 1 / scale.x;
+		var sy:Float = 1 / scale.y;
+		var sz:Float = 1 / scale.z;
+
+		var rotationMatrix = Matrix.FromValues(this.m[0] * sx, this.m[1] * sx, this.m[2] * sx, 0,
+			this.m[4] * sy, this.m[5] * sy, this.m[6] * sy, 0,
+			this.m[8] * sz, this.m[9] * sz, this.m[10] * sz, 0,
+			0, 0, 0, 1);
+
+		rotation.fromRotationMatrix(rotationMatrix);
+
+		return true;
+	}
+	
+	public static function Compose(scale: Vector3, rotation: Quaternion, translation: Vector3): Matrix 
+	{
+		var result:Matrix = Matrix.FromValues(scale.x, 0, 0, 0,
+			0, scale.y, 0, 0,
+			0, 0, scale.z, 0,
+			0, 0, 0, 1);
+
+		var rotationMatrix:Matrix = new Matrix();
+		rotation.toRotationMatrix(rotationMatrix);
+		result = result.multiply(rotationMatrix);
+
+		result.setTranslation(translation);
+
+		return result;
+	}
 
 	public static function FromArray(array:Array<Float>, offset:Int = 0):Matrix 
 	{

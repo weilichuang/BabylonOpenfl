@@ -24,4 +24,17 @@ class Particle
         this.colorStep = new Color4(0, 0, 0, 0);
 	}
 	
+	public function copyTo(other: Particle):Void
+	{
+		other.position.copyFrom(this.position);
+		other.direction.copyFrom(this.direction);
+		other.color.copyFrom(this.color);
+		other.colorStep.copyFrom(this.colorStep);
+		other.lifeTime = this.lifeTime;
+		other.age = this.age;
+		other.size = this.size;
+		other.angle = this.angle;
+		other.angularSpeed = this.angularSpeed;
+	}
+	
 }

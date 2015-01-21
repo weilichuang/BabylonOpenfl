@@ -695,6 +695,34 @@ class RigidBody
         this.angularVelocity.setTo(0,0,0);
     }
 	
+	public function setRotation(rotX:Float, rotY:Float, rotZ:Float):Void
+	{ 
+        this.newOrientation = this.rotationVectToQuad(rotX,rotY,rotZ);
+        this.controlRot = true;
+    }
+	
+	public function rotationVectToQuad(rotX:Float, rotY:Float, rotZ:Float):Quaternion
+	{
+        var r = MathUtil.EulerToAxis( rotX * OimoPhysics.DEGS_PER_RAD, rotY * OimoPhysics.DEGS_PER_RAD, rotZ * OimoPhysics.DEGS_PER_RAD );
+        return this.rotationAxisToQuad(r[0], r[1], r[2], r[3]);
+    }
+	
+	// in radian
+	public function rotationAxisToQuad(rad:Float, ax:Float, ay:Float, az:Float):Quaternion
+	{ 
+        var len:Float = ax * ax + ay * ay + az * az;
+        if (len > 0)
+		{
+            len = 1 / Math.sqrt(len);
+            ax *= len;
+            ay *= len;
+            az *= len;
+        }
+        var sin:Float = Math.sin(rad * 0.5);
+        var cos:Float = Math.cos(rad * 0.5);
+        return new Quaternion(cos, sin * ax, sin * ay, sin * az);
+    }
+	
 	public function setQuaternion(x:Float, y:Float, z:Float, w:Float):Void
 	{ 
         this.newOrientation.setTo(x, y, z, w);

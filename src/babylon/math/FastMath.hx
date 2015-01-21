@@ -99,4 +99,14 @@ class FastMath
 			return value;
 		}
 	}
+	
+	// Returns -1 when value is a negative number and
+	// +1 when value is a positive number. 
+	public static function Sign(value: Float): Float
+	{
+		if (value == 0 || Math.isNaN(value))
+			return value;
+
+		return value > 0 ? 1 : -1;
+	}
 }

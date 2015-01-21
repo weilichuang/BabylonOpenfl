@@ -251,6 +251,11 @@ class Quaternion
 		return result;
 	}
 	
+	public static function Identity(): Quaternion 
+	{
+		return new Quaternion(0, 0, 0, 1);
+	}
+	
 	public static function Inverse(q: Quaternion): Quaternion
 	{
 		return new Quaternion(-q.x, -q.y, -q.z, q.w);

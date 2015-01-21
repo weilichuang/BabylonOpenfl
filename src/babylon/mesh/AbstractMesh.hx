@@ -147,6 +147,9 @@ class AbstractMesh extends Node implements IDispose
 	private var _isDisposed:Bool = false;
 	
 	private var _onAfterWorldMatrixUpdate:Array<AbstractMesh->Void> = new Array<AbstractMesh->Void>();
+	
+	@:dox(hide)
+	public var _waitingActions: Dynamic;
 
 	public function new(name:String, scene:Scene) 
 	{

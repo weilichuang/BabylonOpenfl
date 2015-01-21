@@ -2,9 +2,9 @@ package babylon.math;
 
 class Color3
 {
-	public static inline function FromArray(array:Array<Float>):Color3
+	public static inline function FromArray(array:Array<Float>, offset:Int = 0):Color3
 	{
-		return new Color3(array[0], array[1], array[2]);
+		return new Color3(array[offset], array[offset + 1], array[offset + 2]);
 	}
 	
 	public static inline function FromInts(r:Float, g:Float, b:Float):Color3

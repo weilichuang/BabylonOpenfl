@@ -224,9 +224,11 @@ class ParticleSystem implements IDispose
 				var particle:Particle = particles[index];						
 				particle.age += _scaledUpdateSpeed;
 				
+				
 				if (particle.age >= particle.lifeTime) 
 				{
-					_stockParticles.push(particles.splice(index, 1)[0]);
+					// Recycle by swapping with last particle
+					this.recycleParticle(particle);
 					index--;
 					continue;
 				}
@@ -247,6 +249,17 @@ class ParticleSystem implements IDispose
 					particle.direction.addInPlace(this._scaledGravity);
 				}
 			}
+		}
+	}
+	
+	public function recycleParticle(particle: Particle): Void
+	{
+		var lastParticle:Particle = this.particles.pop();
+
+		if (lastParticle != particle)
+		{
+			lastParticle.copyTo(particle);
+			this._stockParticles.push(lastParticle);
 		}
 	}
 	

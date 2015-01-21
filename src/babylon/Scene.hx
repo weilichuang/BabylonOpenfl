@@ -992,6 +992,23 @@ class Scene
         return null;
     }
 	
+	public function getNodeByName(name: String): Node 
+	{
+		var mesh = this.getMeshByName(name);
+		if (mesh != null)
+		{
+			return mesh;
+		}
+
+		var light = this.getLightByName(name);
+		if (light != null)
+		{
+			return light;
+		}
+
+		return this.getCameraByName(name);
+	}
+	
 	public function getMeshByName(name:String):AbstractMesh
 	{
 		for (index in 0...meshes.length) 
