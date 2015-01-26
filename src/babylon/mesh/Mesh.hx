@@ -374,7 +374,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 
 			var scene:Scene = this.getScene();
 
-			new Geometry(Geometry.RandomId(), scene, vertexData, updatable, this);
+			new Geometry(FastMath.generateUUID(), scene, vertexData, updatable, this);
 		}
 		else
 		{
@@ -425,7 +425,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 			return;
 		}
 		
-		var geometry:Geometry = this._geometry.copy(Geometry.RandomId());
+		var geometry:Geometry = this._geometry.copy(FastMath.generateUUID());
 		geometry.applyToMesh(this);
 	}
 	
@@ -438,7 +438,7 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData
 
 			var scene = this.getScene();
 
-			new Geometry(Geometry.RandomId(), scene, vertexData, false, this);
+			new Geometry(FastMath.generateUUID(), scene, vertexData, false, this);
 		}
 		else
 		{

@@ -2,6 +2,7 @@ package babylon.mesh;
 import babylon.culling.BoundingInfo;
 import babylon.math.Vector3;
 import babylon.tools.Tools;
+import babylon.utils.Logger;
 import haxe.Json;
 
 using StringTools;
@@ -525,25 +526,5 @@ class Geometry implements IGetSetVerticesData
 		}
 
 		return geometry.copy(id);
-	}
-
-	// from http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/2117523#answer-2117523
-	// be aware Math.random() could cause collisions
-	private static var RANDOM_ID:Int = 0;
-	public static function RandomId(): String 
-	{
-		//var s = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-		//var regExp = ~/[xy]/g;
-		//return regExp.map(s, function(regExp:EReg):String {
-			//var c = regExp.matched(1);
-			//var r = Std.int(Math.random() * 16) | 0;
-			//var v = c == 'x' ? r : (r & 0x3 | 0x8);
-			//return v.hex();
-		//});
-		//return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(~/[xy]/g, function(c):String {
-			//var r = Std.int(Math.random() * 16) | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-			//return v.toString(16);
-		//});
-		return "random_geometry_id" + (RANDOM_ID++);
 	}
 }

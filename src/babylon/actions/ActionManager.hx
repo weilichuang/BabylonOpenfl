@@ -2,6 +2,10 @@ package babylon.actions;
 import babylon.Scene;
 import babylon.utils.Logger;
 
+/**
+ * Action Manager manages all events to be triggered on a given mesh or the global scene.
+ * A single scene can have many Action Managers to handle predefined actions on specific meshes.
+ */
 class ActionManager
 {
 	public static inline var NothingTrigger:Int = 0;
@@ -49,10 +53,23 @@ class ActionManager
 				return -1;
 		}
 	}
-		
-	private var _scene:Scene;
+	
+	/**
+	 * Does this action manager has pointer triggers
+	 * @return {boolean} whether or not it has pointer triggers
+	 */
+	public var hasPointerTriggers(get, null):Bool;
+	
+	/**
+	 * Does this action manager has pick triggers
+	 * @return {boolean} whether or not it has pick triggers
+	 */
+	public var hasPickTriggers(get, null):Bool;
+	
 	
 	public var actions:Array<Action>;
+		
+	private var _scene:Scene;
 	
 	public function new(scene:Scene) 
 	{
@@ -77,6 +94,11 @@ class ActionManager
 		return this._scene;
 	}
 	
+	/**
+	 * Does this action manager handles actions of any of the given triggers
+	 * @param triggers {Array<Int>} the triggers to be tested
+	 * @return {Bool} whether one (or more) of the triggers is handeled 
+	 */
 	public function hasSpecificTriggers(triggers: Array<Int>): Bool 
 	{
 		for (index in 0...this.actions.length)
@@ -91,41 +113,12 @@ class ActionManager
 
 		return false;
 	}
-	
-	public var hasPointerTriggers(get, null):Bool;
-	private function get_hasPointerTriggers(): Bool 
-	{
-		for (index in 0...this.actions.length)
-		{
-			var action = this.actions[index];
 
-			if (action.trigger >= ActionManager.OnPickTrigger && 
-				action.trigger <= ActionManager.OnPointerOutTrigger)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public var hasPickTriggers(get, null):Bool;
-	private function get_hasPickTriggers(): Bool
-	{
-		for (index in 0...this.actions.length)
-		{
-			var action = this.actions[index];
-
-			if (action.trigger >= ActionManager.OnPickTrigger && 
-				action.trigger <= ActionManager.OnCenterPickTrigger) 
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-	
+	/**
+	 * Registers an action to this action manager
+	 * @param action {BABYLON.Action} the action to be registered
+	 * @return {BABYLON.Action} the action amended (prepared) after registration
+	 */
 	public function registerAction(action:Action):Action
 	{
 		if (action.trigger == ActionManager.OnEveryFrameTrigger) 
@@ -159,6 +152,7 @@ class ActionManager
 		}
 	}
 	
+	@:dox(hide)
 	public function _getEffectiveTarget(target: Dynamic, propertyPath: String): Dynamic
 	{
 		var properties = propertyPath.split(".");
@@ -171,6 +165,7 @@ class ActionManager
 		return target;
 	}
 
+	@:dox(hide)
 	public function _getProperty(propertyPath: String): String
 	{
 		var properties = propertyPath.split(".");
@@ -178,4 +173,36 @@ class ActionManager
 		return properties[properties.length - 1];
 	}
 	
+	private function get_hasPointerTriggers(): Bool 
+	{
+		for (index in 0...this.actions.length)
+		{
+			var action = this.actions[index];
+
+			if (action.trigger >= ActionManager.OnPickTrigger && 
+				action.trigger <= ActionManager.OnPointerOutTrigger)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	
+	private function get_hasPickTriggers(): Bool
+	{
+		for (index in 0...this.actions.length)
+		{
+			var action = this.actions[index];
+
+			if (action.trigger >= ActionManager.OnPickTrigger && 
+				action.trigger <= ActionManager.OnCenterPickTrigger) 
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

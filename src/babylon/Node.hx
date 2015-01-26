@@ -4,6 +4,9 @@ import babylon.animations.Animation;
 import babylon.math.Matrix;
 import babylon.math.Vector3;
 
+/**
+ * Node is the basic class for all scene objects (Mesh, Light Camera).
+ */
 class Node 
 {
 	public var position:Vector3;
@@ -30,7 +33,12 @@ class Node
 	@:dox(hide)
 	public var _waitingParentId: String;
 	
-	public function new(name:String,scene:Scene) 
+	/**
+	 * @constructor
+	 * @param {string} name - the name and id to be given to this node
+	 * @param {BABYLON.Scene} the scene this node will be added to
+	 */
+	public function new(name:String, scene:Scene) 
 	{
 		this.name = name;
 		this.id = name;

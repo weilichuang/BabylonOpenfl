@@ -1,5 +1,6 @@
 package babylon;
 
+import babylon.actions.Action;
 import babylon.actions.ActionEvent;
 import babylon.actions.ActionManager;
 import babylon.animations.Animatable;
@@ -51,6 +52,9 @@ import openfl.events.MouseEvent;
 import openfl.geom.Rectangle;
 import openfl.Lib;
 
+/**
+ * Represents a scene to be rendered by the engine.
+ */
 class Scene
 {
 	public static var MinDeltaTime:Float = 1.0;
@@ -59,8 +63,20 @@ class Scene
 	public var autoClear:Bool = true;
 	public var clearColor:Color3;
 	public var ambientColor:Color3;
+	
+	/**
+	 * A function to be executed before rendering this scene
+	 */
 	public var beforeRender:Void->Void;
+	
+	/**
+	* A function to be executed after rendering this scene
+	*/
 	public var afterRender:Void->Void;
+	
+	/**
+	 * A function to be executed when this scene is disposed.
+	 */
 	public var onDispose:Void->Void;
 	
 	public var beforeCameraRender:Camera->Void;
@@ -1406,7 +1422,7 @@ class Scene
 
 			for (actionIndex in 0...sourceMesh.actionManager.actions.length)
 			{
-				var action = sourceMesh.actionManager.actions[actionIndex];
+				var action:Action = sourceMesh.actionManager.actions[actionIndex];
 				var actionManager:ActionManager = sourceMesh.actionManager;
 
 				if (action.trigger == ActionManager.OnIntersectionEnterTrigger || 
@@ -1415,7 +1431,7 @@ class Scene
 					var otherMesh:AbstractMesh = action.getTriggerParameter();
 
 					var areIntersecting:Bool = otherMesh.intersectsMesh(sourceMesh, false);
-					var currentIntersectionInProgress = sourceMesh._intersectionsInProgress.indexOf(otherMesh);
+					var currentIntersectionInProgress:Int = sourceMesh._intersectionsInProgress.indexOf(otherMesh);
 
 					if (areIntersecting && currentIntersectionInProgress == -1 && 
 						action.trigger == ActionManager.OnIntersectionEnterTrigger )
@@ -1429,12 +1445,17 @@ class Scene
 					{
 						action._executeCurrent(ActionEvent.CreateNew(sourceMesh));
 
-						var indexOfOther = sourceMesh._intersectionsInProgress.indexOf(otherMesh);
-
+						var indexOfOther:Int = sourceMesh._intersectionsInProgress.indexOf(otherMesh);
 						if (indexOfOther > -1) 
 						{
 							sourceMesh._intersectionsInProgress.splice(indexOfOther, 1);
 						}
+					}
+					else if (areIntersecting && currentIntersectionInProgress == -1 && 
+							action.trigger == ActionManager.OnIntersectionExitTrigger) 
+					{
+
+						sourceMesh._intersectionsInProgress.push(otherMesh);
 					}
 				}
 			}                

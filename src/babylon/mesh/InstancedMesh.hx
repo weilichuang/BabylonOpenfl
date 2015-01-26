@@ -152,9 +152,13 @@ class InstancedMesh extends AbstractMesh
 	public function _syncSubMeshes(): Void
 	{
 		releaseSubMeshes();
-		for (index in 0..._sourceMesh.subMeshes.length)
+		
+		if (_sourceMesh.subMeshes != null)
 		{
-			_sourceMesh.subMeshes[index].clone(this, _sourceMesh);
+			for (index in 0..._sourceMesh.subMeshes.length)
+			{
+				_sourceMesh.subMeshes[index].clone(this, _sourceMesh);
+			}
 		}
 	}
 
