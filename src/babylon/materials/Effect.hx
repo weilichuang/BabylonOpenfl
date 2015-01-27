@@ -64,6 +64,8 @@ class Effect
 		ShadersStore.set("brickPixelShader", CompileTime.readFile("babylon/materials/shaders/brick.frag"));
 		ShadersStore.set("marblePixelShader", CompileTime.readFile("babylon/materials/shaders/marble.frag"));
 		ShadersStore.set("anaglyphPixelShader", CompileTime.readFile("babylon/materials/shaders/anaglyph.frag"));
+		ShadersStore.set("depthVertexShader", CompileTime.readFile("babylon/materials/shaders/depth.vert"));
+		ShadersStore.set("depthPixelShader", CompileTime.readFile("babylon/materials/shaders/depth.frag"));
 	}
 
 	public var name:Dynamic;

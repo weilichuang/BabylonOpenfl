@@ -6,12 +6,12 @@
 	<meta title="babylonhx" package="com.babylon.engine" version="1.0.0" company="" />
 	
 	<!-- output -->
-	<app main="example.FogDemo" file="FogDemo" path="bin" />
+	<app main="example.WindowCafeSceneDemo" file="WindowCafeSceneDemo" path="bin" />
 	
 	<window background="#000000" fps="0" if="html5" />
 	<window background="#000000" fps="60" unless="html5" />
 	<window width="0" height="0" if="html5" />
-	<window width="1280" height="800" if="cpp" />
+	<window width="0" height="0" if="cpp" />
 	<window width="0" height="0" if="android" />
 	<window orientation="landscape" vsync="true" antialiasing="4" if="cpp" />
 	<window require-shaders="true" hardware="true" depth-buffer="true" />

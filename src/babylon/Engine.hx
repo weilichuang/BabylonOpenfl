@@ -76,6 +76,9 @@ class Engine
     public static inline var DELAYLOADSTATE_LOADING:Int = 2;
     public static inline var DELAYLOADSTATE_NOTLOADED:Int = 4;
 	
+	public static inline var TEXTURETYPE_UNSIGNED_INT:Int = 0;
+	public static inline var TEXTURETYPE_FLOAT:Int = 1;
+	
 	public var cullBackFaces:Bool = true;
 	
 	//public var isFullscreen:Bool = false;
@@ -1519,15 +1522,27 @@ class Engine
         var generateMipMaps:Bool = false;
         var generateDepthBuffer:Bool = true;
         var samplingMode:Int = Texture.TRILINEAR_SAMPLINGMODE;
-		
+		var type:Int = Engine.TEXTURETYPE_UNSIGNED_INT;
         if (options != null) 
 		{
             generateMipMaps = Reflect.hasField(options, "generateMipMaps") ? options.generateMipMaps : options;
             generateDepthBuffer = Reflect.field(options, "generateDepthBuffer") ? options.generateDepthBuffer : true;
+			
+			if (Reflect.hasField(options, "type")) 
+			{
+                type = options.type;
+            }
+			
             if (Reflect.hasField(options, "samplingMode")) 
 			{
                 samplingMode = options.samplingMode;
             }
+			
+			if (type == Engine.TEXTURETYPE_FLOAT)
+			{
+				// if floating point (gl.FLOAT) then force to NEAREST_SAMPLINGMODE
+				samplingMode = Texture.NEAREST_SAMPLINGMODE;
+			}
         }
 		
 		//trace("createRenderTargetTexture: width:" + width + ",height:" + height);

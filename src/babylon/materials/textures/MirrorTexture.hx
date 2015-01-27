@@ -13,9 +13,9 @@ class MirrorTexture extends RenderTargetTexture
 	
 	public var mirrorPlane:Plane;
 
-	public function new(name:String, size:Int, scene:Scene, generateMipMaps:Bool = false)
+	public function new(name:String, width:Int, height:Int, scene:Scene, generateMipMaps:Bool = false)
 	{
-		super(name, size, scene, generateMipMaps);
+		super(name, width, height, scene, generateMipMaps);
 		
 		this._transformMatrix = Matrix.Zero();
         this._mirrorMatrix = Matrix.Zero();	
@@ -47,7 +47,7 @@ class MirrorTexture extends RenderTargetTexture
 	override public function clone():BaseTexture 
 	{
         var textureSize = this.getSize();
-        var newTexture:MirrorTexture = new MirrorTexture(this.name, Std.int(textureSize.width), getScene(), _generateMipMaps);
+        var newTexture:MirrorTexture = new MirrorTexture(this.name, Std.int(textureSize.width),Std.int(textureSize.height), getScene(), _generateMipMaps);
 
         // Base texture
         newTexture.hasAlpha = this.hasAlpha;

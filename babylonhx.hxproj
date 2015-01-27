@@ -28,16 +28,17 @@
     <class path="C:\HaxeToolkit\haxe\lib\yagp\1,1,4" />
     <class path="C:\HaxeToolkit\haxe\lib\openfl\2,2,4" />
     <class path="src" />
-    <class path="bin\html5\haxe" />
+    <class path="C:\HaxeToolkit\haxe\lib\lime\2,0,6\legacy" />
+    <class path="bin\windows\cpp\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="dconsole=4.3.2&#xA;assetsmanager=1.2.0&#xA;msignal=1.2.2&#xA;mlib=2.0.2&#xA;haxeui=1.7.0&#xA;svg=1.0.8&#xA;hscript=2.0.4&#xA;lime=2.0.6&#xA;actuate=1.8.1&#xA;yagp=1.1.4&#xA;openfl=2.2.4&#xA;dom&#xA;tools=2.0.6&#xA;no-compilation&#xA;openfl-html5&#xA;canvas&#xA;lime-html5&#xA;html5&#xA;web&#xA;html5" />
+    <option directives="dconsole=4.3.2&#xA;assetsmanager=1.2.0&#xA;msignal=1.2.2&#xA;mlib=2.0.2&#xA;haxeui=1.7.0&#xA;svg=1.0.8&#xA;hscript=2.0.4&#xA;lime=2.0.6&#xA;actuate=1.8.1&#xA;yagp=1.1.4&#xA;openfl=2.2.4&#xA;dom&#xA;tools=2.0.6&#xA;lime-legacy&#xA;no-compilation&#xA;native&#xA;lime-native&#xA;openfl-native&#xA;windows&#xA;desktop" />
     <option flashStrict="False" />
     <option noInlineOnDebug="True" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="False" />
-    <option additional="--remap flash:openfl&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;-debug " />
+    <option additional="--remap flash:openfl&#xA;#--macro keep(&quot;example.WindowCafeSceneDemo&quot;)&#xA;-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

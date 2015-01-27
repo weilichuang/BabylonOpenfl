@@ -66,7 +66,7 @@ class ShadowGenerator
 		this._targetPosition = new Vector3();
 		
         // Render target
-        this._shadowMap = new RenderTargetTexture(light.name + "_shadowMap", mapSize, this._scene, false);
+        this._shadowMap = new RenderTargetTexture(light.name + "_shadowMap", mapSize, mapSize, this._scene, false);
         this._shadowMap.wrapU = Texture.CLAMP_ADDRESSMODE;
         this._shadowMap.wrapV = Texture.CLAMP_ADDRESSMODE;
         this._shadowMap.renderParticles = false;

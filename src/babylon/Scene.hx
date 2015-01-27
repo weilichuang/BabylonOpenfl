@@ -41,6 +41,7 @@ import babylon.physics.PhysicsEngine;
 import babylon.postprocess.PostProcessManager;
 import babylon.postprocess.renderpipeline.PostProcessRenderPipelineManager;
 import babylon.rendering.BoundingBoxRenderer;
+import babylon.rendering.DepthRenderer;
 import babylon.rendering.OutlineRenderer;
 import babylon.rendering.RenderingManager;
 import babylon.sprites.SpriteManager;
@@ -213,6 +214,7 @@ class Scene
 	
 	private var _boundingBoxRenderer: BoundingBoxRenderer;
 	private var _outlineRenderer: OutlineRenderer;
+	private var _depthRenderer: DepthRenderer;
 	
 	private var _scaledVelocity:Vector3;
 	private var _scaledPosition:Vector3;
@@ -1573,6 +1575,12 @@ class Scene
 				}
 			}
 		}
+		
+		// Depth renderer
+		if (this._depthRenderer != null)
+		{
+			this._renderTargets.push(this._depthRenderer.getDepthMap());
+		}
         
 		// RenderPipeline
 		this.postProcessRenderPipelineManager.update();
@@ -1654,6 +1662,29 @@ class Scene
 		return _physicsEnable;
 	}
 	
+	public function enableDepthRenderer(): DepthRenderer 
+	{
+		if (this._depthRenderer != null)
+		{
+			return this._depthRenderer;
+		}
+
+		this._depthRenderer = new DepthRenderer(this);
+
+		return this._depthRenderer;
+	}
+
+	public function disableDepthRenderer(): Void 
+	{
+		if (this._depthRenderer == null)
+		{
+			return;
+		}
+
+		this._depthRenderer.dispose();
+		this._depthRenderer = null;
+	}
+	
 	public function dispose():Void
 	{
 		this.beforeRender = null;
@@ -1662,9 +1693,13 @@ class Scene
         this.skeletons = [];
 		
 		this._boundingBoxRenderer.dispose();
+		this._boundingBoxRenderer = null;
 		
-		// Debug layer
-		//this.debugLayer.enabled = false;
+		if (this._depthRenderer != null) 
+		{
+			this._depthRenderer.dispose();
+			this._depthRenderer = null;
+		}
 		
 		if (this.onDispose != null)
 			this.onDispose();

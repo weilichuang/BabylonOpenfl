@@ -29,7 +29,8 @@ class RenderTargetTexture extends Texture
 	
 	private var _generateMipMaps:Bool;
 	
-	private var _size:Int;
+	private var _width:Int;
+	private var _height:Int;
 	
 	private var _renderingManager:RenderingManager;
 	
@@ -38,15 +39,16 @@ class RenderTargetTexture extends Texture
 	private var _refreshRate:Int = 1;
 	
 	
-
-	public function new(name:String, size:Int, 
+	public function new(name:String, width:Int, height:Int,
 						scene:Scene, generateMipMaps:Bool = false,
-						doNotChangeAspectRatio:Bool = true)
+						doNotChangeAspectRatio:Bool = true,
+						type: Int = Engine.TEXTURETYPE_UNSIGNED_INT)
 	{			
 		super(null, scene, !generateMipMaps);
 		
 		this.name = name;
-		this._size = size;
+		this._width = width;
+		this._height = height;
         this._generateMipMaps = generateMipMaps;
 		this._doNotChangeAspectRatio = doNotChangeAspectRatio;
 
@@ -57,7 +59,7 @@ class RenderTargetTexture extends Texture
         // Rendering groups
         this._renderingManager = new RenderingManager(scene);
 		
-        this._texture = scene.getEngine().createRenderTargetTexture(size, size, generateMipMaps);
+        this._texture = scene.getEngine().createRenderTargetTexture(_width, _height, { generateMipMaps: generateMipMaps, type: type });
 	}
 	
 	public function resetRefreshCounter():Void
@@ -102,10 +104,10 @@ class RenderTargetTexture extends Texture
 		return false;
 	}
 	
-	public function getRenderSize(): Int
-	{
-		return this._size;
-	}
+	//public function getRenderSize(): Int
+	//{
+		//return this._size;
+	//}
 	
 	public function resize(size:Int, generateMipMaps:Bool):Void
 	{
@@ -133,22 +135,10 @@ class RenderTargetTexture extends Texture
             _waitingRenderList = null;
         }
 		
-		var i:Int = 0;
-		while (i < renderList.length)
+		if (this.renderList != null && this.renderList.length == 0)
 		{
-			mesh = renderList[i];
-			if (mesh.isDisposed())
-			{
-				renderList.splice(i, 1);
-				i--;
-			}
-			i++;
+			return;
 		}
-
-        if (renderList.length == 0)
-		{
-            return;
-        }
 		
 		// Bind
 		if (!useCameraPostProcess || !scene.postProcessManager._prepareFrame(_texture))
@@ -160,10 +150,12 @@ class RenderTargetTexture extends Texture
 		engine.clear(scene.clearColor, true, true);
 
 		_renderingManager.reset();
+		
+		var currentRenderList:Array<AbstractMesh> = this.renderList != null ? this.renderList : scene.getActiveMeshes().data;
 
-		for (meshIndex in 0...renderList.length)
+		for (meshIndex in 0...currentRenderList.length)
 		{
-			mesh = this.renderList[meshIndex];
+			mesh = currentRenderList[meshIndex];
 
 			if (mesh != null)
 			{
@@ -183,7 +175,7 @@ class RenderTargetTexture extends Texture
 
 					for (subIndex in 0...mesh.subMeshes.length)
 					{
-						var subMesh = mesh.subMeshes[subIndex];
+						var subMesh:SubMesh = mesh.subMeshes[subIndex];
 						scene.statistics.activeVertices += subMesh.indexCount;
 						_renderingManager.dispatch(subMesh);
 					}
@@ -202,7 +194,7 @@ class RenderTargetTexture extends Texture
 		}
 
 		// Render
-		_renderingManager.render(customRenderFunction, renderList, renderParticles, renderSprites);
+		_renderingManager.render(customRenderFunction, currentRenderList, renderParticles, renderSprites);
 
 		if (useCameraPostProcess)
 		{
@@ -226,7 +218,7 @@ class RenderTargetTexture extends Texture
 	override public function clone():BaseTexture 
 	{
         var textureSize = this.getSize();
-        var newTexture:RenderTargetTexture = new RenderTargetTexture(this.name, Std.int(textureSize.width), getScene(), this._generateMipMaps);
+        var newTexture:RenderTargetTexture = new RenderTargetTexture(this.name, Std.int(textureSize.width),Std.int(textureSize.height), getScene(), this._generateMipMaps);
 
         // Base texture
         newTexture.hasAlpha = this.hasAlpha;

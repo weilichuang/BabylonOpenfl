@@ -120,16 +120,45 @@ class BabylonFileLoader implements ISceneLoaderPlugin
         }
 
         var texture:Texture = null;
+		
+		#if debug
+		Logger.log("parsedTexture.renderTargetSize:" + parsedTexture.renderTargetSize);
+		#end
 
         if (parsedTexture.mirrorPlane != null) 
 		{
-            texture = new MirrorTexture(parsedTexture.name, parsedTexture.renderTargetSize, scene);
+			var width:Int;
+			var height:Int;
+			if (Reflect.hasField(parsedTexture.renderTargetSize, "width"))
+			{
+				width = parsedTexture.renderTargetSize.width;
+				height = parsedTexture.renderTargetSize.height;
+			}
+			else
+			{
+				width = parsedTexture.renderTargetSize;
+				height = parsedTexture.renderTargetSize;
+			}
+            texture = new MirrorTexture(parsedTexture.name, width, height, scene);
             Std.instance(texture, MirrorTexture)._waitingRenderList = parsedTexture.renderList;
             Std.instance(texture, MirrorTexture).mirrorPlane = babylon.math.Plane.FromArray(parsedTexture.mirrorPlane);
         } 
 		else if (parsedTexture.isRenderTarget) 
 		{
-            texture = new RenderTargetTexture(parsedTexture.name, parsedTexture.renderTargetSize, scene);
+			var width:Int;
+			var height:Int;
+			if (Reflect.hasField(parsedTexture.renderTargetSize, "width"))
+			{
+				width = parsedTexture.renderTargetSize.width;
+				height = parsedTexture.renderTargetSize.height;
+			}
+			else
+			{
+				width = parsedTexture.renderTargetSize;
+				height = parsedTexture.renderTargetSize;
+			}
+			
+            texture = new RenderTargetTexture(parsedTexture.name, width, height, scene);
             Std.instance(texture, RenderTargetTexture)._waitingRenderList = parsedTexture.renderList;
         }
 		else 

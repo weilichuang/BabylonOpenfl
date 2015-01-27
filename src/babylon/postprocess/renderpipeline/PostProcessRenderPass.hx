@@ -20,7 +20,7 @@ class PostProcessRenderPass
 	{
 		this.name = name;
 
-		this._renderTexture = new RenderTargetTexture(name, size, scene);
+		this._renderTexture = new RenderTargetTexture(name, size, size, scene);
 		this.setRenderList(renderList);
 		this._renderList = renderList;
 
