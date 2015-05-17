@@ -44,6 +44,8 @@ class AbstractMesh extends Node implements IDispose
 	public var positions(get, never):Array<Vector3>;
 	public var isBlocked(get, never):Bool;
 	
+	public var alwaysSelectAsActiveMesh:Bool = false;
+	
 	public var rotation:Vector3 = new Vector3(0, 0, 0);
 	public var rotationQuaternion:Quaternion = null;
 	public var scaling:Vector3 = new Vector3(1, 1, 1);

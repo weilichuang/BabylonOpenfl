@@ -20,6 +20,9 @@ import babylon.tools.Tools;
 import babylon.utils.BitmapDataUtils;
 import babylon.utils.GLUtil;
 import babylon.utils.Logger;
+import haxe.ds.StringMap;
+import haxe.io.UInt16Array;
+import haxe.io.UInt32Array;
 import openfl.display.BitmapData;
 import openfl.display.OpenGLView;
 import openfl.display.Stage;
@@ -51,6 +54,7 @@ class EngineCapabilities
 	public var maxAnisotropy: Int;	
 	public var instancedArrays:Dynamic = null;
 	public var uintIndices: Bool = false;
+	public var highPrecisionShaderSupported:Bool;
 	
 	public function new()
 	{
@@ -60,13 +64,6 @@ class EngineCapabilities
  
 class Engine 
 {
-	// Updatable statics so stick with vars here
-	public static var Epsilon:Float = 0.001;
-	public static var CollisionsEpsilon:Float = 0.001;
-
-	// Statics
-    public static var ShadersRepository:String = "shaders/";
-
     public static inline var ALPHA_DISABLE:Int = 0;
     public static inline var ALPHA_ADD:Int = 1;
     public static inline var ALPHA_COMBINE:Int = 2;
@@ -76,11 +73,30 @@ class Engine
     public static inline var DELAYLOADSTATE_LOADING:Int = 2;
     public static inline var DELAYLOADSTATE_NOTLOADED:Int = 4;
 	
+	public static inline var TEXTUREFORMAT_ALPHA:Int = 0;
+    public static inline var TEXTUREFORMAT_LUMINANCE:Int = 1;
+    public static inline var TEXTUREFORMAT_LUMINANCE_ALPHA:Int = 2;
+    public static inline var TEXTUREFORMAT_RGB:Int = 4;
+	public static inline var TEXTUREFORMAT_RGBA:Int = 4;
+	
 	public static inline var TEXTURETYPE_UNSIGNED_INT:Int = 0;
 	public static inline var TEXTURETYPE_FLOAT:Int = 1;
 	
-	public var cullBackFaces:Bool = true;
+	public static function Version():String
+	{
+		return "2.1.0";
+	}
 	
+	// Updatable statics so stick with vars here
+	public static var Epsilon:Float = 0.001;
+	public static var CollisionsEpsilon:Float = 0.001;
+
+	// Statics
+    public static var ShadersRepository:String = "shaders/";
+	
+	public var scenes:Array<Scene> = [];
+	
+	public var cullBackFaces:Bool = true;
 	//public var isFullscreen:Bool = false;
 	public var isPointerLock:Bool = false;
 	
@@ -91,7 +107,9 @@ class Engine
 	private var _alphaTest:Bool;
 	
 	private var _runningLoop:Bool = false;
-	private var _renderFunction:Rectangle->Void;
+	private var _renderFunction:Rectangle-> Void;
+	
+	private var _windowIsBackground:Bool = false;
 	
 	private var _loadedTexturesCache:Array<BabylonGLTexture>;
 	private var _activeTexturesCache:Array<BaseTexture>;
@@ -102,7 +120,7 @@ class Engine
 	private var _alphaMode:Int = ALPHA_DISABLE;
 	
 	private var _currentEffect:Effect;
-	private var _compiledEffects:Map<String, Effect>;
+	private var _compiledEffects:StringMap<Effect>;
 	
 	private var _vertexAttribArrays:Array<Int> = [];
 	
@@ -143,6 +161,7 @@ class Engine
         // Textures
         this._workingContext = new OpenGLView();
 		_stage.addChild(this._workingContext);
+		
 		this._workingContext.addEventListener(OpenGLView.CONTEXT_LOST, onContextLost);
 		this._workingContext.addEventListener(OpenGLView.CONTEXT_RESTORED, onContextRestored);
 		
@@ -157,7 +176,7 @@ class Engine
         this._activeTexturesCache = [];
         this._currentEffect = null;
 
-        this._compiledEffects = new Map();
+        this._compiledEffects = new StringMap<Effect>();
 
 		// Depth buffer
 		this.setDepthTest(true);
@@ -293,7 +312,7 @@ class Engine
 		#else
 		_caps.maxRenderTextureSize = 2048;
 		#end
-		
+
         // Extensions
 		#if cpp
 		_caps.standardDerivatives = true;
@@ -301,6 +320,7 @@ class Engine
         _caps.standardDerivatives = GL.getExtension('OES_standard_derivatives') != null;	
 		#end
 		_caps.s3tc = GL.getExtension('WEBGL_compressed_texture_s3tc') != null;	
+		
         _caps.textureFloat = GL.getExtension('OES_texture_float') != null;  
 		
 		// TODO - this fails on desktops
@@ -331,15 +351,16 @@ class Engine
 		
 		this._caps.instancedArrays = GL.getExtension('ANGLE_instanced_arrays');
 		this._caps.uintIndices = GL.getExtension('OES_element_index_uint') != null;
+		
+		var highp = GL.getShaderPrecisionFormat(GL.FRAGMENT_SHADER, GL.HIGH_FLOAT);
+		this._caps.highPrecisionShaderSupported = highp != null && highp.precision != 0;
 	}
 	
 	// Properties
     public function getAspectRatio(camera:Camera):Float 
 	{
-        return this._aspectRatio;
-		// TODO - what is this ??
-		//var viewport = camera.viewport;
-        //return (this.getRenderWidth() * viewport.width) / (this.getRenderWidth() * viewport.height);
+		var viewport = camera.viewport;
+        return (this.getRenderWidth() * viewport.width) / (this.getRenderWidth() * viewport.height);
     }
 	
     public function getRenderWidth():Int 
@@ -348,7 +369,7 @@ class Engine
 		{
 			return Std.int(this._currentRenderTarget._width);
 		}
-		return cast Lib.current.stage.stageWidth;
+		return Lib.current.stage.stageWidth;
     }
 
     public function getRenderHeight():Int
@@ -357,7 +378,7 @@ class Engine
 		{
 			return Std.int(this._currentRenderTarget._height);
 		}
-		return cast Lib.current.stage.stageHeight;
+		return Lib.current.stage.stageHeight;
     }
 
     public inline function getStage():Stage
@@ -426,14 +447,13 @@ class Engine
 
     private function _renderLoop(rect:Rectangle):Void
 	{
-		//var shouldRender:Bool = true;
-		//if (!this.renderEvenInBackground && 
-			//this._windowIsBackground)
-		//{
-			//shouldRender = false;
-		//}
+		var shouldRender:Bool = true;
+		if (this._windowIsBackground)
+		{
+			shouldRender = false;
+		}
 			
-		//if (shouldRender)
+		if (shouldRender)
 		{
 			// Start new frame
 			this.beginFrame();
@@ -550,7 +570,7 @@ class Engine
 
     public function endFrame():Void
 	{
-        this.flushFramebuffer();
+        //this.flushFramebuffer();
 		
 		#if cpp
 		cleanGLStates();
@@ -561,7 +581,17 @@ class Engine
 	{
 		// This is handled by OpenFL
         //this._renderingCanvas.width = this._renderingCanvas.clientWidth / this._hardwareScalingLevel;
-        //this._renderingCanvas.height = this._renderingCanvas.clientHeight / this._hardwareScalingLevel;        
+        //this._renderingCanvas.height = this._renderingCanvas.clientHeight / this._hardwareScalingLevel;   
+		
+		for (index in 0...scenes.length) 
+		{
+			var scene:Scene = this.scenes[index];
+			for (camIndex in 0...scene.cameras.length)
+			{
+				var cam:Camera = scene.cameras[camIndex];
+				cam._currentRenderId = 0;
+			}
+		}
     }
 
     public function bindFramebuffer(texture:BabylonGLTexture):Void
@@ -570,6 +600,7 @@ class Engine
 		
         GL.bindFramebuffer(GL.FRAMEBUFFER, texture._framebuffer);
         GL.viewport(0, 0, Std.int(texture._width), Std.int(texture._height));
+		
         this._aspectRatio = texture._width / texture._height;
 
         this.wipeCaches();
@@ -585,6 +616,8 @@ class Engine
             GL.generateMipmap(GL.TEXTURE_2D);
             GL.bindTexture(GL.TEXTURE_2D, null);
         }
+		
+		GL.bindFramebuffer(GL.FRAMEBUFFER, null);
     }
 
     public inline function flushFramebuffer():Void
@@ -658,23 +691,15 @@ class Engine
 
 		if (_caps.uintIndices)
 		{
-			if (indices.length > 65535)
+			for (index in 0...indices.length)
 			{
-				need32Bits = true;
-			}
-			
-			if (!need32Bits)
-			{
-				for (index in 0...indices.length) 
+				if (indices[index] > 65535)
 				{
-					if (indices[index] > 65535)
-					{
-						need32Bits = true;
-						break;
-					}
+					need32Bits = true;
+					break;
 				}
 			}
-			
+				
 			arrayBuffer = need32Bits ? new Int32Array(indices) : new Int16Array(indices);
 		}
 		else
@@ -686,9 +711,7 @@ class Engine
 		
 		_resetIndexBufferBinding();
 		
-		var bvbo:BabylonGLBuffer = new BabylonGLBuffer(vbo);
-		bvbo.is32Bits = need32Bits;
-        return bvbo;
+		return new BabylonGLBuffer(vbo,need32Bits);
     }
 
     public function bindBuffers(vertexBuffer:BabylonGLBuffer, 
@@ -707,7 +730,7 @@ class Engine
             var offset:Int = 0;
             for (index in 0...vertexDeclaration.length) 
 			{
-                var order:Int = effect.getAttribute(index);
+                var order:Int = effect.getAttributeLocation(index);
                 if (order >= 0) 
 				{
                     GL.vertexAttribPointer(order, vertexDeclaration[index], GL.FLOAT, false, vertexStrideSize, offset);
@@ -737,8 +760,7 @@ class Engine
 			
             for (index in 0...attributes.length)
 			{
-                var order:Int = effect.getAttribute(index);
-
+                var order:Int = effect.getAttributeLocation(index);
                 if (order >= 0) 
 				{
                     var vertexBuffer:VertexBuffer = vertexBuffers.get(attributes[index]);
@@ -768,6 +790,7 @@ class Engine
         if (buffer.references <= 0) 
 		{
             GL.deleteBuffer(buffer.buffer);
+			buffer.buffer = null;
 			return true;
         }
 		
@@ -790,6 +813,7 @@ class Engine
 	public function deleteInstancesBuffer(buffer: BabylonGLBuffer): Void 
 	{
 		GL.deleteBuffer(buffer.buffer);
+		buffer.buffer = null;
 	}
 	
 	public function updateAndBindInstancesBuffer(instancesBuffer: BabylonGLBuffer, data: Float32Array, offsetLocations: Array<Int>): Void 
@@ -872,6 +896,7 @@ class Engine
 			{
 				GL.deleteProgram(effect.getProgram());
 			}
+			effect.release();
 		}
 	}
 		
@@ -919,7 +944,7 @@ class Engine
 			["diffuseSampler"].concat(samplers), defines, fallbacks, onCompiled, onError);
 	}
 	
-	public function getSamplingParameters(samplingMode: Int, generateMipMaps: Bool): Dynamic
+	public function getSamplingParameters(samplingMode: Int, generateMipMaps: Bool): { min:Int, mag:Int }	
 	{
         var magFilter = GL.NEAREST;
         var minFilter = GL.NEAREST;
@@ -965,6 +990,14 @@ class Engine
             mag: magFilter
         };
     }
+	
+	public function getGLTextureType(type:Int):Int
+	{
+		if (type == Engine.TEXTURETYPE_FLOAT)
+			return GL.FLOAT;
+		else
+			return GL.UNSIGNED_BYTE;
+	}
 
     public function compileShader(source:String, type:String, defines:String = ""):GLShader 
 	{
@@ -993,10 +1026,10 @@ class Engine
 
     public function createShaderProgram(vertexCode:String, fragmentCode:String, defines:String):GLProgram
 	{					
-        var vertexShader = compileShader(vertexCode, "vertex", defines);
-        var fragmentShader = compileShader(fragmentCode, "fragment", defines);
+        var vertexShader:GLShader = compileShader(vertexCode, "vertex", defines);
+        var fragmentShader:GLShader = compileShader(fragmentCode, "fragment", defines);
 
-        var shaderProgram = GL.createProgram();
+        var shaderProgram:GLProgram = GL.createProgram();
         GL.attachShader(shaderProgram, vertexShader);
         GL.attachShader(shaderProgram, fragmentShader);
 
@@ -1005,7 +1038,11 @@ class Engine
 		#if debug
 		if (GL.getProgramParameter(shaderProgram, GL.LINK_STATUS) == 0)
 		{
-			throw "Unable to initialize the shader program.";
+			var error:String = GL.getProgramInfoLog(shaderProgram);
+			if (error != "") 
+			{
+				throw error;
+			}
 		}
 		#end
 
@@ -1065,7 +1102,7 @@ class Engine
 
     public function enableEffect(effect:Effect):Void
 	{
-		if (effect == null || _currentEffect == effect)
+		if (effect == null || effect.getAttributesCount() == 0 || _currentEffect == effect)
 		{
 			if (effect != null && effect.onBind != null)
 			{
@@ -1073,13 +1110,6 @@ class Engine
 			}
 			return;
 		}
-			
-		var attributesCount:Int = effect.getAttributesCount();
-		
-        if (attributesCount == 0)
-		{
-            return;
-        }
 		
         // Use program
         GL.useProgram(effect.getProgram());
@@ -1097,17 +1127,17 @@ class Engine
         //}
 		
 		//only active not actived vertex attribute
+		var attributesCount:Int = effect.getAttributesCount();
         for (i in 0...attributesCount) 
 		{
             // Attributes
-            var order:Int = effect.getAttribute(i);
+            var order:Int = effect.getAttributeLocation(i);
             if (order >= 0)
 			{
 				var index:Int = _vertexAttribArrays.indexOf(order);
 				if (index == -1)
 				{
 					GL.enableVertexAttribArray(order);
-					
 				}
 				else
 				{
@@ -1140,6 +1170,30 @@ class Engine
 			return;
 			
 		GL.uniform1fv(uniform, new Float32Array(array));
+	}
+	
+	public function setArray2(uniform:GLUniformLocation, array:Array<Float>):Void
+	{
+		if (uniform == null || array.length % 2 != 0)
+			return;
+			
+		GL.uniform2fv(uniform, new Float32Array(array));
+	}
+	
+	public function setArray3(uniform:GLUniformLocation, array:Array<Float>):Void
+	{
+		if (uniform == null || array.length % 3 != 0)
+			return;
+			
+		GL.uniform3fv(uniform, new Float32Array(array));
+	}
+	
+	public function setArray4(uniform:GLUniformLocation, array:Array<Float>):Void
+	{
+		if (uniform == null || array.length % 4 != 0)
+			return;
+			
+		GL.uniform4fv(uniform, new Float32Array(array));
 	}
 
     public inline function setMatrices(uniform:GLUniformLocation, matrices: #if html5 Float32Array #else Array<Float> #end ):Void
@@ -1216,7 +1270,7 @@ class Engine
 	
 	
 	// States
-    public function setCullState(culling:Bool, force:Bool = false):Void
+    public function setCullState(culling:Bool,zOffset:Float=0, force:Bool = false):Void
 	{
         // Culling        
 		if (_depthCullingState.cull != culling || force) 
@@ -1231,6 +1285,9 @@ class Engine
 				_depthCullingState.cull = false;
 			}
 		}
+		
+		// Z offset
+		this._depthCullingState.zOffset = zOffset;
     }
 
     public function setDepthTest(enable:Bool):Void
@@ -1347,7 +1404,24 @@ class Engine
 									samplingMode:Int = Texture.TRILINEAR_SAMPLINGMODE,
 									onLoad:Void->Void = null, onError:Void->Void = null):BabylonGLTexture
 									
-	{		
+	{
+		var extension: String;
+		var fromData: Bool = false;
+		if (url.substr(0, 5) == "data:")
+		{
+			fromData = true;
+		}
+		
+		if (!fromData)
+			extension = url.substr(url.length - 4, 4).toLowerCase();
+		else 
+		{
+			var oldUrl:String = url;
+			var data:Array<String> = oldUrl.split(':');
+			url = oldUrl;
+			extension = data[1].substr(data[1].length - 4, 4).toLowerCase();
+		}
+			
         var texture:BabylonGLTexture = new BabylonGLTexture(url, GL.createTexture());
 		
 		function onLoadError():Void
@@ -1420,13 +1494,14 @@ class Engine
         }
 
         scene._addPendingData(texture);
-		
-        Tools.LoadImage(url, onLoadSuccess, onLoadError);
-
-        texture.url = url;
+		texture.url = url;
         texture.noMipmap = noMipmap;
         texture.references = 1;
+		texture.samplingMode = samplingMode;
+		
         _loadedTexturesCache.push(texture);
+		
+        Tools.LoadImage(url, onLoadSuccess, onLoadError);
 
         return texture;
     }
@@ -1435,31 +1510,36 @@ class Engine
 	{
         var texture:BabylonGLTexture = new BabylonGLTexture("", GL.createTexture());
 
-        width = FastMath.getExponantOfTwo(Std.int(width), _caps.maxTextureSize);
-        height = FastMath.getExponantOfTwo(Std.int(height), _caps.maxTextureSize);
-
-        GL.bindTexture(GL.TEXTURE_2D, texture.data);
-		
-		var filters = getSamplingParameters(samplingMode, generateMipMaps);
-		
-        GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filters.mag);
-		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filters.min);
-        GL.bindTexture(GL.TEXTURE_2D, null);
+        var nw:Int = FastMath.getExponantOfTwo(Std.int(width), _caps.maxTextureSize);
+        var nh:Int = FastMath.getExponantOfTwo(Std.int(height), _caps.maxTextureSize);
 
         _activeTexturesCache = [];
-        texture._baseWidth = Std.int(width);
-        texture._baseHeight = Std.int(height);
-        texture._width = width;
-        texture._height = height;
+        texture._baseWidth = nw;
+        texture._baseHeight = nh;
+        texture._width = nw;
+        texture._height = nh;
         texture.isReady = false;
         texture.generateMipMaps = generateMipMaps;
 		texture.samplingMode = samplingMode;
         texture.references = 1;
 
         _loadedTexturesCache.push(texture);
+		
+		this.updateTextureSamplingMode(samplingMode, texture);
 
         return texture;
     }
+	
+	public function updateTextureSamplingMode(samplingMode: Int, texture: BabylonGLTexture): Void 
+	{
+		var filters = getSamplingParameters(samplingMode, texture.generateMipMaps);
+
+		GL.bindTexture(GL.TEXTURE_2D, texture.data);
+
+		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, filters.mag);
+		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filters.min);
+		GL.bindTexture(GL.TEXTURE_2D, null);
+	}
 
     public function updateDynamicTexture(texture:BabylonGLTexture, canvas:BitmapData, invertY:Bool):Void
 	{
@@ -1486,7 +1566,7 @@ class Engine
         texture.isReady = true;
     }
 
-    public function updateVideoTexture(texture:BabylonGLTexture, video:Dynamic):Void
+    public function updateVideoTexture(texture:BabylonGLTexture, video:Dynamic, invertY: Bool):Void
 	{
 		// TODO
         /*GL.bindTexture(GL.TEXTURE_2D, texture.data);
@@ -1545,7 +1625,15 @@ class Engine
 			}
         }
 		
-		//trace("createRenderTargetTexture: width:" + width + ",height:" + height);
+		#if debug
+		Logger.log("createRenderTargetTexture: width:" + width + ",height:" + height);
+		#end
+		
+		if (type == Engine.TEXTURETYPE_FLOAT && !this._caps.textureFloat)
+		{
+			type = Engine.TEXTURETYPE_UNSIGNED_INT;
+			Logger.warn("Float textures are not supported. Render target forced to TEXTURETYPE_UNSIGNED_BYTE type");
+		}
 		
         var texture:BabylonGLTexture = new BabylonGLTexture("", GL.createTexture());
         GL.bindTexture(GL.TEXTURE_2D, texture.data);
@@ -1556,7 +1644,7 @@ class Engine
 		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, filters.min);
         GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
         GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
-        GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width, height, 0, GL.RGBA, GL.UNSIGNED_BYTE, null);
+        GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width, height, 0, GL.RGBA, getGLTextureType(type), null);
 
         var depthBuffer:GLRenderbuffer = null;
         // Create the depth buffer

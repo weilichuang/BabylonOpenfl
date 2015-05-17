@@ -9,6 +9,9 @@ import babylon.audio.AudioEngine;
 import babylon.bones.Skeleton;
 import babylon.cameras.Camera;
 import babylon.collisions.Collider;
+import babylon.collisions.CollisionCoordinatorLegacy;
+import babylon.collisions.CollisionCoordinatorWorker;
+import babylon.collisions.ICollisionCoordinator;
 import babylon.collisions.PickingInfo;
 import babylon.culling.BoundingBox;
 import babylon.culling.octrees.Octree;
@@ -32,6 +35,7 @@ import babylon.math.Vector3;
 import babylon.mesh.AbstractMesh;
 import babylon.mesh.Geometry;
 import babylon.mesh.Mesh;
+import babylon.mesh.simplify.SimplificationQueue;
 import babylon.mesh.SubMesh;
 import babylon.particles.ParticleSystem;
 import babylon.physics.IPhysicsEnginePlugin;
@@ -61,6 +65,10 @@ class Scene
 	public static var MinDeltaTime:Float = 1.0;
 	public static var MaxDeltaTime:Float = 1000.0;
 	
+	public var meshUnderPointer(get, null):AbstractMesh;
+	public var pointerX(get, null):Float;
+	public var pointerY(get, null):Float;
+	
 	public var autoClear:Bool = true;
 	public var clearColor:Color3;
 	public var ambientColor:Color3;
@@ -84,6 +92,7 @@ class Scene
 	public var afterCameraRender:Camera->Void;
 	
 	public var forceWireframe:Bool = false;
+	public var forcePointsCloud:Bool = false;
 	public var forceShowBoundingBoxes:Bool = false;
 	
 	public var clipPlane:Plane;
@@ -97,8 +106,13 @@ class Scene
 	// Pointers
 	private var _onPointerMove: MouseEvent->Void;
 	private var _onPointerDown: MouseEvent->Void;
+	private var _onPointerUp: MouseEvent->Void;
+	
 	public var onPointerDown: MouseEvent->PickingInfo->Void;
-	// Define this parameter if you are using multiple cameras and you want to specify which one should be used for pointer position
+	public var onPointerUp: MouseEvent->PickingInfo->Void;
+	
+	// Define this parameter if you are using multiple cameras and 
+	// you want to specify which one should be used for pointer position
 	public var cameraToUseForPointers: Camera = null; 
 	
 	private var _pointerX: Float = 0;
@@ -106,25 +120,41 @@ class Scene
 	private var _meshUnderPointer: AbstractMesh;
 	private var _pointerOverMesh: AbstractMesh;
 	
+	// Fog
 	public var fogEnabled:Bool = true;
 	public var fogInfo:FogInfo;
 	
 	//---------Lights begin-------//
+	public var shadowsEnabled:Bool = true;
+	
 	public var lightsEnabled:Bool = true;
 	public var lights:Array<Light>;
+	
+	public var onNewLightAdded:Light->Int->Scene-> Void;
+	public var onLightRemoved:Light->Void;
+	
 	//---------Lights end---------//
 	
 	//---------Cameras begin-------//
 	public var cameras:Array<Camera>;
 	public var activeCamera:Camera;
 	public var activeCameras:Array<Camera>;
+	
+	public var onNewCameraAdded:Camera->Int->Scene-> Void;
+	public var onCameraRemoved:Camera->Void;
 	//---------Cameras end-------//
 	
-	// Meshes
+	//---------Meshes begin-------//
 	public var meshes:Array<AbstractMesh>;
+	public var onNewMeshAdded:AbstractMesh->Int->Scene-> Void;
+	public var onMeshRemoved:AbstractMesh->Void;
+	//---------Meshes end-------//
 	
-	 // Geometries
+	//---------Geometries begin-------//
 	private var _geometries:Array<Geometry>;
+	public var onGeometryAdded:Geometry->Void;
+	public var onGeometryRemoved:Geometry->Void;
+	//---------Geometries begin-------//
 	
 	public var materials:Array<Material>;
 	public var multiMaterials:Array<MultiMaterial>;
@@ -139,6 +169,7 @@ class Scene
 	public var particleSystems:Array<ParticleSystem>;
 	
 	// Sprites
+	public var spritesEnabled:Bool = true;
 	public var spriteManagers:Array<SpriteManager>;
 	
 	// Layers
@@ -152,9 +183,14 @@ class Scene
 	public var lensFlaresEnabled:Bool = true;
 	public var lensFlareSystems:Array<LensFlareSystem>;
 	
-	// Collisions
+	//--------- Collisions begin--------------//
 	public var collisionsEnabled:Bool = true;
 	public var gravity:Vector3;
+	private var _workerCollisions:Bool = false;
+	public var collisionCoordinator:ICollisionCoordinator;
+	
+	public var workerCollisions(get, set):Bool;
+	//--------- Collisions end--------------//
 	
 	private var _physicsEngine:PhysicsEngine;
 	private var _physicsEnable:Bool = true;
@@ -166,6 +202,7 @@ class Scene
 	
 	// Customs render targets
 	public var renderTargetsEnabled:Bool = true;
+	public var dumpNextRenderTargets:Bool = false;
 	public var customRenderTargets:Array<RenderTargetTexture>;
 	
 	// Delay loading
@@ -182,6 +219,19 @@ class Scene
 	public var _actionManagers:Array<ActionManager>;
 	private var _meshesForIntersections:SmartArray<AbstractMesh>;
 	
+	// Procedural textures
+	public var proceduralTexturesEnabled:Bool = true;
+	public var _proceduralTextures:Array<ProceduralTexture> = [];
+	
+	// Sound Tracks
+	//public mainSoundTrack: SoundTrack;
+	//public soundTracks = new Array<SoundTrack>();
+	//private _audioEnabled = true;
+	//private _headphone = false;
+	
+	//Simplification Queue
+	public var simplificationQueue: SimplificationQueue;
+	
 	public var engine:Engine;
 	
 	public var statistics:Statistics;
@@ -190,10 +240,11 @@ class Scene
 	private var _animationStartDate:Int = -1;
 	
 	private var _renderId:Int = 0;
+	private var _executeWhenReadyTimeoutId:Int = -1;
 
 	public var _toBeDisposed:SmartArray<IDispose>;
 	
-	public var _onReadyCallbacks:Array<Dynamic>;
+	public var _onReadyCallbacks:Array<Void->Void>;
 	public var _pendingData:Array<Dynamic>;
 	
 	public var _onBeforeRenderCallbacks:Array<Void->Void> ;
@@ -224,20 +275,16 @@ class Scene
 	public var _frustumPlanes:Array<Plane>;
 	
 	public var _selectionOctree:Octree<AbstractMesh>;
-	
-	public var shadowsEnabled:Bool = true;
 
-	// Procedural textures
-	public var proceduralTexturesEnabled:Bool = true;
-	public var _proceduralTextures:Array<ProceduralTexture> = [];
-	
-	public var forcePointsCloud:Bool = false;
-	
 	public var _cachedMaterial: Material;
+	
+	private var _uniqueIdCounter:Int = 0;
 
 	public function new(engine:Engine) 
 	{
 		this.engine = engine;
+		
+		engine.scenes.push(this);
 
 		_oldViewPort = new Rectangle();
 		
@@ -333,8 +380,33 @@ class Scene
 
 		this._boundingBoxRenderer = new BoundingBoxRenderer(this);
 		this._outlineRenderer = new OutlineRenderer(this);
+		
+		//simplification queue
+		this.simplificationQueue = new SimplificationQueue();
+		
+		this.workerCollisions = false;
 
 		this.attachControl();
+	}
+	
+	private function set_workerCollisions(value:Bool):Bool
+	{
+		this._workerCollisions = value;
+		if (this.collisionCoordinator != null) 
+		{
+			this.collisionCoordinator.destroy();
+		}
+
+		this.collisionCoordinator = value ? new CollisionCoordinatorWorker() : new CollisionCoordinatorLegacy();
+
+		this.collisionCoordinator.init(this);
+		
+		return value;
+	}
+	
+	private function get_workerCollisions():Bool
+	{
+		return this._workerCollisions;
 	}
 	
 	public function getCachedMaterial(): Material
@@ -362,19 +434,19 @@ class Scene
 		return this._activeParticleSystems;
 	}
 	
-	public var meshUnderPointer(get, null):AbstractMesh;
+	
 	private function get_meshUnderPointer(): AbstractMesh 
 	{
 		return this._meshUnderPointer;
 	}
 
-	public var pointerX(get, null):Float;
+	
 	private function get_pointerX(): Float
 	{
 		return this._pointerX;
 	}
 
-	public var pointerY(get, null):Float;
+	
 	private function get_pointerY(): Float
 	{
 		return this._pointerY;
@@ -388,42 +460,6 @@ class Scene
 	public function getOutlineRenderer(): OutlineRenderer
 	{
 		return this._outlineRenderer;
-	}
-	
-	public function addLight(light:Light):Void
-	{
-		if (lights.indexOf(light) == -1)
-			lights.push(light);
-	}
-	
-	public function removeLight(light:Light):Bool
-	{
-		return lights.remove(light);
-	}
-	
-	public function addMesh(mesh:AbstractMesh):Void
-	{
-		if (meshes.indexOf(mesh) == -1)
-			meshes.push(mesh);
-	}
-	
-	public function removeMesh(mesh:AbstractMesh):Bool
-	{
-		return meshes.remove(mesh);
-	}
-	
-	public function addCamera(camera: Camera):Void
-	{
-		this.cameras.push(camera);
-	}
-
-	public function removeCamera(camera: Camera):Void
-	{
-		var index = this.cameras.indexOf(camera);
-		if (index != -1)
-		{
-			this.cameras.splice(index, 1);
-		}
 	}
 
 	public inline function getEngine():Engine 
@@ -466,12 +502,15 @@ class Scene
 				this._meshUnderPointer = pickResult.pickedMesh;
 				
 				this.setPointerOverMesh(pickResult.pickedMesh);
+				
 				//canvas.style.cursor = "pointer";
 			} 
 			else 
 			{
 				this.setPointerOverMesh(null);
+				
 				//canvas.style.cursor = "";
+				
 				this._meshUnderPointer = null;
 			}
 		};
@@ -491,27 +530,23 @@ class Scene
 			
 			this._updatePointerPosition(evt);
 			
-			//trace("x:"+this._pointerX + ",y:" + this._pointerY);
-			//return;
-			
 			var pickResult = this.pick(this._pointerX, this._pointerY, predicateDown, false, this.cameraToUseForPointers);
 
 			if (pickResult.hit)
 			{
 				if (pickResult.pickedMesh.actionManager != null)
 				{
-					pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnLeftPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh));
+					switch (evt.type) 
+					{
+						case MouseEvent.MOUSE_DOWN:
+							pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnLeftPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh, evt));
+						case MouseEvent.RIGHT_MOUSE_DOWN:
+							pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnRightPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh, evt));
+						case MouseEvent.MIDDLE_MOUSE_DOWN:
+							pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnCenterPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh, evt));
+					}
 					
-					//switch (evt.buttons) 
-					//{
-						//case 1:
-							//pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnLeftPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh));
-						//case 2:
-							//pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnRightPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh));
-						//case 3:
-							//pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnCenterPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh));
-					//}
-					pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh));
+					pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnPickTrigger, ActionEvent.CreateNew(pickResult.pickedMesh, evt));
 				}
 			}
 
@@ -519,8 +554,43 @@ class Scene
 				this.onPointerDown(evt, pickResult);
 		};
 		
-		engine.getStage().addEventListener(MouseEvent.MOUSE_MOVE, _onPointerMove, false);
-		engine.getStage().addEventListener(MouseEvent.MOUSE_DOWN, _onPointerDown, false);
+		this._onPointerUp = function(evt: MouseEvent):Void
+		{
+			var predicateUp:AbstractMesh->Bool = null;
+			
+			if (this.onPointerUp == null)
+			{
+				predicateUp = function(mesh:AbstractMesh):Bool
+				{
+					return mesh.isPickable && mesh.isVisible && mesh.isReady() &&
+						mesh.actionManager != null && mesh.actionManager.hasSpecificTriggers([ActionManager.OnPickUpTrigger]);
+				}
+			}
+			
+			this._updatePointerPosition(evt);
+			
+			var pickResult = this.pick(this._pointerX, this._pointerY, predicateUp, false, this.cameraToUseForPointers);
+
+			if (pickResult.hit)
+			{
+				if (pickResult.pickedMesh.actionManager != null)
+				{
+							pickResult.pickedMesh.actionManager.processTrigger(ActionManager.OnPickUpTrigger, ActionEvent.CreateNew(pickResult.pickedMesh, evt));
+				}
+			}
+
+			if(this.onPointerUp != null)
+				this.onPointerUp(evt, pickResult);
+		};
+		
+		engine.getStage().addEventListener(MouseEvent.MOUSE_MOVE, _onPointerMove);
+		engine.getStage().addEventListener(MouseEvent.MOUSE_DOWN, _onPointerDown);
+		engine.getStage().addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, _onPointerDown);
+		engine.getStage().addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, _onPointerDown);
+		
+		engine.getStage().addEventListener(MouseEvent.MOUSE_UP, _onPointerUp);
+		engine.getStage().addEventListener(MouseEvent.MIDDLE_MOUSE_UP, _onPointerUp);
+		engine.getStage().addEventListener(MouseEvent.RIGHT_MOUSE_UP, _onPointerUp);
 		
 		#if !mobile
 		this._onKeyDown = function(event:KeyboardEvent):Void
@@ -549,6 +619,12 @@ class Scene
 	{
 		engine.getStage().removeEventListener(MouseEvent.MOUSE_MOVE, _onPointerMove);
 		engine.getStage().removeEventListener(MouseEvent.MOUSE_DOWN, _onPointerDown);
+		engine.getStage().removeEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, _onPointerDown);
+		engine.getStage().removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, _onPointerDown);
+		
+		engine.getStage().removeEventListener(MouseEvent.MOUSE_UP, _onPointerUp);
+		engine.getStage().removeEventListener(MouseEvent.MIDDLE_MOUSE_UP, _onPointerUp);
+		engine.getStage().removeEventListener(MouseEvent.RIGHT_MOUSE_UP, _onPointerUp);
 		
 		#if !mobile
 		engine.getStage().removeEventListener(KeyboardEvent.KEY_UP, _onKeyUp);
@@ -575,23 +651,20 @@ class Scene
             return false;
         }
 		
-		for (index in 0...this._geometries.length)
+		for (index in 0..._geometries.length)
 		{
-			var geometry = this._geometries[index];
-
+			var geometry = _geometries[index];
 			if (geometry.delayLoadState == Engine.DELAYLOADSTATE_LOADING)
 			{
-				//trace("geometry.id:"+geometry.id);
 				return false;
 			}
 		}
 
-        for (index in 0...this.meshes.length)
+        for (index in 0...meshes.length)
 		{
-            var mesh = this.meshes[index];
+            var mesh = meshes[index];
 			if (!mesh.isReady())
 			{
-				//trace("mesh.id:"+mesh.id);
 				return false;
 			}
 			
@@ -600,7 +673,6 @@ class Scene
 			{
                 if (!mat.isReady(mesh))
 				{
-					//trace("mat.id:"+mat.name);
                     return false;
                 }
             }
@@ -617,7 +689,6 @@ class Scene
 	public function unregisterBeforeRender(func:Void->Void):Void
 	{
 		var index = this._onBeforeRenderCallbacks.indexOf(func);
-
         if (index > -1) 
 		{
             this._onBeforeRenderCallbacks.splice(index, 1);
@@ -632,7 +703,6 @@ class Scene
 	public function unregisterAfterRender(func:Void->Void):Void
 	{
 		var index = this._onAfterRenderCallbacks.indexOf(func);
-
 		if (index > -1)
 		{
 			this._onAfterRenderCallbacks.splice(index, 1);
@@ -647,8 +717,8 @@ class Scene
 	public function _removePendingData(data:Dynamic):Void
 	{
         var index = this._pendingData.indexOf(data);
-
-        if (index != -1) {
+        if (index != -1)
+		{
             this._pendingData.splice(index, 1);
         }
     }
@@ -712,10 +782,11 @@ class Scene
 		
 		if (Reflect.getProperty(target, "animations") != null)
 		{
-			animatable.appendAnimations(target, target.animations);
+			animatable.appendAnimations(target, Reflect.getProperty(target, "animations"));
 		}
 
         // Children animations		
+		//TODO 写法对不对？
         if (Reflect.getProperty(target, "getAnimatables") != null)
 		{
             var animatables:Array<Dynamic> = target.getAnimatables();
@@ -782,11 +853,7 @@ class Scene
 		var index:Int = 0;
 		while (index < _activeAnimatables.length)
 		{
-            if (!_activeAnimatables[index]._animate(delay)) 
-			{
-                _activeAnimatables.splice(index, 1);
-                index--;
-            }
+            _activeAnimatables[index]._animate(delay); 
 			index++;
         }
     }
@@ -814,11 +881,126 @@ class Scene
         this._viewMatrix.multiplyToRef(this._projectionMatrix, this._transformMatrix);
 	}
 	
+	public function addMesh(newMesh: AbstractMesh):Void
+	{
+		newMesh.uniqueId = this._uniqueIdCounter++;
+		
+		var position:Int = this.meshes.push(newMesh);
+
+		//notify the collision coordinator
+		this.collisionCoordinator.onMeshAdded(newMesh);
+
+		if (this.onNewMeshAdded != null)
+		{
+			this.onNewMeshAdded(newMesh, position, this);
+		}
+	}
+
+	public function removeMesh(toRemove: AbstractMesh): Int
+	{
+		var index: Int = this.meshes.indexOf(toRemove);
+		if (index != -1)
+		{
+			// Remove from the scene if mesh found 
+			this.meshes.splice(index, 1);
+		}
+		//notify the collision coordinator
+		this.collisionCoordinator.onMeshRemoved(toRemove);
+
+		if (this.onMeshRemoved != null)
+		{
+			this.onMeshRemoved(toRemove);
+		}
+		return index;
+	}
+
+	public function removeLight(toRemove: Light): Int 
+	{
+		var index: Int = this.lights.indexOf(toRemove);
+		if (index != -1) 
+		{
+			// Remove from the scene if mesh found 
+			this.lights.splice(index, 1);
+		}
+		if (this.onLightRemoved != null)
+		{
+			this.onLightRemoved(toRemove);
+		}
+		return index;
+	}
+
+	public function removeCamera(toRemove: Camera): Int
+	{
+		var index: Int = this.cameras.indexOf(toRemove);
+		if (index != -1) 
+		{
+			// Remove from the scene if mesh found 
+			this.cameras.splice(index, 1);
+		}
+		// Remove from activeCameras
+		var index2: Int = this.activeCameras.indexOf(toRemove);
+		if (index2 != -1)
+		{
+			// Remove from the scene if mesh found
+			this.activeCameras.splice(index2, 1);
+		}
+		// Reset the activeCamera
+		if (this.activeCamera == toRemove) 
+		{
+			if (this.cameras.length > 0)
+			{
+				this.activeCamera = this.cameras[0];
+			} 
+			else
+			{
+				this.activeCamera = null;
+			}
+		}
+		if (this.onCameraRemoved != null) 
+		{
+			this.onCameraRemoved(toRemove);
+		}
+		return index;
+	}
+
+	public function addLight(newLight: Light):Void
+	{
+		newLight.uniqueId = this._uniqueIdCounter++;
+		var position: Int = this.lights.push(newLight);
+		if (this.onNewLightAdded != null)
+		{
+			this.onNewLightAdded(newLight, position, this);
+		}
+	}
+
+	public function addCamera(newCamera: Camera):Void
+	{
+		newCamera.uniqueId = this._uniqueIdCounter++;
+		var position: Int = this.cameras.push(newCamera);
+		if (this.onNewCameraAdded != null)
+		{
+			this.onNewCameraAdded(newCamera, position, this);
+		}
+	}
+
 	public function getCameraByID(id: String): Camera
 	{
 		for (index in  0...cameras.length) 
 		{
 			if (cameras[index].id == id) 
+			{
+				return cameras[index];
+			}
+		}
+
+		return null;
+	}
+	
+	public function getCameraByUniqueID(uniqueId: Int): Camera
+	{
+		for (index in  0...cameras.length) 
+		{
+			if (cameras[index].uniqueId == uniqueId) 
 			{
 				return cameras[index];
 			}
@@ -840,7 +1022,13 @@ class Scene
 		return null;
 	}
 	
-	public function activeCameraByID(id:String):Camera 
+	/**
+	 * sets the active camera of the scene using its ID
+	 * @param {string} id - the camera's ID
+	 * @return {BABYLON.Camera|null} the new active camera or null if none found.
+	 * @see activeCamera
+	 */
+	public function setActiveCameraByID(id:String):Camera 
 	{
 		var camera = getCameraByID(id);
 		if (camera != null)
@@ -852,6 +1040,12 @@ class Scene
 		return null;
 	}
 	
+	/**
+	 * sets the active camera of the scene using its name
+	 * @param {string} name - the camera's name
+	 * @return {BABYLON.Camera|null} the new active camera or null if none found.
+	 * @see activeCamera
+	 */
 	public function setActiveCameraByName(name: String): Camera 
 	{
 		var camera = getCameraByName(name);
@@ -865,6 +1059,11 @@ class Scene
 		return null;
 	}
 	
+	/**
+	 * get a material using its id
+	 * @param {string} the material's ID
+	 * @return {BABYLON.Material|null} the material or null if none found.
+	 */
 	public function getMaterialByID(id:String):Material
 	{
 		for (index in 0...materials.length)
@@ -896,6 +1095,19 @@ class Scene
 		for (index in 0...lights.length)
 		{
             if (lights[index].id == id) 
+			{
+                return lights[index];
+            }
+        }
+
+        return null;
+	}
+	
+	public function getLightByUniqueID(uniqueId:Int):Light 
+	{
+		for (index in 0...lights.length)
+		{
+            if (lights[index].uniqueId == uniqueId) 
 			{
                 return lights[index];
             }
@@ -938,8 +1150,41 @@ class Scene
 		}
 
 		_geometries.push(geometry);
+		
+		//notify the collision coordinator
+		this.collisionCoordinator.onGeometryAdded(geometry);
+
+		if (this.onGeometryAdded != null)
+		{
+			this.onGeometryAdded(geometry);
+		}
 
 		return true;
+	}
+	
+	/**
+	 * Removes an existing geometry
+	 * @param {BABYLON.Geometry} geometry - the geometry to be removed from the scene.
+	 * @return {boolean} was the geometry removed or not
+	 */
+	public function removeGeometry(geometry: Geometry): Bool 
+	{
+		var index:Int = this._geometries.indexOf(geometry);
+
+		if (index > -1) 
+		{
+			this._geometries.splice(index, 1);
+
+			//notify the collision coordinator
+			this.collisionCoordinator.onGeometryDeleted(geometry);
+
+			if (this.onGeometryRemoved != null)
+			{
+				this.onGeometryRemoved(geometry);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	public function getGeometries(): Array<Geometry> 
@@ -952,6 +1197,19 @@ class Scene
 		for (index in 0...meshes.length)
 		{
             if (meshes[index].id == id)
+			{
+                return meshes[index];
+            }
+        }
+
+        return null;
+	}
+	
+	public function getMeshByUniqueID(uniqueId:Int):AbstractMesh
+	{
+		for (index in 0...meshes.length)
+		{
+            if (meshes[index].uniqueId == uniqueId)
 			{
                 return meshes[index];
             }
@@ -1088,13 +1346,13 @@ class Scene
 
 	public function _evaluateSubMesh(subMesh:SubMesh, mesh:AbstractMesh):Void
 	{
-		if (mesh.subMeshes.length == 1 || subMesh.isInFrustrum(_frustumPlanes)) 
+		if (mesh.alwaysSelectAsActiveMesh || mesh.subMeshes.length == 1 || subMesh.isInFrustrum(_frustumPlanes)) 
 		{
             var material:Material = subMesh.getMaterial();
 			
 			if (mesh.showSubMeshesBoundingBox) 
 			{
-				this._boundingBoxRenderer.renderList.push(subMesh.getBoundingInfo().boundingBox);
+				this._boundingBoxRenderer.addBoundingBox(subMesh.getBoundingInfo().boundingBox);
 			}
 
             if (material != null)
@@ -1111,7 +1369,7 @@ class Scene
                 }
 
                 // Dispatch
-                statistics.activeVertices += subMesh.indexCount;
+                statistics.activeIndices += subMesh.indexCount;
                 _renderingManager.dispatch(subMesh);
             }
         }
@@ -1119,6 +1377,7 @@ class Scene
 	
 	private function _evaluateActiveMeshes():Void 
 	{
+		this.activeCamera._activeMeshes.reset();
 		this._activeMeshes.reset();
         this._renderingManager.reset(); 
         this._processedMaterials.reset();
@@ -1161,7 +1420,7 @@ class Scene
 			
 			statistics.totalVertices += mesh.getTotalVertices();
 			
-			if (!mesh.isReady())
+			if (!mesh.isReady() || !mesh.isEnabled())
 			{
 				continue;
 			}
@@ -1184,7 +1443,7 @@ class Scene
 			
 			mesh.preActivate();
 
-			if (mesh.isEnabled() && 
+			if (mesh.alwaysSelectAsActiveMesh ||
 				mesh.isVisible && 
 				mesh.visibility > 0 && 
 				((mesh.layerMask & this.activeCamera.layerMask) != 0) &&
@@ -1313,7 +1572,10 @@ class Scene
 				if (renderTarget != null && renderTarget._shouldRender())
 				{
 					this._renderId++;
-					renderTarget.render();
+					
+					var hasSpecialRenderTargetCamera:Bool = renderTarget.activeCamera != null && renderTarget.activeCamera != this.activeCamera;
+					
+					renderTarget.render(hasSpecialRenderTargetCamera, dumpNextRenderTargets);
 				}
             }
 			this._renderId++;
@@ -1430,17 +1692,23 @@ class Scene
 				if (action.trigger == ActionManager.OnIntersectionEnterTrigger || 
 					action.trigger == ActionManager.OnIntersectionExitTrigger)
 				{
-					var otherMesh:AbstractMesh = action.getTriggerParameter();
+					var parameters:Dynamic = action.getTriggerParameter();
+					var otherMesh:AbstractMesh = Std.is(parameters,AbstractMesh) ? parameters : parameters.mesh;
 
-					var areIntersecting:Bool = otherMesh.intersectsMesh(sourceMesh, false);
+					var areIntersecting:Bool = otherMesh.intersectsMesh(sourceMesh, parameters.usePreciseIntersection);
 					var currentIntersectionInProgress:Int = sourceMesh._intersectionsInProgress.indexOf(otherMesh);
 
-					if (areIntersecting && currentIntersectionInProgress == -1 && 
-						action.trigger == ActionManager.OnIntersectionEnterTrigger )
+					if (areIntersecting && currentIntersectionInProgress == -1)
 					{
-						action._executeCurrent(ActionEvent.CreateNew(sourceMesh));
-						sourceMesh._intersectionsInProgress.push(otherMesh);
-
+						if (action.trigger == ActionManager.OnIntersectionEnterTrigger)
+						{
+							action._executeCurrent(ActionEvent.CreateNew(sourceMesh));
+							sourceMesh._intersectionsInProgress.push(otherMesh);
+						} 
+						else if (action.trigger == ActionManager.OnIntersectionExitTrigger)
+						{
+							sourceMesh._intersectionsInProgress.push(otherMesh);
+						}
 					} 
 					else if (!areIntersecting && currentIntersectionInProgress > -1 && 
 							action.trigger == ActionManager.OnIntersectionExitTrigger )
@@ -1452,12 +1720,6 @@ class Scene
 						{
 							sourceMesh._intersectionsInProgress.splice(indexOfOther, 1);
 						}
-					}
-					else if (areIntersecting && currentIntersectionInProgress == -1 && 
-							action.trigger == ActionManager.OnIntersectionExitTrigger) 
-					{
-
-						sourceMesh._intersectionsInProgress.push(otherMesh);
 					}
 				}
 			}                
@@ -1509,6 +1771,7 @@ class Scene
 		
 		// Customs render targets
 		var beforeRenderTargetDate:Int = Lib.getTimer();
+		var currentActiveCamera:Camera = this.activeCamera;
 		if (this.renderTargetsEnabled) 
 		{
 			for (customIndex in 0...this.customRenderTargets.length)
@@ -1529,7 +1792,7 @@ class Scene
 					// Camera
 					this.updateTransformMatrix();
 
-					renderTarget.render();
+					renderTarget.render(currentActiveCamera != this.activeCamera, this.dumpNextRenderTargets);
 				}
 			}
 			this._renderId++;
@@ -1541,6 +1804,8 @@ class Scene
 			engine.restoreDefaultFramebuffer();
 		}
 		statistics.renderTargetsDuration += Lib.getTimer() - beforeRenderTargetDate;
+		
+		this.activeCamera = currentActiveCamera;
 		
 		// Procedural textures
 		if (this.proceduralTexturesEnabled)
@@ -1597,6 +1862,11 @@ class Scene
         } 
 		else 
 		{
+			if (this.activeCamera == null)
+			{
+				throw "No camera defined";
+			}
+				
             _processSubCameras(activeCamera);
         }
 		
@@ -1623,6 +1893,11 @@ class Scene
             _toBeDisposed.data[index].dispose();            
         }		
 		_toBeDisposed.reset();
+		
+		if (this.dumpNextRenderTargets)
+		{
+			this.dumpNextRenderTargets = false;
+		}
 		
 		statistics.lastFrameDuration = Lib.getTimer() - startDate;
 	}
@@ -1706,6 +1981,8 @@ class Scene
 			
 		this._onBeforeRenderCallbacks = [];
 		this._onAfterRenderCallbacks = [];
+		
+		this.detachControl();
 
         // Detach cameras
         for (index in 0...this.cameras.length) 
@@ -1769,8 +2046,34 @@ class Scene
 		{
             this.disablePhysicsEngine();
         }
+		
+		// Remove from engine
+		engine.scenes.remove(this);
 
         engine.wipeCaches();
+	}
+	
+	public function getWorldExtends(): { min: Vector3, max: Vector3 } 
+	{
+		var min:Vector3 = new Vector3(Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY);
+        var max:Vector3 = new Vector3(Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY);
+		for (index in 0...meshes.length)
+		{
+			var mesh:AbstractMesh = this.meshes[index];
+
+			mesh.computeWorldMatrix(true);
+			
+			var minBox:Vector3 = mesh.getBoundingInfo().boundingBox.minimumWorld;
+			var maxBox:Vector3 = mesh.getBoundingInfo().boundingBox.maximumWorld;
+
+			Tools.checkExtends(minBox, min, max);
+			Tools.checkExtends(maxBox, min, max);
+		}
+
+		return {
+			min: min,
+			max: max
+		};
 	}
 	
 	public function _getNewPosition(position:Vector3, velocity:Vector3, 
@@ -1843,24 +2146,10 @@ class Scene
             this._selectionOctree = new Octree<AbstractMesh>(Octree.CreationFuncForMeshes, maxCapacity, maxDepth);
         }
 
-        var min:Vector3 = new Vector3(Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY, Math.POSITIVE_INFINITY);
-        var max:Vector3 = new Vector3(Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY, Math.NEGATIVE_INFINITY);
-        for (index in 0...this.meshes.length) 
-		{
-            var mesh:AbstractMesh = this.meshes[index];
-
-            mesh.computeWorldMatrix(true);
-			
-			var boundingBox:BoundingBox = mesh.getBoundingInfo().boundingBox;
-            var minBox = boundingBox.minimumWorld;
-            var maxBox = boundingBox.maximumWorld;
-
-            Tools.checkExtends(minBox, min, max);
-            Tools.checkExtends(maxBox, min, max);
-        }
+        var worldExtends = this.getWorldExtends();
 
         // Update octree
-        this._selectionOctree.update(min, max, this.meshes);
+        this._selectionOctree.update(worldExtends.min, worldExtends.max, this.meshes);
 		
 		return this._selectionOctree;
 	}

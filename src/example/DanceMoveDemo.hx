@@ -18,7 +18,7 @@ class DanceMoveDemo extends BaseDemo
     	SceneLoader.Load(scene, "scenes/DanceMoves/", "DanceMoves.babylon", function() {
 			
 			var groundMaterial:StandardMaterial = new StandardMaterial("ground", scene);
-            groundMaterial.reflectionTexture = new MirrorTexture("mirror", 1024, scene, true);
+            groundMaterial.reflectionTexture = new MirrorTexture("mirror", 1024,1024, scene, true);
             cast(groundMaterial.reflectionTexture,MirrorTexture).mirrorPlane = new Plane(0, -1.0, 0, 0);
             cast(groundMaterial.reflectionTexture,MirrorTexture).renderList = [scene.meshes[0], scene.meshes[1]];
             cast(groundMaterial.reflectionTexture,MirrorTexture).level = 0.5;

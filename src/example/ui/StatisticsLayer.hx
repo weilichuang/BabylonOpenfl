@@ -24,7 +24,7 @@ class StatisticsLayer extends XMLController
 		
 		activeMeshCountTF.text = scene.getActiveMeshes().length + "";
 		
-		activeVerticeCountTF.text = scene.statistics.activeVertices + "";
+		activeVerticeCountTF.text = scene.statistics.activeIndices + "";
 		
 		particleCountTF.text = scene.statistics.activeParticles + "";
 		

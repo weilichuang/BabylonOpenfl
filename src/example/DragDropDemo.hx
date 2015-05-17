@@ -108,7 +108,7 @@ class DragDropDemo extends BaseDemo
 				if (startingPoint != null)
 				{ 
 					// we need to disconnect camera from canvas
-					camera.detachControl(this.stage);
+					camera.detachControl();
 				}
 			}
 		}

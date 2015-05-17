@@ -20,6 +20,8 @@ class ActionManager
 	public static inline var OnIntersectionExitTrigger:Int = 9;
 	public static inline var OnKeyDownTrigger:Int = 10;
     public static inline var OnKeyUpTrigger:Int = 11;
+	public static inline var OnPickUpTrigger:Int = 12;
+	
 	
 	public static function getTriggerByName(name:String):Int
 	{
@@ -49,6 +51,8 @@ class ActionManager
 				return 10;
 			case "OnKeyUpTrigger":
 				return 11;
+			case "OnPickUpTrigger":
+				return 12;
 			default:
 				return -1;
 		}

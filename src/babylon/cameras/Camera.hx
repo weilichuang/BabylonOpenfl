@@ -1,6 +1,7 @@
 package babylon.cameras;
 
 import babylon.Engine;
+import babylon.mesh.AbstractMesh;
 import babylon.Node;
 import babylon.Scene;
 import babylon.math.Vector3;
@@ -8,6 +9,7 @@ import babylon.math.Matrix;
 import babylon.animations.Animation;
 import babylon.postprocess.PostProcess;
 import babylon.math.Viewport;
+import babylon.tools.SmartArray;
 import babylon.utils.Logger;
 import openfl.display.DisplayObject;
 import openfl.display.Sprite;
@@ -44,6 +46,8 @@ class Camera extends Node
 	
 	private var _computedViewMatrix:Matrix;
 	private var _projectionMatrix:Matrix;
+	
+	public var _activeMeshes:SmartArray<AbstractMesh>;
 
 	public function new(name:String, position:Vector3, scene:Scene)
 	{
@@ -56,6 +60,8 @@ class Camera extends Node
 		{
             scene.activeCamera = this;
         }
+		
+		this._activeMeshes = new SmartArray<AbstractMesh>();
 		
 		this.upVector = Vector3.Up();
         

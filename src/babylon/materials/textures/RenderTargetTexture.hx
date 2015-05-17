@@ -115,7 +115,7 @@ class RenderTargetTexture extends Texture
         this._texture = getScene().getEngine().createRenderTargetTexture(size, size, generateMipMaps);
     }
 	
-	public function render(useCameraPostProcess:Bool = false):Void
+	public function render(useCameraPostProcess:Bool = false, dumpForDebug:Bool = false):Void
 	{
         var scene:Scene = this.getScene();
         var engine:Engine = scene.getEngine();
@@ -176,7 +176,7 @@ class RenderTargetTexture extends Texture
 					for (subIndex in 0...mesh.subMeshes.length)
 					{
 						var subMesh:SubMesh = mesh.subMeshes[subIndex];
-						scene.statistics.activeVertices += subMesh.indexCount;
+						scene.statistics.activeIndices += subMesh.indexCount;
 						_renderingManager.dispatch(subMesh);
 					}
 				}

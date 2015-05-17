@@ -14,16 +14,19 @@ class Node
 	public var parent:Node = null;
 	public var name:String;
 	public var id:String;
+	public var uniqueId:Int;
 	public var state:String = "";
 	
 	public var animations:Array<Animation>;
 	
 	public var onReady:Node->Void = null;
 	
+	private var _childrenFlag:Int = -1;
+	private var _isEnabled:Bool = true;
     private var _isReady:Bool = true;
-    private var _isEnabled:Bool = true;
 	
 	public var _currentRenderId:Int = -1;
+	private var _parentRenderId:Int = -1;
 	
 	private var _scene:Scene;
 	private var _cache:Dynamic;
@@ -62,8 +65,7 @@ class Node
 	{
 		return _scene.getEngine();
 	}
-	
-	// override it in derived class
+
 	public function getWorldMatrix():Matrix 
 	{
 		return _worldMatrix;
@@ -108,8 +110,23 @@ class Node
 	
 	public function isSynchronizedWithParent():Bool 
 	{
-        return this.parent != null ? this.parent._currentRenderId <= this._currentRenderId : true;
+        if (this.parent == null) 
+		{
+			return true;
+		}
+
+		if (this._parentRenderId != this.parent._currentRenderId)
+		{
+			return false;
+		}
+
+		return this.parent.isSynchronized();
     }
+	
+	public function _markSyncedWithParent():Void
+	{
+		this._parentRenderId = this.parent._currentRenderId;
+	}
 	
 	public function isSynchronized(updateCache:Bool = false):Bool
 	{		
@@ -162,6 +179,12 @@ class Node
 		this._isEnabled = value;
 	}
 	
+	/**
+	 * Is this node a descendant of the given node.
+	 * The function will iterate up the hierarchy until the ancestor was found or no more parents defined.
+	 * @param {BABYLON.Node} ancestor - The parent node to inspect
+	 * @see parent
+	 */
 	public function isDescendantOf(ancestor:Node):Bool 
 	{
 		if (this.parent != null) 
@@ -188,6 +211,10 @@ class Node
         }
 	}
 	
+	/**
+	 * Will return all nodes that have this node as parent.
+	 * @return Array<Node>  all children nodes of all types.
+	 */
 	public function getDescendants():Array<Node> 
 	{
 		var results:Array<Node> = [];
@@ -206,7 +233,6 @@ class Node
 		}
 		
 		this._isReady = state;
-
 		if (!this._isReady) 
 		{
 			return;

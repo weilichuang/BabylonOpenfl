@@ -26,12 +26,13 @@ class BabylonGLTexture
 	
 	public var _baseHeight:Int;
 	public var _baseWidth:Int;
+	
 	public var _cachedWrapU:Int = -1;
 	public var _cachedWrapV:Int = -1;
 	public var _cachedCoordinatesMode:Int = -1;
 	
-	public var _width:Float;	
-	public var _height:Float;
+	public var _width:Int;	
+	public var _height:Int;
 	
 	
 	public function new(url:String, data:GLTexture)

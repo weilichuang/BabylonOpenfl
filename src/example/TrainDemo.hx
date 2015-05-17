@@ -7,6 +7,7 @@ import babylon.math.Matrix;
 import babylon.Node;
 import babylon.postprocess.BlackAndWhitePostProcess;
 import babylon.postprocess.FilterPostProcess;
+import babylon.utils.Logger;
 import haxe.ui.toolkit.controls.Button;
 import haxe.ui.toolkit.events.UIEvent;
 import openfl.events.KeyboardEvent;
@@ -54,6 +55,8 @@ class TrainDemo extends BaseDemo
 			var mat:StandardMaterial = Std.instance(scene.getMaterialByName("terrain_eau"), StandardMaterial);
 			if(mat != null)
 				mat.bumpTexture = null;
+				
+			Logger.log("scene.cameras.length:" + scene.cameras.length);
 				
 			// Postprocesses
 			var bwPostProcess = new BlackAndWhitePostProcess("Black and White", 1.0, scene.cameras[2]);

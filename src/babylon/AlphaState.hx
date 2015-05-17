@@ -2,10 +2,6 @@ package babylon;
 import haxe.ds.Vector;
 import openfl.gl.GL;
 
-/**
- * ...
- * 
- */
 class AlphaState
 {
 	public var isDirty(get, null):Bool;

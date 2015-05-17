@@ -117,8 +117,8 @@ class ActionManagerDemo extends BaseDemo
 		var condition1 = new StateCondition(sphere.actionManager, light1, "off");
 		var condition2 = new StateCondition(sphere.actionManager, light1, "on");
 
-		sphere.actionManager.registerAction(new InterpolateValueAction(ActionManager.OnLeftPickTrigger, null, camera, "alpha", 0, 500, condition1));
-		sphere.actionManager.registerAction(new InterpolateValueAction(ActionManager.OnLeftPickTrigger, null, camera, "alpha", Math.PI, 500, condition2));
+		sphere.actionManager.registerAction(new InterpolateValueAction(ActionManager.OnRightPickTrigger, null, camera, "alpha", 0, 500, condition1));
+		sphere.actionManager.registerAction(new InterpolateValueAction(ActionManager.OnRightPickTrigger, null, camera, "alpha", Math.PI, 500, condition2));
 
 		// Over/Out
 		var makeOverOut = function(mesh:AbstractMesh):Void

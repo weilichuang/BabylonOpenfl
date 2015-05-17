@@ -6,18 +6,20 @@
 	<meta title="babylonhx" package="com.babylon.engine" version="1.0.0" company="" />
 	
 	<!-- output -->
-	<app main="example.WindowCafeSceneDemo" file="WindowCafeSceneDemo" path="bin" />
+	<app main="example.TrainDemo" file="TrainDemo" path="bin" />
 	
 	<window background="#000000" fps="0" if="html5" />
 	<window background="#000000" fps="60" unless="html5" />
 	<window width="0" height="0" if="html5" />
 	<window width="1024" height="768" if="cpp" />
 	<window width="0" height="0" if="android" />
-	<window orientation="landscape" vsync="true" antialiasing="4" if="cpp" />
+	<window orientation="landscape" vsync="true" antialiasing="1" if="cpp" />
 	<window require-shaders="true" hardware="true" depth-buffer="true" />
 	
 	<!-- classpath, haxe libs -->
 	<source path="src" />
+	
+	
 	<haxelib name="openfl" />
 	<haxelib name="haxeui"/>
 	<haxelib name="actuate" />
@@ -34,6 +36,8 @@
 	<assets path="assets/skybox" rename="skybox" />
 	<assets path="assets/shaders" rename="shaders" />
 	<assets path="assets/ui" rename="assets/ui" />
+	
+	
 	
 	<!-- optimize output 
 	<haxeflag name="-dce full" /> -->

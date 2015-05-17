@@ -1895,7 +1895,7 @@ class BabylonFileLoader implements ISceneLoaderPlugin
 
 		if (parsedData.activeCameraID != null)
 		{
-			scene.activeCameraByID(parsedData.activeCameraID);
+			scene.setActiveCameraByID(parsedData.activeCameraID);
 		}
 
 		// Connecting parents

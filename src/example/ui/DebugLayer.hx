@@ -71,7 +71,7 @@ class DebugLayer extends XMLController
         };
 		
 		animationsCB.onChange = function(e) {
-            scene.shadowsEnabled = animationsCB.selected;
+            scene.animationsEnabled = animationsCB.selected;
         };
 		
 		shadowsCB.onChange = function(e) {

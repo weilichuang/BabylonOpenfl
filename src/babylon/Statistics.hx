@@ -6,7 +6,7 @@ package babylon;
 class Statistics
 {
 	public var totalVertices:Int;
-	public var activeVertices:Int;
+	public var activeIndices:Int;
 	public var activeParticles:Int;
 	
 	public var lastFrameDuration:Int;
@@ -25,7 +25,7 @@ class Statistics
 	public function reset():Void
 	{
 		this.totalVertices = 0;
-        this.activeVertices = 0;
+        this.activeIndices = 0;
         this.activeParticles = 0;
 		
 		this.lastFrameDuration = 0;

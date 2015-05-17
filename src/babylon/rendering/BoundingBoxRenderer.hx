@@ -14,7 +14,7 @@ class BoundingBoxRenderer
 {
 	public var frontColor:Color4;
 	public var backColor:Color4;
-	public var showBackLines:Bool = true;
+	public var showBackLines:Bool = false;
 	public var renderList:SmartArray<BoundingBox>;
 
 	private var _scene: Scene;
@@ -43,6 +43,11 @@ class BoundingBoxRenderer
 		_vb = new VertexBuffer(engine, boxdata.positions, VertexBuffer.PositionKind, false);
 		_ib = engine.createIndexBuffer([0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 7, 1, 6, 2, 5, 3, 4]);
 		_vertexDeclaration = [3];
+	}
+	
+	public function addBoundingBox(box:BoundingBox):Void
+	{
+		renderList.push(box);
 	}
 	
 	public function reset():Void

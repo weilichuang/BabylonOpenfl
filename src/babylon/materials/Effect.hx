@@ -12,6 +12,7 @@ import babylon.postprocess.PostProcess;
 import babylon.tools.Tools;
 import babylon.utils.CompileTime;
 import babylon.utils.Logger;
+import haxe.ds.StringMap;
 import openfl.Assets;
 import openfl.gl.GLProgram;
 import openfl.gl.GLUniformLocation;
@@ -19,14 +20,14 @@ import openfl.utils.Float32Array;
 
 class Effect 
 {
-	public static var ShadersStore:Map<String, String>;
+	public static var ShadersStore:StringMap<String>;
 	
 	/**
 	 * 特殊函数，用于执行一些static变量的定义等(有这个函数时，static变量预先赋值必须也放到这里面)
 	 */
 	static function __init__():Void
 	{
-		ShadersStore = new Map<String,String>();
+		ShadersStore = new StringMap<String>();
 		
 		ShadersStore.set("blackAndWhitePixelShader", CompileTime.readFile("babylon/materials/shaders/blackAndWhite.frag"));
 		ShadersStore.set("blurPixelShader", CompileTime.readFile("babylon/materials/shaders/blur.frag"));
@@ -126,6 +127,11 @@ class Effect
 		});	
 	}
 	
+	public function release():Void
+	{
+		
+	}
+	
 	public inline function isReady():Bool
 	{
         return _isReady;
@@ -146,10 +152,10 @@ class Effect
         return _attributes[index];
     }
 	
-	public inline function getAttribute(index:Int):Int
-	{
-        return _attributes[index];
-    }
+	//public inline function getAttribute(index:Int):Int
+	//{
+        //return _attributes[index];
+    //}
 	
 	public function getAttributeLocationByName(name:String):Int
 	{
