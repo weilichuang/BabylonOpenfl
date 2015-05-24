@@ -1,23 +1,24 @@
 package babylon.cameras;
 
 import babylon.Engine;
+import babylon.math.Matrix;
+import babylon.math.Vector3;
+import babylon.math.Viewport;
 import babylon.mesh.AbstractMesh;
 import babylon.Node;
-import babylon.Scene;
-import babylon.math.Vector3;
-import babylon.math.Matrix;
-import babylon.animations.Animation;
 import babylon.postprocess.PostProcess;
-import babylon.math.Viewport;
+import babylon.Scene;
 import babylon.tools.SmartArray;
 import babylon.utils.Logger;
-import openfl.display.DisplayObject;
 import openfl.display.Sprite;
 
 class Camera extends Node
 {
 	public static inline var PERSPECTIVE_CAMERA:Int = 0;
 	public static inline var ORTHOGRAPHIC_CAMERA:Int = 1;
+	
+	public static inline var FOVMODE_VERTICAL_FIXED:Int = 0;
+	public static inline var FOVMODE_HORIZONTAL_FIXED:Int = 1;
 
 	public var upVector:Vector3;
 	
@@ -40,6 +41,8 @@ class Camera extends Node
 	public var subCameras:Array<Camera>;
 	
 	public var layerMask: UInt = 0xFFFFFFFF;
+	
+	public var fovMode: Int = FOVMODE_VERTICAL_FIXED;
 		
 	public var _postProcesses:Array<PostProcess>;	
 	public var _postProcessesTakenIndices:Array<Int>;
@@ -48,6 +51,8 @@ class Camera extends Node
 	private var _projectionMatrix:Matrix;
 	
 	public var _activeMeshes:SmartArray<AbstractMesh>;
+	
+	private var _globalPosition:Vector3;
 
 	public function new(name:String, position:Vector3, scene:Scene)
 	{
@@ -78,6 +83,25 @@ class Camera extends Node
         
         // Viewport
         this.viewport = new Viewport(0, 0, 1, 1);	
+		
+		this._globalPosition = new Vector3();
+	}
+	
+	public var globalPosition(get, null):Vector3;
+	
+	private function get_globalPosition():Vector3
+	{
+		return this._globalPosition;
+	}
+	
+	public function getActiveMeshes(): SmartArray<AbstractMesh>
+	{
+		return this._activeMeshes;
+	}
+	
+	public function isActiveMesh(mesh: AbstractMesh): Bool
+	{
+		return _activeMeshes.indexOf(mesh) != -1;
 	}
 	
 	override private function _initCache():Void
@@ -271,8 +295,7 @@ class Camera extends Node
 
                 _postProcesses[i] = null;  // TODO: remove it from array ??
 
-                var index:Int = _postProcessesTakenIndices.indexOf(i);
-                _postProcessesTakenIndices.splice(index, 1);
+                _postProcessesTakenIndices.remove(i);
             }
         }
         else 
@@ -290,8 +313,7 @@ class Camera extends Node
 
                 _postProcesses[atIndices[i]] = null;		// TODO: remove it from array ??
 
-                var index = _postProcessesTakenIndices.indexOf(atIndices[i]);
-                _postProcessesTakenIndices.splice(index, 1);
+                _postProcessesTakenIndices.remove(atIndices[i]);
             }
         }
         return result;
@@ -310,19 +332,33 @@ class Camera extends Node
 		return new Matrix();
 	}
 
-	public function getViewMatrix():Matrix 
+	public function getViewMatrix(force:Bool = false):Matrix
 	{
 		_computedViewMatrix = _computeViewMatrix();
 
-        if (parent == null || isSynchronized())
+        if (!force && this._isSynchronizedViewMatrix())
 		{
 			return _computedViewMatrix;
 		}
+		
+		if (parent == null)
+		{
+			this._globalPosition.copyFrom(this.position);
+		}
+		else
+		{
+			_computedViewMatrix.invertToRef(_worldMatrix);
+			_worldMatrix.multiplyToRef(parent.getWorldMatrix(), _computedViewMatrix);
+			
+			_globalPosition.setTo(_computedViewMatrix.m[12], 
+									_computedViewMatrix.m[13],
+									_computedViewMatrix.m[14]);
+			
+			_computedViewMatrix.invert();	
+			
+			this._markSyncedWithParent();
+		}
             
-		_computedViewMatrix.invertToRef(_worldMatrix);
-		_worldMatrix.multiplyToRef(parent.getWorldMatrix(), _computedViewMatrix);
-		_computedViewMatrix.invert();	
-   
 		_currentRenderId = getScene().getRenderId();
 		
         return _computedViewMatrix;
@@ -336,10 +372,8 @@ class Camera extends Node
 		}
 
 		_computedViewMatrix = _getViewMatrix();
-		if (parent == null) 
-		{
-			_currentRenderId = getScene().getRenderId();
-		}
+		_currentRenderId = getScene().getRenderId();
+		
 		return _computedViewMatrix;
     }
 
@@ -358,7 +392,7 @@ class Camera extends Node
 				minZ = 1;
 			}
 
-			Matrix.PerspectiveFovLHToRef(fov, engine.getAspectRatio(this), minZ, maxZ, _projectionMatrix);
+			Matrix.PerspectiveFovLHToRef(fov, engine.getAspectRatio(this), minZ, maxZ, _projectionMatrix,fovMode);
 		}
 		else
 		{

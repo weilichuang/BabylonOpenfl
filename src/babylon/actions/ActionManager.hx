@@ -117,6 +117,25 @@ class ActionManager
 
 		return false;
 	}
+	
+	/**
+	 * Does this action manager handles actions of a given trigger
+	 * @param {Int} trigger - the trigger to be tested
+	 * @return {Bool} whether the trigger is handeled 
+	 */
+	public function hasSpecificTrigger(trigger: Int): Bool 
+	{
+		for (index in 0...this.actions.length)
+		{
+			var action = this.actions[index];
+			if (action.trigger == trigger)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * Registers an action to this action manager

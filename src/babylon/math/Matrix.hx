@@ -1,5 +1,6 @@
 package babylon.math;
 
+import babylon.cameras.Camera;
 import openfl.utils.Float32Array;
 
 //TODO 很多方法需要优化
@@ -783,19 +784,40 @@ class Matrix
         return matrix;
 	}
 	
-	public static inline function PerspectiveFovLHToRef(fov:Float, aspect:Float, znear:Float, zfar:Float, result:Matrix):Matrix 
+	public static inline function PerspectiveFovLHToRef(fov:Float, aspect:Float, 
+														znear:Float, zfar:Float, 
+														result:Matrix, fovMode:Int = 0):Matrix 
 	{
 		var tan:Float = 1.0 / (Math.tan(fov * 0.5));
 
-        result.m[0] = tan / aspect;
-        result.m[1] = result.m[2] = result.m[3] = 0.0;
-        result.m[5] = tan;
-        result.m[4] = result.m[6] = result.m[7] = 0.0;
-        result.m[8] = result.m[9] = 0.0;
-        result.m[10] = -zfar / (znear - zfar);
-        result.m[11] = 1.0;
-        result.m[12] = result.m[13] = result.m[15] = 0.0;
-        result.m[14] = (znear * zfar) / (znear - zfar);
+        var v_fixed:Bool = (fovMode == Camera.FOVMODE_VERTICAL_FIXED);
+
+		if (v_fixed)
+		{
+			result.m[0] = tan / aspect;
+		}
+		else 
+		{
+			result.m[0] = tan;
+		}
+
+		result.m[1] = result.m[2] = result.m[3] = 0.0;
+
+		if (v_fixed)
+		{
+			result.m[5] = tan;
+		}
+		else 
+		{
+			result.m[5] = tan * aspect;
+		}
+
+		result.m[4] = result.m[6] = result.m[7] = 0.0;
+		result.m[8] = result.m[9] = 0.0;
+		result.m[10] = -zfar / (znear - zfar);
+		result.m[11] = 1.0;
+		result.m[12] = result.m[13] = result.m[15] = 0.0;
+		result.m[14] = (znear * zfar) / (znear - zfar);
 		
 		return result;
 	}
