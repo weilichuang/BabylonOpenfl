@@ -83,7 +83,7 @@ class TrainDemo extends BaseDemo
 		rootUI.addChild(cameraButton);
 		cameraButton.x = (stage.stageWidth - cameraButton.width) / 2;
 		cameraButton.y = stage.stageHeight - 100;
-		cameraButton.onClick = onCameraMouseDown;
+		cameraButton.addEventListener(UIEvent.CLICK,onCameraMouseDown);
     }
 	
 	private function onKeyDown(e:KeyboardEvent):Void

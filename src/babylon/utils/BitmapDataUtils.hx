@@ -25,7 +25,7 @@ class BitmapDataUtils
 	public static inline function getPixelData(bitmapData:BitmapData):ArrayBufferView
 	{
 		#if html5
-		return @:privateAccess (bitmapData.__image).data;
+		return bitmapData.image.data;
 		#else
 		return new UInt8Array(BitmapData.getRGBAPixels(bitmapData));
 		#end

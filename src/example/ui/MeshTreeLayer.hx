@@ -7,6 +7,8 @@ import haxe.ui.toolkit.containers.VBox;
 import haxe.ui.toolkit.controls.CheckBox;
 import haxe.ui.toolkit.core.interfaces.IDisplayObject;
 import haxe.ui.toolkit.core.XMLController;
+import haxe.ui.toolkit.controls.Button;
+import haxe.ui.toolkit.events.UIEvent;
 
 @:build(haxe.ui.toolkit.core.Macros.buildController ("assets/ui/meshtree.xml"))
 class MeshTreeLayer extends XMLController
@@ -21,7 +23,7 @@ class MeshTreeLayer extends XMLController
 		theView.style.backgroundColor = 0xffffff;
 		
 		
-		visableBtn.onClick = function(e) {
+		visableBtn.addEventListener(UIEvent.CLICK,function(e) {
             var meshes:Array<AbstractMesh> = scene.meshes;
 			for (i in 0...meshes.length)
 			{
@@ -37,9 +39,9 @@ class MeshTreeLayer extends XMLController
 					cast(children[i], CheckBox).selected = true;
 				}
 			}
-        };
+        });
 		
-		diableBtn.onClick = function(e) {
+		diableBtn.addEventListener(UIEvent.CLICK,function(e) {
             var meshes:Array<AbstractMesh> = scene.meshes;
 			for (i in 0...meshes.length)
 			{
@@ -55,11 +57,11 @@ class MeshTreeLayer extends XMLController
 					cast(children[i], CheckBox).selected = false;
 				}
 			}
-        };
+        });
 		
-		hideBtn.onClick = function(e) {
+		hideBtn.addEventListener(UIEvent.CLICK,function(e) {
             demo.showMeshTree(false);
-        };
+        });
 	}
 	
 	public function refreshList():Void
@@ -73,9 +75,9 @@ class MeshTreeLayer extends XMLController
 			var checkBox:CheckBox = new CheckBox();
 			checkBox.text = mesh.name;
 			checkBox.selected = mesh.isVisible;
-			checkBox.onClick = function(e) {
+			checkBox.addEventListener(UIEvent.CHANGE,function(e) {
 				mesh.isVisible = checkBox.selected;
-			};
+			});
 			
 			meshBox.addChild(checkBox);
 		}

@@ -662,7 +662,7 @@ class Engine
 	{
         GL.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer.buffer);
 
-        if (Std.is(vertices,Float32Array)) 
+        if (!Std.is(vertices,Array)) 
 		{
             GL.bufferSubData(GL.ARRAY_BUFFER, offset, cast vertices);
         } 
@@ -686,7 +686,7 @@ class Engine
 		GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, vbo);
 		
 		// Check for 32 bits indices
-		var arrayBuffer;
+		var arrayBuffer:Dynamic;
 		var need32Bits:Bool = false;
 
 		if (_caps.uintIndices)

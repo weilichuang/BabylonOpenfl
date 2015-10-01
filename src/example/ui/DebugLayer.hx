@@ -3,6 +3,7 @@ import babylon.materials.StandardMaterial;
 import babylon.Scene;
 import example.BaseDemo;
 import haxe.ui.toolkit.core.XMLController;
+import haxe.ui.toolkit.events.UIEvent;
 
 @:build(haxe.ui.toolkit.core.Macros.buildController ("assets/ui/options.xml"))
 class DebugLayer extends XMLController
@@ -16,15 +17,15 @@ class DebugLayer extends XMLController
 		theView.style.backgroundAlpha = 0.8;
 		theView.style.backgroundColor = 0xffffff;
 		
-		statisticsCB.onChange = function(e) {
+		statisticsCB.addEventListener(UIEvent.CHANGE,function(e) {
 			demo.showStatistics(statisticsCB.selected);
-        };
+        });
 		
-		meshTreeBtn.onClick = function(e) {
+		meshTreeBtn.addEventListener(UIEvent.CLICK,function(e) {
 			demo.showMeshTree(true);
-        };
+        });
 		
-		renderMode.onChange = function(e) {
+		renderMode.addEventListener(UIEvent.CHANGE,function(e) {
 			switch(renderMode.selectedIndex) {
 				case 0:
 					scene.forceWireframe = false;
@@ -36,79 +37,79 @@ class DebugLayer extends XMLController
 					scene.forcePointsCloud = true;
 					scene.forceWireframe = false;
 			}
-		};
+		});
 		
-		boundingBoxCB.onChange = function(e) {
+		boundingBoxCB.addEventListener(UIEvent.CHANGE,function(e) {
             this.scene.forceShowBoundingBoxes = boundingBoxCB.selected;
-        };
+        });
 		
-		diffuseCB.onChange = function(e) {
+		diffuseCB.addEventListener(UIEvent.CHANGE,function(e) {
             StandardMaterial.DiffuseTextureEnabled = diffuseCB.selected;
-        };
+        });
 		
-		ambientCB.onChange = function(e) {
+		ambientCB.addEventListener(UIEvent.CHANGE,function(e) {
             StandardMaterial.AmbientTextureEnabled = ambientCB.selected;
-        };
+        });
 		
-		specularCB.onChange = function(e) {
+		specularCB.addEventListener(UIEvent.CHANGE,function(e) {
             StandardMaterial.SpecularTextureEnabled = specularCB.selected;
-        };
+        });
 		
-		emissiveCB.onChange = function(e) {
+		emissiveCB.addEventListener(UIEvent.CHANGE,function(e) {
             StandardMaterial.EmissiveTextureEnabled = emissiveCB.selected;
-        };
+        });
 		
-		opacityCB.onChange = function(e) {
+		opacityCB.addEventListener(UIEvent.CHANGE,function(e) {
             StandardMaterial.OpacityTextureEnabled = opacityCB.selected;
-        };
+        });
 		
-		reflectionCB.onChange = function(e) {
+		reflectionCB.addEventListener(UIEvent.CHANGE,function(e) {
             StandardMaterial.ReflectionTextureEnabled = reflectionCB.selected;
-        };
+        });
 		
-		fresnelCB.onChange = function(e) {
+		fresnelCB.addEventListener(UIEvent.CHANGE,function(e) {
             StandardMaterial.FresnelEnabled = fresnelCB.selected;
-        };
+        });
 		
-		animationsCB.onChange = function(e) {
+		animationsCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.animationsEnabled = animationsCB.selected;
-        };
+        });
 		
-		shadowsCB.onChange = function(e) {
+		shadowsCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.shadowsEnabled = shadowsCB.selected;
-        };
+        });
 		
-		particlesCB.onChange = function(e) {
+		particlesCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.particlesEnabled = particlesCB.selected;
-        };
+        });
 		
-		postprocessesCB.onChange = function(e) {
+		postprocessesCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.postProcessesEnabled = postprocessesCB.selected;
-        };
+        });
 		
-		collisionsCB.onChange = function(e) {
+		collisionsCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.collisionsEnabled = collisionsCB.selected;
-        };
+        });
 		
-		lightsCB.onChange = function(e) {
+		lightsCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.lightsEnabled = lightsCB.selected;
-        };
+        });
 		
-		lensflaresCB.onChange = function(e) {
+		lensflaresCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.lensFlaresEnabled = lensflaresCB.selected;
-        };
+        });
 		
-		rendertargetsCB.onChange = function(e) {
+		rendertargetsCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.renderTargetsEnabled = rendertargetsCB.selected;
-        };
+        });
 		
-		proceduraltexturesCB.onChange = function(e) {
+		proceduraltexturesCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.proceduralTexturesEnabled = proceduraltexturesCB.selected;
-        };
+        });
 		
-		fogCB.onChange = function(e) {
+		fogCB.addEventListener(UIEvent.CHANGE,function(e) {
             scene.fogEnabled = fogCB.selected;
-        };
+        });
 	}
 	
 	public function applyConfig():Void
