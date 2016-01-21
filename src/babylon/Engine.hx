@@ -1164,9 +1164,21 @@ class Engine
 		}
     }
 	
+	public function isUniformValid(uniform:GLUniformLocation):Bool
+	{
+		#if (js || html5)
+		if (uniform == null)
+			return false;
+		#else
+		if (uniform < 0)
+			return false;
+		#end
+		return true;
+	}
+	
 	public function setArray(uniform:GLUniformLocation, array:Array<Float>):Void
 	{
-		if (uniform == null)
+		if (!isUniformValid(uniform))
 			return;
 			
 		GL.uniform1fv(uniform, new Float32Array(array));
@@ -1174,7 +1186,10 @@ class Engine
 	
 	public function setArray2(uniform:GLUniformLocation, array:Array<Float>):Void
 	{
-		if (uniform == null || array.length % 2 != 0)
+		if (!isUniformValid(uniform))
+			return;
+			
+		if (array.length % 2 != 0)
 			return;
 			
 		GL.uniform2fv(uniform, new Float32Array(array));
@@ -1182,7 +1197,10 @@ class Engine
 	
 	public function setArray3(uniform:GLUniformLocation, array:Array<Float>):Void
 	{
-		if (uniform == null || array.length % 3 != 0)
+		if (!isUniformValid(uniform))
+			return;
+			
+		if (array.length % 3 != 0)
 			return;
 			
 		GL.uniform3fv(uniform, new Float32Array(array));
@@ -1190,7 +1208,10 @@ class Engine
 	
 	public function setArray4(uniform:GLUniformLocation, array:Array<Float>):Void
 	{
-		if (uniform == null || array.length % 4 != 0)
+		if (!isUniformValid(uniform))
+			return;
+			
+		if (array.length % 4 != 0)
 			return;
 			
 		GL.uniform4fv(uniform, new Float32Array(array));
@@ -1198,7 +1219,7 @@ class Engine
 
     public inline function setMatrices(uniform:GLUniformLocation, matrices: #if html5 Float32Array #else Array<Float> #end ):Void
 	{
-        if (uniform != null)
+        if (isUniformValid(uniform))
 		{
 			GL.uniformMatrix4fv(uniform, false, #if html5 matrices #else new Float32Array(matrices) #end );
 		}
@@ -1206,7 +1227,7 @@ class Engine
 
     public inline function setMatrix(uniform:GLUniformLocation, matrix:Matrix):Void
 	{
-        if (uniform != null) 
+        if (isUniformValid(uniform))
 		{
 			GL.uniformMatrix4fv(uniform, false, #if html5 matrix.toArray() #else new Float32Array(matrix.toArray()) #end );
 		}
@@ -1214,7 +1235,7 @@ class Engine
     
     public inline function setFloat(uniform:GLUniformLocation, value:Float):Void
 	{
-        if (uniform != null) 
+        if (isUniformValid(uniform))
 		{
 			GL.uniform1f(uniform, value);
 		}
@@ -1222,7 +1243,7 @@ class Engine
 
     public inline function setFloat2(uniform:GLUniformLocation, x:Float, y:Float):Void
 	{
-        if (uniform != null) 
+        if (isUniformValid(uniform))
 		{
 			GL.uniform2f(uniform, x, y);
 		}
@@ -1230,7 +1251,7 @@ class Engine
 
     public inline function setFloat3(uniform:GLUniformLocation, x:Float, y:Float, z:Float):Void
 	{
-        if (uniform != null) 
+        if (isUniformValid(uniform))
 		{
 			GL.uniform3f(uniform, x, y, z);
 		}
@@ -1238,7 +1259,7 @@ class Engine
     
     public inline function setBool(uniform:GLUniformLocation, bool:Bool):Void 
 	{
-        if (uniform != null)
+        if (isUniformValid(uniform))
 		{
 			GL.uniform1i(uniform, bool ? 1 : 0);
 		}
@@ -1246,7 +1267,7 @@ class Engine
 
     public inline function setFloat4(uniform:GLUniformLocation, x:Float, y:Float, z:Float, w:Float):Void
 	{
-        if (uniform != null) 
+        if (isUniformValid(uniform))
 		{
 			GL.uniform4f(uniform, x, y, z, w);
 		}
@@ -1254,7 +1275,7 @@ class Engine
 
     public inline function setColor3(uniform:GLUniformLocation = null, color3:Color3):Void
 	{
-        if (uniform != null)
+        if (isUniformValid(uniform))
 		{
 			GL.uniform3f(uniform, color3.r, color3.g, color3.b);
 		}
@@ -1262,7 +1283,7 @@ class Engine
 
     public inline function setColor4(uniform:GLUniformLocation = null, color3:Color3, alpha:Float):Void
 	{
-        if (uniform != null) 
+        if (isUniformValid(uniform))
 		{
 			GL.uniform4f(uniform, color3.r, color3.g, color3.b, alpha);
 		}

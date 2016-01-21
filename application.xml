@@ -6,7 +6,7 @@
 	<meta title="babylonhx" package="com.babylon.engine" version="1.0.0" company="" />
 	
 	<!-- output -->
-	<app main="example.TrainDemo" file="TrainDemo" path="bin" />
+	<app main="example.DanceMoveDemo" file="PhysicsDemo.hx" path="bin" />
 	
 	<window background="#000000" fps="0" if="html5" />
 	<window background="#000000" fps="60" unless="html5" />
@@ -21,7 +21,7 @@
 	
 	
 	<haxelib name="openfl" />
-	<haxelib name="haxeui"/>
+	<!-- <haxelib name="haxeui"/> -->
 	<haxelib name="actuate" />
 	<haxelib name="dconsole" />
 	<haxelib name="assetsmanager"/>
@@ -42,6 +42,6 @@
 	<!-- optimize output 
 	<haxeflag name="-dce full" /> -->
 	<!--<haxeflag name="-dce" value="std" /> -->
-	<haxedef name="dom" /> 
+	<haxedef name="webgl" /> 
 	
 </project>

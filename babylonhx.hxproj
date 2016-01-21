@@ -15,11 +15,8 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="C:\HaxeToolkit\haxe\lib\lime\2,6,6" />
-    <class path="C:\HaxeToolkit\haxe\lib\haxeui\1,7,16" />
-    <class path="C:\HaxeToolkit\haxe\lib\svg\1,0,8" />
-    <class path="C:\HaxeToolkit\haxe\lib\yagp\1,1,4" />
-    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,3,6" />
+    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,5,2" />
+    <class path="C:\HaxeToolkit\haxe\lib\lime\2,8,1" />
     <class path="C:\HaxeToolkit\haxe\lib\actuate\1,8,6" />
     <class path="C:\HaxeToolkit\haxe\lib\dconsole\5,0,0\src" />
     <class path="C:\HaxeToolkit\haxe\lib\hscript\2,0,4" />
@@ -31,12 +28,12 @@
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="lime=2.6.6&#xA;haxeui=1.7.16&#xA;svg=1.0.8&#xA;yagp=1.1.4&#xA;openfl=3.3.6&#xA;actuate=1.8.6&#xA;dconsole=5.0.0&#xA;hscript=2.0.4&#xA;assetsmanager=1.2.0&#xA;msignal=1.2.2&#xA;mlib=2.0.2&#xA;dom&#xA;openfl-next&#xA;tools=2.6.6&#xA;no-compilation&#xA;openfl-html5&#xA;canvas&#xA;lime-html5&#xA;html5&#xA;web&#xA;html5&#xA;display" />
+    <option directives="openfl=3.5.2&#xA;lime=2.8.1&#xA;actuate=1.8.6&#xA;dconsole=5.0.0&#xA;hscript=2.0.4&#xA;assetsmanager=1.2.0&#xA;msignal=1.2.2&#xA;mlib=2.0.2&#xA;openfl-next&#xA;tools=2.8.1&#xA;no-compilation&#xA;openfl-html5&#xA;canvas&#xA;webgl&#xA;lime-html5&#xA;html5&#xA;web&#xA;html5&#xA;display" />
     <option flashStrict="False" />
     <option noInlineOnDebug="True" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="False" />
-    <option additional="--remap flash:openfl&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;-debug " />
+    <option additional="--macro openfl.Lib.includeExterns()&#xA;--remap flash:openfl&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
@@ -45,10 +42,7 @@
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
     <compile path="src\BumpMapDemo.hx" />
-    <compile path="src\example\TrainDemo.hx" />
-    <compile path="src\example\EspilitDemo.hx" />
     <compile path="src\example\DanceMoveDemo.hx" />
-    <compile path="src\example\DragDropDemo.hx" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>

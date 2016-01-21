@@ -57,6 +57,7 @@ import babylon.mesh.VertexData;
 import babylon.particles.ParticleSystem;
 import babylon.Scene;
 import babylon.utils.Logger;
+import haxe.io.Bytes;
 import haxe.Json;
 import openfl.Lib;
 import openfl.utils.ByteArray;
@@ -1369,7 +1370,7 @@ class BabylonFileLoader implements ISceneLoaderPlugin
 		var scene:Scene = mesh.getScene();
 		
 		// Geometry
-		if (Std.is(parsedGeometry,ByteArray))
+		if (Std.is(parsedGeometry,Bytes))
 		{
 			trace("parse binary geometry");
 			
